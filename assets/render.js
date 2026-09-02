@@ -76,8 +76,6 @@
       tile.classList.toggle("active", on);
       tile.setAttribute("aria-pressed", on ? "true" : "false");
     });
-    var empty = document.getElementById("emptyNote");
-    if(empty) empty.classList.toggle("hidden", shown > 0);
   }
 
   function renderHome(){
@@ -103,8 +101,7 @@
 
     var rows = TOOLS.map(toolRowHtml).join("");
     var list = TOOLS.length
-      ? '<ul class="tool-list">' + rows + '</ul>' +
-        '<p class="empty hidden" id="emptyNote">No tools in this subject yet.</p>'
+      ? '<ul class="tool-list">' + rows + '</ul>'
       : '<div class="empty">No tools yet. Add one in <code>tools.js</code>.</div>';
 
     var foot = '<p class="foot">Saved on this device as you study. Works offline once loaded.</p>';
