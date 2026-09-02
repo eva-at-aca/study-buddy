@@ -1,7 +1,7 @@
 /* =============================================================================
    STUDY TOOLS — SITE CONFIG
    This is the ONLY file you edit to add a new study tool or subject.
-   Everything on the site (home page + each subject page) is built from this.
+   Everything on the home page (filter tiles + tool list) is built from this.
 
    HOW TO ADD A TOOL
    -----------------
@@ -20,7 +20,7 @@
 
    FIELD REFERENCE (per subject)
    -----------------------------
-   id       url-safe id, used for the page filename subject-<id>.html (required)
+   id       url-safe id for the subject; also used in tool file paths (required)
    name     Shown as the subject heading. e.g. "Spanish".       (required)
    blurb    One line under the subject name.                    (optional)
    accent   A hex color for this subject's spine/tab.           (optional)

@@ -16,7 +16,7 @@ Run through this before publishing each tool. It maps to STANDARD.md.
 - [ ] `accent` set to the subject color. (§8)
 - [ ] File saved at `tools/<subject>/<name>.html`. (§9)
 - [ ] Registered in `tools.js` (title, topic, file, date, note). (§9)
-- [ ] Subject exists in `tools.js` and has a `subject-<id>.html` page. (§9)
+- [ ] Subject exists in `tools.js` (the home page adds its filter tile automatically). (§9)
 
 ## Behavior (spot-check in a browser)
 - [ ] Loads with a **‹ Study Buddy** back link. (§8)

@@ -56,85 +56,57 @@ body{
   font-size: 16px;
 }
 
-/* breadcrumb on subject pages */
-.crumb{
-  font-size: 14px;
-  margin: 0 0 22px;
-}
-.crumb a{ color: var(--ochre-ink); text-decoration: none; }
-.crumb a:hover{ text-decoration: underline; }
-.crumb .sep{ color: var(--ink-soft); padding: 0 6px; }
 
-/* ---------- Subject blocks (home) ---------- */
-.subject{
-  margin-top: 34px;
-}
-.subject-head{
+/* ---------- Filter tiles ---------- */
+.tile-bar{
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  border-left: 6px solid var(--subject-accent, var(--ochre));
-  padding-left: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 22px 0 26px;
 }
-.subject-head h2{
-  font-family: var(--serif);
-  font-size: 27px;
-  margin: 0;
-  color: var(--ink);
-}
-.subject-head .count{
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-.subject-blurb{
-  color: var(--ink-soft);
+.subject-tile{
+  font-family: var(--sans);
   font-size: 15px;
-  margin: 4px 0 0 20px;
-}
-.subject-link{
-  margin: 10px 0 0 20px;
-}
-.subject-link a{
-  color: var(--ochre-ink);
-  text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--rule);
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.subject-link a:hover{ text-decoration: underline; }
+.subject-tile:hover{ border-color: var(--tile-accent, var(--ink-soft)); }
+.subject-tile:focus-visible{ outline: 2px solid var(--ink); outline-offset: 2px; }
+/* Active subject tile uses its own accent; the "All" tile uses ink. */
+.subject-tile.active{
+  background: var(--tile-accent, var(--ink));
+  border-color: var(--tile-accent, var(--ink));
+  color: #fff;
+}
 
-/* ---------- Topic groups + tool rows ---------- */
-.topic{
-  margin: 22px 0 0 20px;
-}
-.topic-name{
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--ink-soft);
-  margin: 0 0 8px;
-}
-
+/* ---------- Flat tool list ---------- */
 .tool-list{ list-style: none; margin: 0; padding: 0; }
+.tool-li.hidden{ display: none; }
 
 .tool{
   display: block;
   background: var(--card);
   border: 1px solid var(--rule);
-  border-left: 4px solid var(--subject-accent, var(--ochre));
+  border-left: 5px solid var(--stripe, var(--ochre));
   border-radius: 8px;
-  padding: 13px 16px;
-  margin-bottom: 8px;
+  padding: 14px 16px;
+  margin-bottom: 9px;
   text-decoration: none;
   color: inherit;
   box-shadow: 0 1px 2px var(--shadow);
-  transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 .tool:hover,
 .tool:focus-visible{
   box-shadow: 0 4px 14px var(--shadow);
   transform: translateY(-1px);
   outline: none;
-  border-color: var(--subject-accent, var(--ochre));
 }
 .tool:focus-visible{ outline: 2px solid var(--ink); outline-offset: 2px; }
 
@@ -155,8 +127,16 @@ body{
   white-space: nowrap;
   flex: 0 0 auto;
 }
+.tool-meta{
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+}
+.tool-subject{ font-weight: 700; }
+.tool-dot{ color: var(--ink-soft); padding: 0 6px; }
+.tool-topic{ color: var(--ink-soft); }
 .tool-note{
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   font-size: 14px;
   color: var(--ink-soft);
 }
@@ -169,7 +149,7 @@ body{
   padding: 18px;
   color: var(--ink-soft);
   font-size: 15px;
-  margin: 16px 0 0 20px;
+  margin: 4px 0 0;
 }
 .empty code{
   background: #f1ebde;
@@ -180,7 +160,7 @@ body{
 
 /* ---------- Footer ---------- */
 .foot{
-  margin-top: 48px;
+  margin-top: 40px;
   padding-top: 16px;
   border-top: 1px solid var(--rule);
   font-size: 13px;
@@ -190,9 +170,9 @@ body{
 /* ---------- Responsive ---------- */
 @media (max-width: 520px){
   .masthead h1{ font-size: 32px; }
-  .subject-head h2{ font-size: 23px; }
   .tool-top{ flex-direction: column; gap: 2px; }
   .wrap{ padding: 28px 16px 60px; }
+  .subject-tile{ font-size: 14px; padding: 9px 15px; }
 }
 
 @media (prefers-reduced-motion: reduce){

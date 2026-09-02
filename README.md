@@ -12,14 +12,20 @@ no server, and it works offline once a page has loaded.
 ## What's in here
 
 ```
-index.html              Home page (lists every subject + its tools)
-subject-<id>.html        One page per subject (e.g. subject-spanish.html)
-tools.js                 ← THE ONLY FILE YOU EDIT to add tools/subjects
-assets/site.css          Shared styles
-assets/render.js         Builds the pages from tools.js
-build-pages.js           Optional: regenerates subject pages when you add a subject
-tools/<subject>/...      The actual study tool .html files
+index.html               The whole site: filter tiles + list of all tools
+tools.js                  ← THE ONLY FILE YOU EDIT to add tools/subjects
+assets/site.css           Home-page styles (tiles + tool list)
+assets/render.js          Builds the home page from tools.js
+assets/study.css          Shared styles for the study tools
+assets/study-engine.js    Shared engine that powers every tool
+_template/tool.html       Starter you copy to make a new tool
+tools/<subject>/...       The actual study tool .html files
+STANDARD.md / CHECKLIST.md  The build standard and pre-publish checklist
 ```
+
+There is a single page (`index.html`). Subjects are filter tiles across the top;
+clicking one shows just that subject's tools. There are no per-subject pages to
+maintain.
 
 ---
 
@@ -48,7 +54,8 @@ That's it. Bookmark that URL on your kids' devices.
 
 ## Add a new study tool (the common case)
 
-1. Save the tool's `.html` file under `tools/<subject>/`.
+1. Copy `_template/tool.html` to `tools/<subject>/<name>.html` and fill in its
+   content block (see the comments in that file).
    Example: `tools/spanish/verbs.html`
 2. Open **`tools.js`** and add one entry to that subject's `tools` list:
 
@@ -59,9 +66,9 @@ That's it. Bookmark that URL on your kids' devices.
    ```
 3. Upload the new file + the edited `tools.js` to GitHub (Add file → Upload files,
    or edit `tools.js` directly on github.com with the pencil icon). Done — the
-   home page and the subject page update themselves.
+   home page updates itself.
 
-No need to touch any HTML. The pages read `tools.js` automatically.
+No need to touch any HTML on the home page. It reads `tools.js` automatically.
 
 ---
 
@@ -71,20 +78,15 @@ No need to touch any HTML. The pages read `tools.js` automatically.
 
    ```js
    {
-     id: "history",              // used for the page filename: subject-history.html
-     name: "History",
-     blurb: "Dates, people, and places.",
-     accent: "#4c7a5a",          // the subject's stripe color
+     id: "history",             // url-safe id (also used in tool file paths)
+     name: "History",           // shown on the filter tile
+     accent: "#4c7a5a",         // the subject's stripe + tile color
      tools: []
    }
    ```
-2. Create its page. Two ways:
-   - **Easiest:** copy `subject-spanish.html`, rename it to `subject-history.html`,
-     and change the one line near the bottom to `renderSubject("history");`.
-   - **Or**, if you have Node installed, run `node build-pages.js` from this
-     folder and it writes every `subject-<id>.html` for you.
-3. Make a folder for its tools: `tools/history/`.
-4. Upload the changes.
+2. Make a folder for its tools: `tools/history/`.
+3. Upload the changes. A "History" filter tile appears automatically — there is
+   no page to create.
 
 ---
 

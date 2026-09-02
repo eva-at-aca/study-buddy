@@ -1,8 +1,8 @@
-/* Study Buddy — renders pages from window.STUDY_SITE (defined in tools.js).
-   Two entry points:
-     renderHome()            -> builds the home page (all subjects, all tools)
-     renderSubject(subjectId)-> builds one subject page (topics -> tools by date)
-*/
+/* Study Buddy — home page renderer.
+   One interactive page: subject filter tiles on top, a flat list of all tools
+   (newest first) below, each tool striped with its subject color. Clicking a
+   tile filters to that subject; an "All" tile shows everything. No per-subject
+   pages. Reads window.STUDY_SITE from tools.js. */
 
 (function(){
   var SITE = window.STUDY_SITE || { siteTitle: "Study Buddy", subjects: [] };
@@ -13,7 +13,7 @@
       .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   }
 
-  // "2026-09-02" -> "Sep 2, 2026" (parsed as local, no timezone surprises)
+  // "2026-09-02" -> "Sep 2, 2026" (local, no timezone surprises)
   function prettyDate(iso){
     if(!iso) return "";
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
@@ -22,52 +22,70 @@
     return months[Number(m[2]) - 1] + " " + Number(m[3]) + ", " + m[1];
   }
 
-  function toolCount(subject){
-    return (subject.tools || []).length;
+  // Flatten all tools across subjects into one list, tagged with their subject.
+  function allTools(){
+    var list = [];
+    (SITE.subjects || []).forEach(function(sub){
+      (sub.tools || []).forEach(function(t){
+        list.push({
+          title: t.title, topic: t.topic, file: t.file, date: t.date, note: t.note,
+          subjectId: sub.id, subjectName: sub.name, accent: sub.accent || "#c9a227"
+        });
+      });
+    });
+    // newest first; tie-break by title
+    list.sort(function(a,b){
+      var d = (b.date || "").localeCompare(a.date || "");
+      return d !== 0 ? d : (a.title || "").localeCompare(b.title || "");
+    });
+    return list;
   }
 
-  // Group a subject's tools by topic, then sort each topic's tools newest-first.
-  function groupByTopic(tools){
-    var groups = {};
-    var order = [];
-    (tools || []).forEach(function(t){
-      var key = t.topic || "Other";
-      if(!groups[key]){ groups[key] = []; order.push(key); }
-      groups[key].push(t);
-    });
-    order.sort(function(a,b){ return a.localeCompare(b); });
-    order.forEach(function(k){
-      groups[k].sort(function(a,b){ return (b.date || "").localeCompare(a.date || ""); });
-    });
-    return { order: order, groups: groups };
-  }
+  var TOOLS = allTools();
+  var activeSubject = "all"; // "all" or a subject id
 
-  function toolRow(t){
+  function toolRowHtml(t){
     var note = t.note ? '<p class="tool-note">' + esc(t.note) + '</p>' : '';
     return '' +
-      '<li><a class="tool" href="' + esc(t.file) + '">' +
-        '<span class="tool-top">' +
-          '<span class="tool-title">' + esc(t.title) + '</span>' +
-          '<span class="tool-date">' + prettyDate(t.date) + '</span>' +
-        '</span>' +
-        note +
-      '</a></li>';
+      '<li class="tool-li" data-subject="' + esc(t.subjectId) + '">' +
+        '<a class="tool" href="' + esc(t.file) + '" style="--stripe:' + esc(t.accent) + '">' +
+          '<span class="tool-top">' +
+            '<span class="tool-title">' + esc(t.title) + '</span>' +
+            '<span class="tool-date">' + prettyDate(t.date) + '</span>' +
+          '</span>' +
+          '<span class="tool-meta">' +
+            '<span class="tool-subject" style="color:' + esc(t.accent) + '">' + esc(t.subjectName) + '</span>' +
+            (t.topic ? '<span class="tool-dot">&middot;</span><span class="tool-topic">' + esc(t.topic) + '</span>' : '') +
+          '</span>' +
+          note +
+        '</a>' +
+      '</li>';
   }
 
-  function topicBlock(name, tools){
-    var rows = tools.map(toolRow).join("");
-    return '' +
-      '<div class="topic">' +
-        '<p class="topic-name">' + esc(name) + '</p>' +
-        '<ul class="tool-list">' + rows + '</ul>' +
-      '</div>';
+  function applyFilter(){
+    var lis = document.querySelectorAll(".tool-li");
+    var shown = 0;
+    [].forEach.call(lis, function(li){
+      var match = (activeSubject === "all") || (li.getAttribute("data-subject") === activeSubject);
+      li.classList.toggle("hidden", !match);
+      if(match) shown++;
+    });
+    var tiles = document.querySelectorAll(".subject-tile");
+    [].forEach.call(tiles, function(tile){
+      var on = tile.getAttribute("data-id") === activeSubject;
+      tile.classList.toggle("active", on);
+      tile.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    var empty = document.getElementById("emptyNote");
+    if(empty) empty.classList.toggle("hidden", shown > 0);
   }
 
-  // ---------- Home ----------
   function renderHome(){
     document.title = SITE.siteTitle || "Study Buddy";
     var host = document.getElementById("app");
     if(!host) return;
+
+    var subjects = SITE.subjects || [];
 
     var head = '' +
       '<header class="masthead">' +
@@ -75,91 +93,36 @@
         (SITE.siteTagline ? '<p>' + esc(SITE.siteTagline) + '</p>' : '') +
       '</header>';
 
-    var body = "";
-    var subjects = SITE.subjects || [];
+    var tiles = '<button class="subject-tile active" data-id="all" aria-pressed="true">All</button>';
+    subjects.forEach(function(sub){
+      tiles += '<button class="subject-tile" data-id="' + esc(sub.id) + '" ' +
+               'style="--tile-accent:' + esc(sub.accent || "#c9a227") + '">' +
+               esc(sub.name) + '</button>';
+    });
+    var tileBar = '<div class="tile-bar" id="tileBar">' + tiles + '</div>';
 
-    if(!subjects.length){
-      body = '<div class="empty">No subjects yet. Add one in <code>tools.js</code>.</div>';
-    } else {
-      subjects.forEach(function(sub){
-        var accent = sub.accent || "";
-        var styleAttr = accent ? ' style="--subject-accent:' + esc(accent) + '"' : '';
-        var n = toolCount(sub);
-        var countLabel = n + (n === 1 ? " tool" : " tools");
-
-        var inner;
-        if(!n){
-          inner = '<div class="empty">No tools here yet.</div>';
-        } else {
-          var g = groupByTopic(sub.tools);
-          inner = g.order.map(function(topic){
-            return topicBlock(topic, g.groups[topic]);
-          }).join("");
-        }
-
-        body += '' +
-          '<section class="subject"' + styleAttr + '>' +
-            '<div class="subject-head">' +
-              '<h2>' + esc(sub.name) + '</h2>' +
-              '<span class="count">' + countLabel + '</span>' +
-            '</div>' +
-            (sub.blurb ? '<p class="subject-blurb">' + esc(sub.blurb) + '</p>' : '') +
-            '<p class="subject-link"><a href="subject-' + esc(sub.id) + '.html">Open ' + esc(sub.name) + ' &rsaquo;</a></p>' +
-            inner +
-          '</section>';
-      });
-    }
+    var rows = TOOLS.map(toolRowHtml).join("");
+    var list = TOOLS.length
+      ? '<ul class="tool-list">' + rows + '</ul>' +
+        '<p class="empty hidden" id="emptyNote">No tools in this subject yet.</p>'
+      : '<div class="empty">No tools yet. Add one in <code>tools.js</code>.</div>';
 
     var foot = '<p class="foot">Saved on this device as you study. Works offline once loaded.</p>';
-    host.innerHTML = head + body + foot;
+
+    host.innerHTML = head + tileBar + list + foot;
+
+    var bar = document.getElementById("tileBar");
+    if(bar){
+      [].forEach.call(bar.querySelectorAll(".subject-tile"), function(tile){
+        tile.addEventListener("click", function(){
+          var id = tile.getAttribute("data-id");
+          activeSubject = (id === activeSubject && id !== "all") ? "all" : id;
+          applyFilter();
+        });
+      });
+    }
+    applyFilter();
   }
 
-  // ---------- Subject ----------
-  function renderSubject(subjectId){
-    var host = document.getElementById("app");
-    if(!host) return;
-    var sub = (SITE.subjects || []).find(function(s){ return s.id === subjectId; });
-
-    if(!sub){
-      document.title = "Not found — " + (SITE.siteTitle || "Study Buddy");
-      host.innerHTML =
-        '<p class="crumb"><a href="index.html">' + esc(SITE.siteTitle || "Home") + '</a></p>' +
-        '<header class="masthead"><h1>Subject not found</h1>' +
-        '<p>There is no subject with id &ldquo;' + esc(subjectId) + '&rdquo; in tools.js.</p></header>';
-      return;
-    }
-
-    document.title = sub.name + " — " + (SITE.siteTitle || "Study Buddy");
-    var accent = sub.accent || "";
-    var styleAttr = accent ? ' style="--subject-accent:' + esc(accent) + '"' : '';
-    var n = toolCount(sub);
-
-    var crumb =
-      '<p class="crumb"><a href="index.html">' + esc(SITE.siteTitle || "Home") + '</a>' +
-      '<span class="sep">/</span>' + esc(sub.name) + '</p>';
-
-    var head = '' +
-      '<header class="masthead">' +
-        '<h1>' + esc(sub.name) + '</h1>' +
-        (sub.blurb ? '<p>' + esc(sub.blurb) + '</p>' : '') +
-      '</header>';
-
-    var body;
-    if(!n){
-      body = '<div class="empty">No tools here yet. Add one to the &ldquo;' + esc(sub.name) +
-             '&rdquo; subject in <code>tools.js</code>.</div>';
-    } else {
-      var g = groupByTopic(sub.tools);
-      body = '<section class="subject"' + styleAttr + '>' +
-        g.order.map(function(topic){ return topicBlock(topic, g.groups[topic]); }).join("") +
-      '</section>';
-    }
-
-    host.innerHTML = crumb + head + body +
-      '<p class="foot">Progress in each tool is saved on this device.</p>';
-  }
-
-  // expose
   window.renderHome = renderHome;
-  window.renderSubject = renderSubject;
 })();

@@ -96,7 +96,7 @@ When a tool's answer differs from the student's original worksheet answer:
 - **MUST** — Tool file lives at `tools/<subject>/<name>.html`.
 - **MUST** — Registered in `tools.js` with `title`, `topic`, `file`, `date`, and
   (optional) `note`.
-- **MUST** — Its subject exists in `tools.js` (and has a `subject-<id>.html` page).
+- **MUST** — Its subject exists in `tools.js` (the home page filters by it automatically).
 
 ---
 
