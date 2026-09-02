@@ -1,11 +1,11 @@
-/* Study Desk — renders pages from window.STUDY_SITE (defined in tools.js).
+/* Study Buddy — renders pages from window.STUDY_SITE (defined in tools.js).
    Two entry points:
      renderHome()            -> builds the home page (all subjects, all tools)
      renderSubject(subjectId)-> builds one subject page (topics -> tools by date)
 */
 
 (function(){
-  var SITE = window.STUDY_SITE || { siteTitle: "Study Desk", subjects: [] };
+  var SITE = window.STUDY_SITE || { siteTitle: "Study Buddy", subjects: [] };
 
   function esc(s){
     return String(s == null ? "" : s)
@@ -65,13 +65,13 @@
 
   // ---------- Home ----------
   function renderHome(){
-    document.title = SITE.siteTitle || "Study Desk";
+    document.title = SITE.siteTitle || "Study Buddy";
     var host = document.getElementById("app");
     if(!host) return;
 
     var head = '' +
       '<header class="masthead">' +
-        '<h1>' + esc(SITE.siteTitle || "Study Desk") + '</h1>' +
+        '<h1>' + esc(SITE.siteTitle || "Study Buddy") + '</h1>' +
         (SITE.siteTagline ? '<p>' + esc(SITE.siteTagline) + '</p>' : '') +
       '</header>';
 
@@ -121,7 +121,7 @@
     var sub = (SITE.subjects || []).find(function(s){ return s.id === subjectId; });
 
     if(!sub){
-      document.title = "Not found — " + (SITE.siteTitle || "Study Desk");
+      document.title = "Not found — " + (SITE.siteTitle || "Study Buddy");
       host.innerHTML =
         '<p class="crumb"><a href="index.html">' + esc(SITE.siteTitle || "Home") + '</a></p>' +
         '<header class="masthead"><h1>Subject not found</h1>' +
@@ -129,7 +129,7 @@
       return;
     }
 
-    document.title = sub.name + " — " + (SITE.siteTitle || "Study Desk");
+    document.title = sub.name + " — " + (SITE.siteTitle || "Study Buddy");
     var accent = sub.accent || "";
     var styleAttr = accent ? ' style="--subject-accent:' + esc(accent) + '"' : '';
     var n = toolCount(sub);

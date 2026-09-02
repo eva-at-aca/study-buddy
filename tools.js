@@ -28,7 +28,7 @@
 
 window.STUDY_SITE = {
   // Shown in the header of the home page.
-  siteTitle: "Study Desk",
+  siteTitle: "Study Buddy",
   siteTagline: "A home for the study tools we build through the year.",
 
   subjects: [
@@ -48,9 +48,9 @@ window.STUDY_SITE = {
         // Add more Spanish tools here, e.g.:
         // { title: "Ser vs. Estar", topic: "Grammar", file: "tools/spanish/ser-estar.html", date: "2026-09-15", note: "When to use each." }
       ]
-    }
+    },
 
-    // Add more subjects here, e.g.:
+    // Add more subjects by copying a block like this one:
     // {
     //   id: "history",
     //   name: "History",
@@ -60,11 +60,21 @@ window.STUDY_SITE = {
     //     { title: "U.S. Presidents", topic: "American History", file: "tools/history/presidents.html", date: "2026-10-01" }
     //   ]
     // },
-    // {
-    //   id: "science",
-    //   name: "Science",
-    //   accent: "#3f6f8f",
-    //   tools: []
-    // }
+
+    {
+      id: "science",
+      name: "Science",
+      blurb: "Biology, chemistry, and lab concepts.",
+      accent: "#5aa9a0",
+      tools: [
+        {
+          title: "Cell Biology Review",
+          topic: "Cell Biology",
+          file: "tools/science/cell-biology.html",
+          date: "2026-09-02",
+          note: "Cell cycle, cell structures, and levels of organization — flashcards and write-in. Test on 9/4."
+        }
+      ]
+    }
   ]
 };
