@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Notebook — Spanish-Speaking Countries</title>
+<style>
+  :root{
+    --bg: #101a30;
+    --panel: #223561;
+    --panel-2: #2c4074;
+    --rule: #3d5088;
+    --ink: #eee6d3;
+    --ink-dim: #b9c0d6;
+    --gold: #c9a227;
+    --gold-dim: #8d7326;
+    --stamp: #c1443b;
+    --teal: #3e8c82;
+    --good: #4c9a6a;
+    --bad: #c1443b;
+    --font-display: Georgia, 'Times New Roman', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-mono: 'Courier New', Courier, monospace;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #1c2b52 0%, transparent 60%),
+      radial-gradient(1000px 500px at 110% 10%, #16234a 0%, transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    display: flex;
+    justify-content: center;
+    padding: 28px 16px 60px;
+  }
+
+  .page{
+    width: 100%;
+    max-width: 760px;
+  }
+
+  header.masthead{
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .eyebrow{
+    font-family: var(--font-mono);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: var(--gold);
+    margin: 0 0 6px;
+  }
+  h1{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 26px;
+    margin: 0 0 4px;
+    letter-spacing: 0.01em;
+  }
+  .sub{
+    color: var(--ink-dim);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 27px,
+      rgba(238,230,211,0.035) 28px
+    );
+  }
+
+  .section-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin: 0 0 10px;
+  }
+
+  .chip-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .controls-head{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .controls-head-actions{ display: flex; gap: 14px; align-items: center; }
+  /* Results & miss-pattern screen */
+  .results-empty{ color: var(--ink-dim); font-size: 14px; margin: 6px 0; }
+  .results-intro{ color: var(--ink-dim); font-size: 13px; margin: 0 0 16px; }
+  .rp-section-title{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 18px 0 8px;
+  }
+  .rp-toprow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .miss-item{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 7px 0;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  .miss-item:first-child{ border-top: none; }
+  .miss-name{ color: var(--ink); }
+  .miss-ans{ color: var(--ink-dim); font-size: 12.5px; }
+  .miss-count{
+    justify-self: end;
+    min-width: 30px;
+    text-align: center;
+    background: rgba(193,68,59,0.22);
+    color: #f0a59f;
+    border: 1px solid rgba(193,68,59,0.5);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .miss-count.count-1{ background: rgba(201,162,39,0.18); color: #e8cf7a; border-color: rgba(201,162,39,0.5); }
+  .run-row{
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: baseline;
+    padding: 8px 0;
+    border-top: 1px solid var(--rule);
+    font-size: 13.5px;
+  }
+  .run-row:first-child{ border-top: none; }
+  .run-when{ color: var(--ink-dim); font-size: 12px; white-space: nowrap; }
+  .run-meta{ color: var(--ink); }
+  .run-missed{ color: var(--ink-dim); font-size: 12px; margin-top: 2px; grid-column: 1 / -1; }
+  .run-missed .m{ color: #f0a59f; }
+  .run-perfect{ color: var(--good); }
+  .results-filter{ display:flex; flex-wrap:wrap; gap:6px; margin: 4px 0 8px; }
+  .controls-sub{
+    margin: 0 0 8px;
+    opacity: 0.8;
+  }
+  #levelHeading{ margin-top: 2px; }
+  .controls-summary{
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--ink);
+    margin: 0;
+  }
+  .controls-summary .accent{ color: var(--gold); font-weight: 600; }
+  .chip{
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
+    background: var(--panel-2);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .chip:hover{ border-color: var(--gold-dim); }
+  .chip.active{
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #241b03;
+    font-weight: 600;
+  }
+  .chip:active{ transform: scale(0.97); }
+
+  .level-chip .num{
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: rgba(238,230,211,0.12);
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-right: 7px;
+  }
+  .chip.active .num{ background: rgba(0,0,0,0.18); }
+
+  .restart-row{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -2px;
+  }
+  .link-btn{
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .link-btn:hover{ color: var(--gold); }
+
+  .stats-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    margin-bottom: 4px;
+  }
+  .best-badge{
+    color: var(--gold);
+  }
+  .progress-track{
+    height: 6px;
+    background: var(--panel-2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 22px;
+  }
+  .progress-fill{
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--gold));
+    width: 0%;
+    transition: width 0.25s ease;
+  }
+
+  .quiz-card{ min-height: 240px; }
+  .prompt-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--teal);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  .prompt{
+    font-family: var(--font-display);
+    font-size: 23px;
+    line-height: 1.4;
+    margin: 0 0 20px;
+  }
+
+  .options{
+    display: grid;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .option-btn{
+    text-align: left;
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    background: var(--panel-2);
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .option-btn:hover{ border-color: var(--gold-dim); }
+  .option-btn.correct{
+    background: rgba(76,154,106,0.22);
+    border-color: var(--good);
+  }
+  .option-btn.incorrect{
+    background: rgba(193,68,59,0.22);
+    border-color: var(--bad);
+  }
+  .option-btn:disabled{ cursor: default; }
+
+  .letters-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 18px;
+    font-family: var(--font-mono);
+    font-size: 20px;
+  }
+  .letter-fixed{
+    min-width: 20px;
+    text-align: center;
+    padding: 6px 2px;
+    color: var(--ink-dim);
+  }
+  .letter-space{ width: 14px; }
+  .letter-input{
+    width: 30px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    background: var(--panel-2);
+    border: none;
+    border-bottom: 2px solid var(--gold-dim);
+    color: var(--ink);
+    border-radius: 3px 3px 0 0;
+    padding: 6px 2px;
+  }
+  .letter-input:focus{
+    outline: none;
+    border-bottom-color: var(--gold);
+    background: rgba(201,162,39,0.12);
+  }
+  .letter-input.correct{ border-bottom-color: var(--good); background: rgba(76,154,106,0.18); }
+  .letter-input.incorrect{ border-bottom-color: var(--bad); background: rgba(193,68,59,0.18); }
+
+  .free-input{
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    background: var(--panel-2);
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .free-input:focus{ outline: none; border-color: var(--gold); }
+  .free-input.correct{ border-color: var(--good); background: rgba(76,154,106,0.14); }
+  .free-input.incorrect{ border-color: var(--bad); background: rgba(193,68,59,0.14); }
+
+  .accent-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .accent-key{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--rule);
+    background: var(--panel-2);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .accent-key:hover{ border-color: var(--gold-dim); }
+
+  .feedback{
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .feedback.show{ display: block; }
+  .feedback.good{ background: rgba(76,154,106,0.15); color: #bfe3cd; border: 1px solid rgba(76,154,106,0.4); }
+  .feedback.bad{ background: rgba(193,68,59,0.15); color: #f3c7c3; border: 1px solid rgba(193,68,59,0.4); }
+
+  .action-row{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn{
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14.5px;
+    padding: 11px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary{ background: var(--gold); color: #241b03; }
+  .btn-primary:hover{ background: #d8b03a; }
+  .btn-ghost{
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid var(--rule);
+  }
+  .btn-ghost:hover{ color: var(--ink); border-color: var(--gold-dim); }
+  .btn:disabled{ opacity: 0.4; cursor: default; }
+
+  .stamp{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    margin: -75px 0 0 -75px;
+    border: 4px solid var(--stamp);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--stamp);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transform: rotate(-18deg) scale(0.6);
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(16,26,48,0.55);
+  }
+  .stamp.play{ animation: stampIn 0.6s ease forwards; }
+  @keyframes stampIn{
+    0%{ opacity: 0; transform: rotate(-18deg) scale(0.5); }
+    55%{ opacity: 1; transform: rotate(-14deg) scale(1.08); }
+    75%{ transform: rotate(-14deg) scale(0.96); }
+    100%{ opacity: 1; transform: rotate(-14deg) scale(1); }
+  }
+  .stamp.fadeout{ animation: stampOut 0.4s ease forwards; }
+  @keyframes stampOut{ to{ opacity: 0; } }
+
+  .summary{ text-align: center; padding: 10px 0 4px; }
+  .summary .big{
+    font-family: var(--font-display);
+    font-size: 42px;
+    color: var(--gold);
+    margin: 0;
+  }
+  .summary p{ color: var(--ink-dim); margin: 6px 0 20px; }
+  .review-block{
+    text-align: left;
+    background: var(--panel-2);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 0 0 20px;
+  }
+  .review-title{
+    color: var(--ink) !important;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 10px !important;
+  }
+  .review-list{ list-style: none; margin: 0; padding: 0; }
+  .review-list li{
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  .review-list li:first-child{ border-top: none; }
+  .rev-label{ color: var(--ink-dim); }
+  .rev-ans{ color: var(--gold); font-weight: 600; text-align: right; }
+  .review-perfect{ color: var(--good) !important; font-weight: 600; margin: 0 0 20px !important; }
+
+  footer{
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    margin-top: 8px;
+  }
+
+  /* ---- Mode switch ---- */
+  .hidden{ display: none !important; }
+
+  /* ---- Full map mode ---- */
+  .map-wrap{
+    border: 1px dashed var(--gold-dim);
+    border-radius: 10px;
+    padding: 10px;
+    background: radial-gradient(600px 400px at 50% 0%, rgba(201,162,39,0.06), transparent 70%);
+  }
+  .map-shape{
+    fill: var(--panel-2);
+    stroke: var(--rule);
+    stroke-width: 1.5;
+    cursor: pointer;
+    transition: fill 0.15s;
+  }
+  .map-shape.green{ fill: rgba(76,154,106,0.55); stroke: var(--good); }
+  .map-shape.red{ fill: rgba(193,68,59,0.5); stroke: var(--bad); }
+  .map-shape.decoy{ fill: #202a45; stroke: #2c3956; stroke-width: 1.2; }
+  .map-shape.decoy.red{ fill: rgba(193,68,59,0.5); stroke: var(--bad); }
+  /* Top border layer: never covered by neighbors; only visible on hover */
+  .map-border-layer{ pointer-events: none; }
+  .map-border{
+    fill: none;
+    stroke: transparent;
+    stroke-width: 3;
+    stroke-linejoin: round;
+    pointer-events: none;
+    transition: stroke 0.12s;
+  }
+  .map-border.border-hi{ stroke: var(--gold); }
+  .map-border.sel-hi{ stroke: var(--gold); stroke-width: 3.5; }
+  /* Locator (Location topic) states */
+  .map-shape.locator-target{ fill: var(--gold); stroke: var(--gold); }
+  .map-shape.locator-done{ fill: rgba(76,154,106,0.5); stroke: var(--good); }
+  .map-shape.locator-dim{ fill: #1a2540; stroke: #2c3956; stroke-width: 1; cursor: default; }
+  .map-shape.locator-pickable{ fill: var(--panel-2); stroke: var(--rule); cursor: pointer; }
+  .map-shape.locator-pickable:hover{ fill: #26355f; }
+  .map-caption{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--ink-dim);
+    letter-spacing: 0.04em;
+  }
+  .legend-row{
+    display:flex; gap:16px; flex-wrap:wrap;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 12px;
+  }
+  .legend-dot{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:middle; }
+
+  /* ---- Modal ---- */
+  .modal-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(8,12,24,0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .modal-card{
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 22px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-title{
+    font-family: var(--font-display);
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+  .modal-sub{ color: var(--ink-dim); font-size: 13px; margin: 0 0 16px; }
+  /* Floating challenge popup for the Countries topic (sits beside the highlighted country, at its height) */
+  .locator-stage{ position: relative; max-width: 600px; margin: 0 auto; }
+  .loc-popup{
+    position: absolute;
+    z-index: 20;
+    width: min(255px, 58%);
+    background: var(--panel);
+    border: 1px solid var(--gold-dim);
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transform: translateY(-50%);
+  }
+  .loc-popup.side-right{ right: 6px; }
+  .loc-popup.side-left{ left: 6px; }
+  .loc-popup .prompt-eyebrow{ margin-top: 0; }
+  /* In the narrow popup, keep the 'some help' letter boxes on one line */
+  .loc-popup .letters-row{
+    flex-wrap: nowrap;
+    gap: 2px;
+    margin: 4px 0 14px;
+    font-size: 14px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .loc-popup .letters-row .letter-fixed{ min-width: 11px; padding: 3px 1px; font-size: 14px; flex: 0 0 auto; }
+  .loc-popup .letters-row .letter-space{ width: 6px; flex: 0 0 auto; }
+  .loc-popup .letters-row .letter-input{ width: 15px; font-size: 14px; padding: 3px 1px; flex: 0 0 auto; }
+  .field-group{ margin-bottom: 12px; }
+  .field-label{
+    display:block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 5px;
+  }
+  .field-input{
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    padding: 9px 11px;
+    border-radius: 7px;
+    border: 1px solid var(--rule);
+    background: var(--panel-2);
+    color: var(--ink);
+  }
+  .field-input:focus{ outline: none; border-color: var(--gold); }
+  .field-input.correct{ border-color: var(--good); background: rgba(76,154,106,0.14); }
+  .field-input.incorrect{ border-color: var(--bad); background: rgba(193,68,59,0.14); }
+  .field-input:disabled{ opacity: 0.85; }
+  .field-hint{ font-size: 12px; margin-top: 4px; color: var(--bad); display:none; }
+  .field-hint.show{ display:block; }
+
+  @media (max-width: 480px){
+    h1{ font-size: 24px; }
+    .prompt{ font-size: 19px; }
+    .card{ padding: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .stamp, .stamp.play, .stamp.fadeout{ animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Study notebook</p>
+    <h1>Spanish-Speaking Countries</h1>
+    <p class="sub">Countries · Capitals · Nationalities — practice in three levels, or test everything on the map</p>
+  </header>
+
+  <div class="card" id="controlsCard">
+    <div class="controls-head">
+      <p class="section-label" style="margin:0;">Topic &amp; level</p>
+      <div class="controls-head-actions">
+        <button class="link-btn" id="viewResultsBtn">View results</button>
+        <button class="link-btn" id="controlsToggle" style="display:none;">Change</button>
+      </div>
+    </div>
+    <div id="controlsBody">
+      <p class="section-label controls-sub">Topic</p>
+      <div class="chip-row" id="datasetRow"></div>
+      <p class="section-label controls-sub" id="levelHeading">Level</p>
+      <div class="chip-row" id="levelRow"></div>
+    </div>
+    <p class="controls-summary hidden" id="controlsSummary"></p>
+  </div>
+
+  <div id="resultsSection" class="hidden">
+    <div class="card">
+      <div class="controls-head">
+        <p class="section-label" style="margin:0;">Results &amp; miss patterns</p>
+        <button class="link-btn" id="closeResultsBtn">← Back</button>
+      </div>
+      <div id="resultsBody"></div>
+    </div>
+  </div>
+
+  <div id="topicModeSection">
+    <div class="card">
+      <div class="stats-row">
+        <span id="statProgress">Mastered 0 / 0 · Round 1</span>
+        <span id="statBest" class="best-badge"></span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+      <div class="quiz-card" id="quizArea">
+        <p class="sub">Loading your saved progress…</p>
+      </div>
+      <div class="restart-row">
+        <button class="link-btn" id="restartTopicBtn">Reset this topic (test all again)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="fullMapSection" class="hidden">
+    <div class="card">
+      <div class="stats-row">
+        <span id="mapStatProgress">Countries in green: 0 / 0</span>
+        <button class="link-btn" id="restartMapBtn">Reset full map</button>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="mapProgressFill"></div></div>
+      <p class="sub" style="margin-bottom:14px;">Click a Spanish-speaking country, then type its country, capital, and nationality (masculine and feminine). All correct = green. Anything wrong = red. Watch out: the map also shows non-Spanish-speaking countries (like Brazil) — those are traps, not ones to label!</p>
+      <div class="map-wrap" id="mapWrap"></div>
+      <div class="legend-row">
+        <span><span class="legend-dot" style="background:var(--panel-2); border:1px solid var(--rule);"></span>Not yet tried</span>
+        <span><span class="legend-dot" style="background:var(--good);"></span>All correct</span>
+        <span><span class="legend-dot" style="background:var(--bad);"></span>Something wrong</span>
+        <span><span class="legend-dot" style="background:#202a45; border:1px solid #2c3956;"></span>Not Spanish-speaking (skip)</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>Progress is saved automatically on this device</footer>
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-card" id="modalCard"></div>
+</div>
+
+<script>
+(function(){
+
+  // ---------- Data ----------
+  const COUNTRIES = [
+    { country: "España", capital: ["Madrid"], masc: "español", fem: "española" },
+    { country: "México", capital: ["Ciudad de México"], masc: "mexicano", fem: "mexicana" },
+    { country: "Bolivia", capital: ["La Paz", "Sucre"], masc: "boliviano", fem: "boliviana" },
+    { country: "República Dominicana", capital: ["Santo Domingo"], masc: "dominicano", fem: "dominicana" },
+    { country: "Chile", capital: ["Santiago"], masc: "chileno", fem: "chilena" },
+    { country: "Cuba", capital: ["La Habana"], masc: "cubano", fem: "cubana" },
+    { country: "Paraguay", capital: ["Asunción"], masc: "paraguayo", fem: "paraguaya" },
+    { country: "Perú", capital: ["Lima"], masc: "peruano", fem: "peruana" },
+    { country: "Ecuador", capital: ["Quito"], masc: "ecuatoriano", fem: "ecuatoriana" },
+    { country: "Honduras", capital: ["Tegucigalpa"], masc: "hondureño", fem: "hondureña" },
+    { country: "Nicaragua", capital: ["Managua"], masc: "nicaragüense", fem: "nicaragüense" },
+    { country: "Argentina", capital: ["Buenos Aires"], masc: "argentino", fem: "argentina" },
+    { country: "Puerto Rico", capital: ["San Juan"], masc: "puertorriqueño", fem: "puertorriqueña" },
+    { country: "Guatemala", capital: ["Ciudad de Guatemala"], masc: "guatemalteco", fem: "guatemalteca" },
+    { country: "Venezuela", capital: ["Caracas"], masc: "venezolano", fem: "venezolana" },
+    { country: "Panamá", capital: ["Ciudad de Panamá"], masc: "panameño", fem: "panameña" },
+    { country: "El Salvador", capital: ["San Salvador"], masc: "salvadoreño", fem: "salvadoreña" },
+    { country: "Colombia", capital: ["Bogotá"], masc: "colombiano", fem: "colombiana" },
+    { country: "Uruguay", capital: ["Montevideo"], masc: "uruguayo", fem: "uruguaya" },
+    { country: "Costa Rica", capital: ["San José"], masc: "costarricense", fem: "costarricense" },
+    { country: "Guinea Ecuatorial", capital: ["Malabo"], masc: "ecuatoguineano", fem: "ecuatoguineana" }
+  ];
+
+  const MAP_CLUES = [
+    { clue: "Es el único país hispanohablante de Europa, en la península ibérica.", country: "España" },
+    { clue: "Está justo al sur de los Estados Unidos.", country: "México" },
+    { clue: "Es el primer país centroamericano al sur de México.", country: "Guatemala" },
+    { clue: "Está entre Guatemala/El Salvador y Nicaragua, con costa en dos océanos.", country: "Honduras" },
+    { clue: "Es el único país centroamericano sin costa en el Caribe.", country: "El Salvador" },
+    { clue: "Es el país más grande de Centroamérica.", country: "Nicaragua" },
+    { clue: "Conocido por el ecoturismo, entre Nicaragua y Panamá.", country: "Costa Rica" },
+    { clue: "El último país de la cadena centroamericana, con un canal famoso.", country: "Panamá" },
+    { clue: "La isla más grande del Caribe, con forma de cocodrilo.", country: "Cuba" },
+    { clue: "Comparte la isla La Española con Haití.", country: "República Dominicana" },
+    { clue: "La más pequeña de las Antillas Mayores, territorio de EE.UU.", country: "Puerto Rico" },
+    { clue: "En la costa norte de Sudamérica, al este de Colombia, gran productor de petróleo.", country: "Venezuela" },
+    { clue: "Conecta Centroamérica con Sudamérica; capital Bogotá.", country: "Colombia" },
+    { clue: "Nombrado por la línea del ecuador que lo atraviesa.", country: "Ecuador" },
+    { clue: "Hogar de Machu Picchu, en la costa del Pacífico.", country: "Perú" },
+    { clue: "País sin costa (interior), al este de Perú y al norte de Paraguay.", country: "Bolivia" },
+    { clue: "País larguísimo y angosto en la costa del Pacífico.", country: "Chile" },
+    { clue: "El otro país sin costa de Sudamérica, entre Bolivia y Argentina.", country: "Paraguay" },
+    { clue: "El segundo país más grande de Sudamérica por área.", country: "Argentina" },
+    { clue: "País pequeño entre Argentina y Brasil, en la costa atlántica.", country: "Uruguay" }
+  ];
+
+  // Real country outlines (Natural Earth 110m, projected to SVG). Main Americas panel + España & Guinea Ecuatorial insets.
+  const MAP_SHAPES = [
+    { id: 'México', d: 'M10.0,103.0L18.2,102.5L27.4,101.7L26.7,103.1L37.6,106.7L54.1,111.9L68.4,111.8L74.2,111.8L74.2,108.8L86.7,108.8L89.3,111.4L93.0,113.7L97.3,117.0L99.7,120.8L101.5,124.9L105.2,127.1L111.2,129.3L115.7,123.5L121.6,123.4L126.7,126.3L130.3,131.4L132.8,135.7L137.1,139.9L138.7,145.0L140.7,148.5L146.3,150.8L151.5,152.4L154.3,152.2L151.5,158.7L150.2,164.0L149.7,173.8L149.0,177.5L150.2,181.5L152.5,185.1L153.9,190.8L158.7,196.3L160.4,200.5L163.2,204.1L170.9,206.1L173.9,209.2L180.2,207.1L185.7,206.3L191.1,205.0L195.7,203.8L200.2,200.8L202.0,196.4L202.5,190.3L203.8,188.1L208.7,186.2L216.3,184.5L222.7,184.7L227.1,184.1L228.8,185.7L228.6,189.2L224.7,193.6L223.0,198.1L224.3,199.4L223.2,202.6L221.4,208.3L219.6,206.4L218.1,206.5L216.7,206.6L214.1,211.1L212.8,210.2L211.9,210.6L212.0,211.6L205.3,211.5L198.6,211.6L198.6,215.7L195.3,215.7L198.0,218.2L200.7,219.9L201.5,221.5L202.6,221.9L202.5,224.5L193.2,224.5L189.7,230.5L190.7,231.9L189.9,233.6L189.7,235.7L181.6,227.8L177.8,225.4L172.0,223.5L167.9,224.0L162.1,226.8L158.5,227.5L153.4,225.6L148.0,224.2L141.2,220.8L135.8,219.8L127.7,216.3L121.6,212.8L119.8,210.8L115.8,210.4L108.4,208.1L105.4,204.7L97.6,200.5L94.0,195.9L92.3,192.3L94.7,191.6L93.9,189.4L95.6,187.5L95.6,185.0L93.2,181.7L92.6,178.7L90.1,175.0L83.8,167.7L76.5,161.9L73.0,157.3L66.8,154.3L65.5,152.5L66.6,148.0L62.9,146.2L58.6,142.7L56.8,137.5L53.0,136.9L48.7,133.0L45.4,129.4L45.1,127.1L41.2,121.6L38.6,115.9L38.7,113.1L33.5,110.2L31.1,110.5L27.0,108.5L25.8,111.5L27.0,115.0L27.7,120.5L30.2,123.6L35.5,128.7L36.7,130.4L37.8,130.9L38.8,133.4L40.1,133.3L41.5,138.1L43.7,140.0L45.3,142.6L49.8,146.3L52.2,153.2L54.3,156.4L56.3,159.9L56.7,163.8L60.2,164.0L63.1,167.4L65.7,170.7L65.6,172.0L62.5,174.7L61.2,174.7L59.3,170.2L54.6,166.0L49.4,162.4L45.7,160.5L45.9,155.1L44.8,151.1L41.4,148.9L36.5,145.6L35.5,146.5L33.7,144.6L29.2,142.8L25.0,138.5L25.5,138.0L28.5,138.4L31.2,135.6L31.4,132.3L25.9,127.0L21.6,125.0L19.0,120.4L16.3,115.6L12.9,109.7L10.0,103.0Z', cx: 111.0, cy: 166.9 },
+    { id: 'Guatemala', d: 'M189.7,235.7L189.9,233.6L190.7,231.9L189.7,230.5L193.2,224.5L202.5,224.5L202.6,221.9L201.5,221.5L200.7,219.9L198.0,218.2L195.3,215.7L198.6,215.7L198.6,211.6L205.3,211.5L212.0,211.6L211.9,217.5L211.4,225.8L213.5,225.8L215.9,227.1L216.5,226.0L218.6,227.0L215.3,229.8L211.9,231.9L211.4,233.3L212.0,234.7L210.5,236.6L208.8,237.0L209.2,237.9L207.8,238.7L205.3,240.6L205.1,241.7L201.4,240.4L196.9,240.2L193.6,238.8L189.7,235.7Z', cx: 203.9, cy: 228.4 },
+    { id: 'Honduras', d: 'M255.3,232.4L252.8,232.2L251.8,233.2L249.3,234.2L247.5,234.2L245.9,235.1L244.4,234.8L243.2,233.7L242.5,233.9L241.5,235.6L240.8,235.6L240.7,237.1L238.2,239.1L236.9,240.0L236.1,240.9L234.0,239.4L232.4,241.4L230.9,241.4L229.2,241.5L229.4,245.1L228.3,245.2L227.4,246.9L225.2,247.2L223.9,244.9L221.7,244.3L222.2,241.3L221.2,240.5L219.8,240.0L216.6,240.9L216.3,239.9L214.2,238.7L212.6,237.2L210.5,236.6L212.0,234.7L211.4,233.3L211.9,231.9L215.3,229.8L218.6,227.0L219.4,227.3L221.0,226.0L223.0,225.9L223.7,226.5L224.8,226.1L228.2,226.8L231.5,226.6L233.8,225.8L234.7,224.9L237.0,225.3L238.7,225.8L240.6,225.6L242.0,225.0L245.3,226.0L246.5,226.2L248.7,227.6L250.7,229.2L253.4,230.3L255.3,232.4Z', cx: 232.5, cy: 234.2 },
+    { id: 'El Salvador', d: 'M210.5,236.6L212.6,237.2L214.2,238.7L216.3,239.9L216.6,240.9L219.8,240.0L221.2,240.5L222.2,241.3L221.7,244.3L220.9,246.0L216.8,245.9L214.2,245.2L211.2,243.7L207.2,243.2L205.1,241.7L205.3,240.6L207.8,238.7L209.2,237.9L208.8,237.0L210.5,236.6Z', cx: 213.6, cy: 240.8 },
+    { id: 'Nicaragua', d: 'M251.6,262.3L249.9,263.9L247.8,263.4L246.6,261.8L244.2,261.2L242.6,262.2L237.9,260.2L236.8,261.2L234.3,258.9L230.9,255.9L229.3,253.4L226.3,251.1L222.6,247.8L223.4,246.6L224.6,247.7L225.2,247.2L227.4,246.9L228.3,245.2L229.4,245.1L229.2,241.5L230.9,241.4L232.4,241.4L234.0,239.4L236.1,240.9L236.9,240.0L238.2,239.1L240.7,237.1L240.8,235.6L241.5,235.6L242.5,233.9L243.2,233.7L244.4,234.8L245.9,235.1L247.5,234.2L249.3,234.2L251.8,233.2L252.8,232.2L255.3,232.4L254.6,233.1L254.3,234.7L255.0,237.4L253.4,239.9L252.6,242.9L252.4,246.2L252.7,248.1L252.9,251.4L251.8,252.1L251.1,255.3L251.6,257.2L250.2,259.1L250.5,261.1L251.6,262.3Z', cx: 242.1, cy: 246.5 },
+    { id: 'Costa Rica', d: 'M259.6,272.4L256.8,273.1L256.8,276.0L258.4,277.1L257.3,278.0L257.5,279.3L257.0,280.8L256.6,282.3L252.7,280.7L251.2,279.1L252.0,277.8L251.8,276.2L249.8,274.4L246.9,273.0L244.5,272.0L244.0,269.9L242.1,268.6L242.5,270.7L241.1,272.5L239.4,270.4L237.1,269.7L236.1,268.2L236.2,266.0L237.1,263.6L235.1,262.6L236.8,261.2L237.9,260.2L242.6,262.2L244.2,261.2L246.6,261.8L247.8,263.4L249.9,263.9L251.6,262.3L253.4,266.3L256.2,269.3L259.6,272.4Z', cx: 248.0, cy: 270.5 },
+    { id: 'Panamá', d: 'M297.1,279.0L296.2,280.1L297.9,284.4L296.5,286.6L294.2,286.1L293.3,289.7L290.9,287.6L289.3,283.6L291.1,281.6L289.3,281.1L287.9,278.7L284.3,276.6L281.2,277.1L279.7,279.6L276.8,281.5L275.2,281.8L274.5,283.3L277.9,287.3L276.0,288.2L275.0,289.3L271.6,289.7L270.3,285.3L269.4,286.6L267.0,286.1L265.6,283.1L262.6,282.7L260.7,281.8L257.6,281.8L257.4,283.4L256.6,282.3L257.0,280.8L257.5,279.3L257.3,278.0L258.4,277.1L256.8,276.0L256.8,273.1L259.6,272.4L262.2,275.0L262.0,276.6L264.9,276.9L265.6,276.3L267.6,278.2L271.1,277.6L274.2,275.8L278.6,274.3L281.1,272.1L285.0,272.5L284.8,273.2L288.8,273.5L292.0,274.8L294.4,277.0L297.1,279.0Z', cx: 275.7, cy: 280.3 },
+    { id: 'Cuba', d: 'M261.6,172.0L267.8,172.5L273.5,172.6L280.3,175.1L283.2,177.8L289.9,177.0L292.5,178.7L298.6,183.2L303.1,186.6L305.5,186.5L309.8,188.0L309.2,190.1L314.6,190.4L320.0,193.4L319.2,195.1L314.4,196.0L309.5,196.4L304.5,195.8L294.2,196.5L299.0,192.4L296.1,190.5L291.4,190.0L288.9,187.9L287.2,183.7L283.1,184.0L276.4,182.0L274.3,180.4L264.9,179.3L262.3,177.9L265.0,176.0L257.9,175.7L252.8,179.5L249.8,179.6L248.7,181.4L245.2,182.2L242.1,181.5L245.9,179.2L247.4,176.6L250.7,174.9L254.4,173.5L259.9,172.8L261.6,172.0Z', cx: 279.9, cy: 182.8 },
+    { id: 'República Dominicana', d: 'M337.8,209.9L338.0,207.9L336.1,205.7L337.9,204.4L338.4,201.6L337.8,197.6L338.7,196.3L344.3,196.4L348.6,198.3L350.5,198.1L351.8,200.7L355.8,200.5L355.5,202.7L358.8,203.0L362.3,205.7L359.6,208.7L356.2,207.1L352.9,207.4L350.5,207.1L349.2,208.4L346.4,208.9L345.3,207.1L342.9,208.1L340.0,213.2L338.2,212.0L337.8,209.9Z', cx: 346.6, cy: 204.9 },
+    { id: 'Puerto Rico', d: 'M377.0,206.4L380.7,207.1L382.0,208.5L380.1,210.4L374.7,210.4L370.5,210.6L370.1,207.5L371.1,206.4L377.0,206.4Z', cx: 375.9, cy: 208.2 },
+    { id: 'Colombia', d: 'M372.7,333.7L371.4,334.6L369.9,330.3L367.9,327.9L365.5,330.5L351.5,330.3L351.6,334.9L355.8,335.7L355.6,338.5L354.1,337.7L350.1,338.9L350.0,344.3L353.2,347.0L354.3,351.2L354.2,354.4L350.9,374.6L347.3,370.7L345.2,370.5L349.8,363.0L344.3,359.6L340.0,360.2L337.3,358.9L333.4,360.9L328.0,360.0L323.8,352.2L320.4,350.3L318.1,346.9L313.3,343.4L311.4,344.1L308.3,342.3L304.7,339.9L302.7,341.1L296.6,340.0L294.8,336.9L293.5,337.0L286.2,332.8L285.3,330.5L288.0,329.9L287.6,326.2L289.3,323.6L292.9,323.1L296.0,318.4L298.7,314.6L296.1,312.8L297.4,308.5L295.8,301.8L297.3,299.8L296.2,293.6L293.3,289.7L294.2,286.1L296.5,286.6L297.9,284.4L296.2,280.1L297.1,279.0L300.8,279.2L306.2,274.1L309.2,273.3L309.3,270.9L310.6,264.6L314.7,261.2L319.3,261.1L319.9,259.5L325.5,260.2L331.2,256.4L334.0,254.8L337.5,251.2L340.0,251.7L341.9,253.6L340.5,256.1L335.9,257.4L334.1,261.0L331.3,263.1L329.2,265.9L328.3,271.2L326.3,275.5L330.0,276.0L331.0,279.3L332.6,281.0L333.1,283.9L332.3,286.7L332.5,288.2L334.3,288.8L336.0,291.4L345.3,290.7L349.5,291.6L354.6,298.0L357.5,297.2L362.7,297.6L366.8,296.7L369.4,298.0L368.1,302.0L366.4,304.5L365.9,309.7L367.3,314.6L369.4,316.8L369.6,318.5L366.0,322.2L368.6,323.8L370.5,326.4L372.7,333.7Z', cx: 331.0, cy: 309.8 },
+    { id: 'Venezuela', d: 'M417.0,304.6L418.0,306.7L415.4,309.5L407.3,312.3L402.1,313.4L400.0,315.1L394.3,313.3L388.9,312.4L387.6,313.0L390.8,314.9L390.5,319.9L391.5,324.5L397.6,325.2L398.0,326.7L392.9,328.8L392.0,331.9L389.1,333.1L383.7,334.9L382.3,337.1L376.7,337.6L372.7,333.7L370.5,326.4L368.6,323.8L366.0,322.2L369.6,318.5L369.4,316.8L367.3,314.6L365.9,309.7L366.4,304.5L368.1,302.0L369.4,298.0L366.8,296.7L362.7,297.6L357.5,297.2L354.6,298.0L349.5,291.6L345.3,290.7L336.0,291.4L334.3,288.8L332.5,288.2L332.3,286.7L333.1,283.9L332.6,281.0L331.0,279.3L330.0,276.0L326.3,275.5L328.3,271.2L329.2,265.9L331.3,263.1L334.1,261.0L335.9,257.4L340.5,256.1L340.3,257.9L336.1,258.7L338.5,262.1L338.4,265.9L335.2,270.2L337.9,276.0L341.0,275.6L342.6,270.2L340.4,267.6L340.0,262.1L349.0,259.1L348.1,255.6L350.6,253.3L353.2,258.5L358.2,258.6L362.9,262.7L363.2,265.1L369.7,265.2L377.4,264.4L381.5,267.7L387.1,268.6L391.1,266.3L391.2,264.5L400.1,264.0L408.8,263.9L402.6,266.1L405.1,269.6L410.9,270.1L416.3,273.8L417.5,279.7L421.2,279.5L424.1,281.3L418.4,285.6L417.7,288.3L420.2,291.0L418.4,292.4L414.0,293.6L414.1,297.0L412.2,299.0L417.0,304.6Z', cx: 372.9, cy: 289.8 },
+    { id: 'Ecuador', d: 'M311.4,344.1L312.4,349.7L310.1,354.5L302.3,362.2L293.6,365.1L289.2,371.5L287.8,376.5L283.7,379.5L280.7,375.8L277.8,375.0L274.8,375.6L274.6,372.9L276.6,371.1L275.8,368.1L279.6,362.5L278.1,359.3L275.3,362.7L271.0,359.5L272.5,357.4L271.2,350.7L273.8,349.6L275.1,345.0L277.8,340.3L277.3,337.3L281.3,335.7L286.2,332.8L293.5,337.0L294.8,336.9L296.6,340.0L302.7,341.1L304.7,339.9L308.3,342.3L311.4,344.1Z', cx: 287.3, cy: 355.0 },
+    { id: 'Perú', d: 'M350.9,374.6L344.4,374.3L343.5,375.4L337.6,376.8L329.3,381.8L328.8,385.3L326.9,387.8L327.7,391.8L323.3,394.0L323.3,397.1L321.4,398.4L324.4,405.1L328.4,409.6L326.9,412.7L331.7,413.1L334.4,417.1L340.8,417.3L346.7,412.9L346.2,424.1L349.5,425.0L353.6,423.7L359.8,435.6L358.2,438.1L357.9,443.2L357.7,449.5L354.9,453.2L356.2,455.9L354.6,458.4L357.7,464.6L353.1,472.6L351.2,476.4L347.5,478.2L340.2,474.0L339.6,471.0L325.3,463.6L312.3,455.5L306.8,451.0L303.8,444.9L305.0,442.7L298.9,433.1L291.7,419.5L284.9,404.8L282.0,401.4L279.7,396.0L274.1,391.2L269.0,388.2L271.3,384.9L267.8,377.9L270.0,372.7L275.8,368.1L276.6,371.1L274.6,372.9L274.8,375.6L277.8,375.0L280.7,375.8L283.7,379.5L287.8,376.5L289.2,371.5L293.6,365.1L302.3,362.2L310.1,354.5L312.4,349.7L311.4,344.1L313.3,343.4L318.1,346.9L320.4,350.3L323.8,352.2L328.0,360.0L333.4,360.9L337.3,358.9L340.0,360.2L344.3,359.6L349.8,363.0L345.2,370.5L347.3,370.7L350.9,374.6Z', cx: 320.7, cy: 400.1 },
+    { id: 'Bolivia', d: 'M353.6,423.7L358.9,424.3L362.6,424.2L364.2,421.9L370.6,418.9L374.4,416.2L383.8,414.9L383.1,420.5L383.9,423.3L383.3,428.2L391.2,434.8L399.3,436.1L402.1,438.8L407.0,440.3L410.0,442.4L414.5,442.3L418.7,444.5L419.0,448.8L420.4,450.9L420.5,454.1L418.4,454.2L421.2,462.8L435.0,463.1L434.0,467.4L434.8,470.3L438.7,472.4L440.4,477.0L439.1,482.8L437.1,486.0L437.8,490.2L435.6,491.7L435.5,489.4L428.7,485.7L422.0,485.6L409.5,487.7L406.0,494.2L405.8,498.2L403.0,507.0L401.8,505.4L393.6,505.1L390.7,511.1L386.5,505.7L377.0,503.9L371.0,510.6L365.9,511.6L363.0,501.4L359.1,493.2L361.4,486.0L357.6,482.9L356.7,477.6L353.1,472.6L357.7,464.6L354.6,458.4L356.2,455.9L354.9,453.2L357.7,449.5L357.9,443.2L358.2,438.1L359.8,435.6L353.6,423.7Z', cx: 392.5, cy: 463.4 },
+    { id: 'Chile', d: 'M360.0,731.1L360.0,747.5L367.7,747.5L372.1,747.7L369.7,750.7L363.5,753.0L360.0,752.8L355.7,752.2L350.5,750.0L342.9,748.9L333.8,744.8L326.5,740.8L316.5,732.6L322.5,734.1L332.6,739.0L342.2,741.7L345.9,738.3L348.2,733.2L354.9,730.2L360.0,731.1Z M353.1,472.6L356.7,477.6L357.6,482.9L361.4,486.0L359.1,493.2L363.0,501.4L365.9,511.6L371.0,510.6L371.9,512.4L369.4,520.1L361.6,523.7L361.8,536.0L360.3,538.4L362.5,541.3L357.4,545.9L352.7,552.8L350.1,559.5L350.8,566.6L346.3,574.2L349.6,586.9L351.5,588.3L351.5,595.1L347.4,602.3L347.5,608.4L342.1,613.3L342.1,620.0L344.3,627.2L340.0,629.9L338.0,636.5L336.3,644.0L337.6,653.0L334.6,654.5L336.3,663.0L339.6,665.8L337.2,668.9L340.6,670.4L341.3,673.2L338.2,674.6L339.0,678.9L336.3,688.7L332.5,695.0L333.3,698.7L331.1,703.4L325.5,706.6L326.1,714.4L328.7,717.1L333.5,716.6L333.3,722.1L336.3,726.4L353.8,727.4L360.5,728.6L354.1,728.5L350.6,730.3L344.1,733.0L342.9,739.9L339.8,740.1L331.7,737.7L323.4,732.5L314.5,728.3L312.2,723.6L314.2,719.3L310.6,714.4L309.7,701.9L312.8,694.8L320.4,689.1L309.4,686.9L316.3,680.4L318.7,668.1L326.8,670.7L330.5,655.5L325.7,653.5L323.4,662.7L318.9,661.7L321.2,651.1L323.6,637.5L326.9,632.4L324.8,625.2L324.3,616.9L327.3,616.7L331.7,604.8L336.7,593.0L339.8,582.0L338.1,570.9L340.3,564.9L339.4,555.8L343.6,546.8L344.9,532.5L347.2,517.2L349.5,500.7L349.0,488.6L347.5,478.2L351.2,476.4L353.1,472.6Z', cx: 341.5, cy: 644.0 },
+    { id: 'Paraguay', d: 'M435.6,491.7L437.7,495.8L437.2,505.8L444.8,507.2L447.8,505.8L452.7,507.8L454.0,510.0L454.7,516.8L455.5,519.6L458.2,519.9L460.9,518.7L463.5,520.1L463.5,524.1L462.5,528.5L461.1,532.7L460.0,539.2L453.4,544.9L447.7,546.1L439.6,545.0L432.3,543.0L439.4,531.7L438.4,528.5L430.9,525.6L422.1,520.2L416.2,519.0L403.0,507.0L405.8,498.2L406.0,494.2L409.5,487.7L422.0,485.6L428.7,485.7L435.5,489.4L435.6,491.7Z', cx: 439.9, cy: 514.8 },
+    { id: 'Argentina', d: 'M439.5,565.8L437.7,571.7L435.7,579.2L435.8,586.6L434.2,588.2L433.7,593.0L433.2,596.8L442.4,603.1L441.4,608.2L445.9,611.4L445.5,615.1L438.6,624.5L427.9,628.5L413.4,630.0L405.5,629.3L407.0,633.6L405.5,639.2L406.9,642.9L402.5,645.5L395.1,646.5L388.2,643.8L385.4,645.7L386.4,653.1L391.3,655.3L395.2,653.0L397.4,656.8L390.7,659.1L384.9,663.7L383.9,671.1L382.2,675.0L375.4,675.1L369.7,678.8L367.6,684.4L374.7,689.8L381.6,691.2L379.1,697.9L370.6,702.0L365.9,710.7L359.3,713.6L356.4,717.0L358.7,724.7L363.5,729.0L360.5,728.6L353.8,727.4L336.3,726.4L333.3,722.1L333.5,716.6L328.7,717.1L326.1,714.4L325.5,706.6L331.1,703.4L333.3,698.7L332.5,695.0L336.3,688.7L339.0,678.9L338.2,674.6L341.3,673.2L340.6,670.4L337.2,668.9L339.6,665.8L336.3,663.0L334.6,654.5L337.6,653.0L336.3,644.0L338.0,636.5L340.0,629.9L344.3,627.2L342.1,620.0L342.1,613.3L347.5,608.4L347.4,602.3L351.5,595.1L351.5,588.3L349.6,586.9L346.3,574.2L350.8,566.6L350.1,559.5L352.7,552.8L357.4,545.9L362.5,541.3L360.3,538.4L361.8,536.0L361.6,523.7L369.4,520.1L371.9,512.4L371.0,510.6L377.0,503.9L386.5,505.7L390.7,511.1L393.6,505.1L401.8,505.4L403.0,507.0L416.2,519.0L422.1,520.2L430.9,525.6L438.4,528.5L439.4,531.7L432.3,543.0L439.6,545.0L447.7,546.1L453.4,544.9L460.0,539.2L461.1,532.7L464.7,531.3L468.3,535.6L468.2,541.5L462.1,545.5L457.3,548.5L449.1,555.7L439.5,565.8Z', cx: 385.6, cy: 615.9 },
+    { id: 'Uruguay', d: 'M439.5,565.8L444.2,565.0L451.4,570.7L454.1,570.4L461.5,575.2L467.2,579.3L471.3,584.3L468.2,587.8L470.2,591.9L467.0,596.6L458.9,600.7L453.6,599.2L449.6,600.0L443.0,596.8L438.1,597.1L433.7,593.0L434.2,588.2L435.8,586.6L435.7,579.2L437.7,571.7L439.5,565.8Z', cx: 450.2, cy: 584.1 },
+    { id: 'España', d: 'M508.8,125.3L508.1,121.7L511.2,117.5L512.4,114.5L509.5,111.3L511.8,104.0L508.4,97.4L512.1,96.5L512.4,91.3L513.8,89.7L513.9,81.1L517.8,78.1L515.4,72.6L510.5,72.2L509.1,73.6L504.1,73.6L501.9,68.2L498.5,69.8L495.4,72.6L495.9,64.7L492.4,59.9L504.4,52.0L514.7,54.0L526.1,53.9L535.1,55.8L542.1,55.2L555.8,55.6L559.2,59.9L574.7,64.9L577.8,62.5L587.4,67.5L597.2,66.1L597.6,72.5L589.6,79.8L578.8,82.1L578.0,85.8L572.8,91.9L569.5,100.9L572.8,107.2L567.9,112.1L566.1,119.3L559.7,121.5L553.7,130.0L543.0,130.1L534.9,129.9L529.6,133.8L526.4,138.0L522.2,137.1L519.1,133.4L516.7,127.0L508.8,125.3Z', cx: 534.2, cy: 91.4 },
+    { id: 'Guinea Ecuatorial', d: 'M519.7,220.0L583.5,220.9L583.8,268.1L526.8,267.7L513.5,270.0L506.2,264.0L519.7,220.0Z', cx: 536.2, cy: 247.2 },
+    { id: 'Brazil', decoy: true, d: 'M470.2,591.9L468.2,587.8L471.3,584.3L467.2,579.3L461.5,575.2L454.1,570.4L451.4,570.7L444.2,565.0L439.5,565.8L449.1,555.7L457.3,548.5L462.1,545.5L468.2,541.5L468.3,535.6L464.7,531.3L461.1,532.7L462.5,528.5L463.5,524.1L463.5,520.1L460.9,518.7L458.2,519.9L455.5,519.6L454.7,516.8L454.0,510.0L452.7,507.8L447.8,505.8L444.8,507.2L437.2,505.8L437.7,495.8L435.6,491.7L437.8,490.2L437.1,486.0L439.1,482.8L440.4,477.0L438.7,472.4L434.8,470.3L434.0,467.4L435.0,463.1L421.2,462.8L418.4,454.2L420.5,454.1L420.4,450.9L419.0,448.8L418.7,444.5L414.5,442.3L410.0,442.4L407.0,440.3L402.1,438.8L399.3,436.1L391.2,434.8L383.3,428.2L383.9,423.3L383.1,420.5L383.8,414.9L374.4,416.2L370.6,418.9L364.2,421.9L362.6,424.2L358.9,424.3L353.6,423.7L349.5,425.0L346.2,424.1L346.7,412.9L340.8,417.3L334.4,417.1L331.7,413.1L326.9,412.7L328.4,409.6L324.4,405.1L321.4,398.4L323.3,397.1L323.3,394.0L327.7,391.8L326.9,387.8L328.8,385.3L329.3,381.8L337.6,376.8L343.5,375.4L344.4,374.3L350.9,374.6L354.2,354.4L354.3,351.2L353.2,347.0L350.0,344.3L350.1,338.9L354.1,337.7L355.6,338.5L355.8,335.7L351.6,334.9L351.5,330.3L365.5,330.5L367.9,327.9L369.9,330.3L371.4,334.6L372.7,333.7L376.7,337.6L382.3,337.1L383.7,334.9L389.1,333.1L392.0,331.9L392.9,328.8L398.0,326.7L397.6,325.2L391.5,324.5L390.5,319.9L390.8,314.9L387.6,313.0L388.9,312.4L394.3,313.3L400.0,315.1L402.1,313.4L407.3,312.3L415.4,309.5L418.0,306.7L417.0,304.6L420.8,304.3L422.5,306.0L421.5,309.2L424.0,310.3L425.7,313.8L423.7,316.4L422.5,322.6L424.4,326.4L424.9,329.8L429.3,333.2L432.9,333.6L433.7,332.1L436.0,331.8L439.2,330.5L441.6,328.6L445.6,329.2L447.3,328.9L451.2,329.5L451.9,328.0L450.7,326.6L451.4,324.4L454.3,325.1L457.7,324.3L461.9,325.9L465.0,327.4L467.2,325.4L468.9,325.7L469.8,327.8L473.3,327.3L476.1,324.5L478.3,319.0L482.5,312.3L485.0,312.0L486.8,316.0L490.8,328.9L494.7,330.1L494.9,335.2L489.5,341.3L491.7,343.5L504.5,344.7L504.7,352.1L510.2,347.2L519.3,349.9L531.3,354.4L534.8,358.7L533.6,362.8L542.0,360.5L556.1,364.4L566.8,364.1L577.5,370.2L586.7,378.5L592.3,380.6L598.5,380.9L601.1,383.2L603.5,392.6L604.7,397.1L601.9,409.3L598.2,414.1L588.0,424.4L583.4,432.7L578.1,439.1L576.3,439.2L574.2,444.7L574.8,458.5L572.8,469.8L572.0,474.7L569.7,477.6L568.4,487.5L561.1,497.1L559.9,504.7L554.0,507.9L552.3,512.3L544.5,512.3L533.1,515.1L528.1,518.4L520.0,520.6L511.5,526.4L505.4,533.8L504.3,539.3L505.5,543.3L504.2,550.8L502.6,554.4L497.5,558.4L489.5,571.4L483.1,577.3L478.2,580.7L474.9,587.7L470.2,591.9Z', cx: 444.5, cy: 414.1 },
+    { id: 'French Guiana', decoy: true, d: 'M482.5,312.3L478.3,319.0L476.1,324.5L473.3,327.3L469.8,327.8L468.9,325.7L467.2,325.4L465.0,327.4L461.9,325.9L463.7,322.8L464.3,319.4L465.6,316.3L462.8,311.9L462.2,306.8L465.9,300.5L468.4,301.3L473.7,303.1L481.3,309.3L482.5,312.3Z', cx: 470.2, cy: 316.8 },
+    { id: 'Guyana', decoy: true, d: 'M447.3,328.9L445.6,329.2L441.6,328.6L439.2,330.5L436.0,331.8L433.7,332.1L432.9,333.6L429.3,333.2L424.9,329.8L424.4,326.4L422.5,322.6L423.7,316.4L425.7,313.8L424.0,310.3L421.5,309.2L422.5,306.0L420.8,304.3L417.0,304.6L412.2,299.0L414.1,297.0L414.0,293.6L418.4,292.4L420.2,291.0L417.7,288.3L418.4,285.6L424.1,281.3L428.8,284.0L433.3,288.8L433.5,292.6L436.2,292.7L440.1,296.3L442.9,298.9L441.8,305.5L437.4,307.5L437.8,309.2L436.4,313.0L439.6,318.4L442.0,318.4L442.9,322.5L447.3,328.9Z', cx: 430.3, cy: 309.9 },
+    { id: 'Suriname', decoy: true, d: 'M461.9,325.9L457.7,324.3L454.3,325.1L451.4,324.4L450.7,326.6L451.9,328.0L451.2,329.5L447.3,328.9L442.9,322.5L442.0,318.4L439.6,318.4L436.4,313.0L437.8,309.2L437.4,307.5L441.8,305.5L442.9,298.9L451.6,300.4L452.4,299.0L458.2,298.5L465.9,300.5L462.2,306.8L462.8,311.9L465.6,316.3L464.3,319.4L463.7,322.8L461.9,325.9Z', cx: 452.1, cy: 315.7 },
+    { id: 'Belize', decoy: true, d: 'M212.0,211.6L211.9,210.6L212.8,210.2L214.1,211.1L216.7,206.6L218.1,206.5L218.1,207.6L219.5,207.7L219.4,209.7L218.2,212.8L218.8,214.0L218.1,216.6L218.5,217.3L217.7,221.1L216.3,223.0L215.0,223.2L213.5,225.8L211.4,225.8L211.9,217.5L212.0,211.6Z', cx: 215.7, cy: 214.5 },
+    { id: 'Haiti', decoy: true, d: 'M337.8,197.6L338.4,201.6L337.9,204.4L336.1,205.7L338.0,207.9L337.8,209.9L333.0,208.6L329.6,209.2L325.2,208.6L321.9,210.0L318.0,207.7L318.6,205.3L325.3,206.3L330.7,206.9L333.3,205.3L330.0,202.1L330.1,199.3L325.5,198.1L327.1,196.1L331.6,196.4L337.8,197.6Z', cx: 330.7, cy: 204.0 },
+    { id: 'Jamaica', decoy: true, d: 'M295.5,206.6L300.4,207.3L304.2,209.0L305.4,211.0L300.3,211.2L298.2,212.4L294.1,211.2L290.0,208.6L290.9,206.9L293.9,206.4L295.5,206.6Z', cx: 297.1, cy: 208.8 },
+    { id: 'Trinidad and Tobago', decoy: true, d: 'M410.2,263.6L414.4,262.6L415.9,262.9L415.6,268.4L409.6,269.2L408.3,268.5L410.4,266.5L410.2,263.6Z', cx: 411.8, cy: 265.7 },
+    { id: 'The Bahamas', decoy: true, d: 'M285.4,145.4L288.7,144.8L293.5,145.0L293.7,147.0L285.8,148.1L285.4,145.4Z M293.9,143.6L299.6,146.9L298.4,152.1L297.1,151.2L297.2,147.3L294.0,144.4L293.9,143.6Z M291.0,157.1L293.2,157.3L295.7,163.5L295.8,167.8L294.0,168.1L292.2,163.9L289.5,161.7L291.0,157.1Z', cx: 292.8, cy: 152.4 },
+    { id: 'United States', decoy: true, d: 'M-31.2,-18.4L-10.7,-18.4L10.7,-18.4L17.8,-18.4L39.8,-18.4L61.1,-18.4L82.8,-18.4L104.4,-18.4L128.9,-18.4L153.6,-18.4L168.6,-18.4L168.6,-21.2L171.0,-21.2L172.3,-17.2L174.6,-15.9L179.6,-15.5L187.0,-14.3L194.0,-12.0L199.8,-13.0L208.7,-11.1L211.1,-11.1L217.5,-13.2L224.3,-10.6L231.4,-7.7L237.2,-5.2L242.8,-2.9L243.5,-0.9L245.2,-0.2L244.7,0.5L246.7,0.7L248.1,-0.0L248.5,1.7L249.9,2.9L251.9,2.9L253.0,3.8L252.0,5.1L259.6,8.6L261.1,15.3L262.6,21.7L260.5,26.0L257.1,30.1L255.5,32.7L255.3,33.4L256.1,34.5L258.6,35.7L260.4,35.7L268.8,31.7L276.2,30.5L285.6,26.9L285.8,26.1L285.1,23.9L284.0,22.4L287.2,21.3L294.3,21.2L300.9,21.2L303.3,18.4L304.1,17.8L311.8,12.5L315.0,11.1L326.0,11.1L339.3,11.1L340.0,9.3L342.3,8.9L345.4,7.7L348.0,4.4L350.2,-1.4L355.7,-6.9L358.1,-5.0L362.9,-6.2L366.1,-4.1L366.1,5.9L370.8,10.1L372.1,12.5L364.4,16.1L356.9,18.7L349.3,20.8L345.5,25.2L344.3,26.9L344.2,30.8L346.6,34.7L349.6,34.9L348.8,32.2L351.0,33.8L350.4,35.9L345.5,37.1L342.1,37.0L336.7,38.3L333.6,38.6L329.4,39.0L323.4,41.1L334.0,39.7L336.1,41.1L326.0,43.4L321.4,43.4L321.6,42.5L319.4,44.5L321.6,44.8L320.0,50.1L314.7,55.8L314.2,53.9L312.6,53.5L310.3,51.7L311.8,55.7L313.5,57.0L313.7,59.8L311.4,62.6L307.3,68.5L306.6,68.2L308.9,63.2L305.2,60.4L304.3,54.3L302.9,57.5L304.5,62.1L299.7,61.0L304.7,63.4L305.0,70.4L307.0,70.9L307.8,73.4L308.8,80.8L304.2,86.3L296.8,88.5L292.0,92.8L288.4,93.3L284.8,96.0L283.7,98.5L275.8,103.2L271.7,106.7L268.3,111.1L267.2,116.3L268.5,121.5L270.9,127.8L274.1,133.0L274.2,136.2L277.6,144.7L277.3,149.7L277.0,152.6L275.2,157.1L273.1,158.0L269.5,157.1L268.4,153.9L265.7,152.2L261.8,145.9L258.5,140.2L257.4,137.3L258.8,132.4L256.8,128.4L251.2,122.2L248.4,121.1L241.1,124.4L239.8,124.0L236.3,120.6L231.8,118.8L223.6,119.7L217.2,118.9L211.7,119.4L208.8,120.6L210.1,122.5L209.9,125.5L211.5,127.0L210.1,127.9L207.4,126.8L204.7,128.2L199.4,128.0L194.1,124.1L187.8,125.0L182.5,123.3L178.0,123.8L172.0,125.6L165.4,131.0L158.2,134.2L154.3,137.7L152.6,141.1L152.5,146.1L152.9,149.7L154.3,152.2L151.5,152.4L146.3,150.8L140.7,148.5L138.7,145.0L137.1,139.9L132.8,135.7L130.3,131.4L126.7,126.3L121.6,123.4L115.7,123.5L111.2,129.3L105.2,127.1L101.5,124.9L99.7,120.8L97.3,117.0L93.0,113.7L89.3,111.4L86.7,108.8L74.2,108.8L74.2,111.8L68.4,111.8L54.1,111.9L37.6,106.7L26.7,103.1L27.4,101.7L18.2,102.5L10.0,103.0L8.8,99.3L4.1,95.0L0.7,94.1L-0.0,92.0L-4.1,91.7L-6.7,89.7L-13.4,88.9L-15.2,87.8L-16.1,83.7L-23.1,76.3L-29.1,66.1L-28.8,64.3L-32.0,61.9L-37.6,55.7L-38.6,49.7L-42.5,45.7L-40.9,39.6L-41.1,33.3L-43.4,27.6L-40.6,20.6L-39.7,14.0L-38.9,7.3L-40.2,-2.6L-42.5,-8.9L-44.5,-12.3L-43.7,-13.8L-33.2,-11.3L-29.4,-4.3L-27.6,-6.3L-28.8,-12.3L-31.2,-18.4Z', cx: 203.2, cy: 60.7 }
+  ];
+
+  const ALL_IDS = COUNTRIES.map(c => c.country);
+  const TOTAL = COUNTRIES.length;
+
+  // Item list for the current dataset. Nationalities has TWO items per country
+  // (masculine and feminine), encoded as "Country|masc" / "Country|fem".
+  function datasetItems(){
+    if(dataset === 'nationalities'){
+      const items = [];
+      COUNTRIES.forEach(c => { items.push(c.country + '|masc'); items.push(c.country + '|fem'); });
+      return items;
+    }
+    return ALL_IDS.slice();
+  }
+  function datasetTotal(){
+    return dataset === 'nationalities' ? COUNTRIES.length * 2 : COUNTRIES.length;
+  }
+  const COUNTRY_BY_ID = Object.fromEntries(COUNTRIES.map(c => [c.country, c]));
+  const CLUE_BY_ID = Object.fromEntries(MAP_CLUES.map(c => [c.country, c.clue]));
+
+  const norm = s => (s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const hasStorage = () => (typeof window !== 'undefined' && window.storage && typeof window.storage.get === 'function');
+
+  function shuffled(arr){
+    const a = [...arr];
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i+1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // ---------- Persistence: topic/level rounds ----------
+  function roundKey(ds, lvl){ return 'round:' + ds + ':' + lvl; }
+  function bestKey(ds, lvl){ return 'best:' + ds + ':' + lvl; }
+
+  async function loadRound(ds, lvl){
+    if(!hasStorage()) return null;
+    try{
+      const res = await window.storage.get(roundKey(ds, lvl), false);
+      if(!res || !res.value) return null;
+      const parsed = JSON.parse(res.value);
+      if(!parsed || !Array.isArray(parsed.masteredIds) || !Array.isArray(parsed.passQueue)) return null;
+      return parsed;
+    } catch(e){ return null; }
+  }
+  async function saveRound(ds, lvl, data){
+    if(!hasStorage()) return;
+    try{ await window.storage.set(roundKey(ds, lvl), JSON.stringify(data), false); } catch(e){}
+  }
+  async function clearRound(ds, lvl){
+    if(!hasStorage()) return;
+    try{ await window.storage.delete(roundKey(ds, lvl), false); } catch(e){}
+  }
+  async function loadBest(ds, lvl){
+    if(!hasStorage()) return null;
+    try{
+      const res = await window.storage.get(bestKey(ds, lvl), false);
+      if(!res || !res.value) return null;
+      const n = Number(res.value);
+      return Number.isFinite(n) ? n : null;
+    } catch(e){ return null; }
+  }
+  async function saveBestIfBetter(ds, lvl, passes){
+    if(!hasStorage()) return;
+    try{
+      const current = await loadBest(ds, lvl);
+      if(current === null || passes < current){
+        await window.storage.set(bestKey(ds, lvl), String(passes), false);
+      }
+    } catch(e){}
+  }
+
+  // ---------- Persistence: results history (completed levels) ----------
+  const HISTORY_KEY = 'history:v1';
+  const HISTORY_MAX = 200;
+  async function loadHistory(){
+    if(!hasStorage()) return [];
+    try{
+      const res = await window.storage.get(HISTORY_KEY, false);
+      if(!res || !res.value) return [];
+      const parsed = JSON.parse(res.value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch(e){ return []; }
+  }
+  async function appendHistory(entry){
+    if(!hasStorage()) return;
+    try{
+      const list = await loadHistory();
+      list.push(entry);
+      while(list.length > HISTORY_MAX) list.shift();
+      await window.storage.set(HISTORY_KEY, JSON.stringify(list), false);
+    } catch(e){}
+  }
+  async function clearHistory(){
+    if(!hasStorage()) return;
+    try{ await window.storage.delete(HISTORY_KEY, false); } catch(e){}
+  }
+
+  // ---------- Persistence: full map mode ----------
+  const MAPFULL_STATUS_KEY = 'mapfull:status';
+  const MAPFULL_VALUES_KEY = 'mapfull:values';
+  const MAPFULL_MISSED_KEY = 'mapfull:missed';
+
+  async function loadMapFullState(){
+    if(!hasStorage()) return { statuses: {}, values: {}, missed: {} };
+    try{
+      const [sRes, vRes, mRes] = await Promise.all([
+        window.storage.get(MAPFULL_STATUS_KEY, false).catch(() => null),
+        window.storage.get(MAPFULL_VALUES_KEY, false).catch(() => null),
+        window.storage.get(MAPFULL_MISSED_KEY, false).catch(() => null)
+      ]);
+      const statuses = (sRes && sRes.value) ? JSON.parse(sRes.value) : {};
+      const values = (vRes && vRes.value) ? JSON.parse(vRes.value) : {};
+      const missed = (mRes && mRes.value) ? JSON.parse(mRes.value) : {};
+      return { statuses, values, missed };
+    } catch(e){ return { statuses: {}, values: {}, missed: {} }; }
+  }
+  async function saveMapFullStatuses(statuses){
+    if(!hasStorage()) return;
+    try{ await window.storage.set(MAPFULL_STATUS_KEY, JSON.stringify(statuses), false); } catch(e){}
+  }
+  async function saveMapFullValues(values){
+    if(!hasStorage()) return;
+    try{ await window.storage.set(MAPFULL_VALUES_KEY, JSON.stringify(values), false); } catch(e){}
+  }
+  async function saveMapFullMissed(missed){
+    if(!hasStorage()) return;
+    try{ await window.storage.set(MAPFULL_MISSED_KEY, JSON.stringify(missed), false); } catch(e){}
+  }
+  async function clearMapFullState(){
+    if(!hasStorage()) return;
+    try{
+      await window.storage.delete(MAPFULL_STATUS_KEY, false);
+      await window.storage.delete(MAPFULL_VALUES_KEY, false);
+      await window.storage.delete(MAPFULL_MISSED_KEY, false);
+    } catch(e){}
+  }
+
+  // ---------- Topic-mode state ----------
+  let appMode = "topic"; // topic | fullmap
+  let dataset = "capitals";
+  let level = 1;
+  let masteredIds = [];
+  let passQueue = [];
+  let passIdx = 0;
+  let missedThisPass = [];
+  let missedEver = [];
+  let passNumber = 1;
+  let bestPasses = null;
+  let answered = false;
+  let isRetry = false;
+  let currentAnswerVariants = [];
+  let currentId = null;
+  let loadToken = 0;
+
+  // ---------- Full-map-mode state ----------
+  let mapStatuses = {};
+  let mapValues = {};
+  let mapMissed = {};   // country -> array of fields missed this run: ['country','capital','masc','fem']
+  let currentMapId = null;
+  let lastFocusedModalInput = null;
+
+  const topicModeSection = document.getElementById('topicModeSection');
+  const fullMapSection = document.getElementById('fullMapSection');
+  const datasetRow = document.getElementById('datasetRow');
+  const levelRow = document.getElementById('levelRow');
+  const levelHeading = document.getElementById('levelHeading');
+  const quizArea = document.getElementById('quizArea');
+  const statProgress = document.getElementById('statProgress');
+  const statBest = document.getElementById('statBest');
+  const progressFill = document.getElementById('progressFill');
+  const restartTopicBtn = document.getElementById('restartTopicBtn');
+  const mapWrap = document.getElementById('mapWrap');
+  const mapStatProgress = document.getElementById('mapStatProgress');
+  const mapProgressFill = document.getElementById('mapProgressFill');
+  const restartMapBtn = document.getElementById('restartMapBtn');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalCard = document.getElementById('modalCard');
+  const controlsBody = document.getElementById('controlsBody');
+  const controlsToggle = document.getElementById('controlsToggle');
+  const controlsSummary = document.getElementById('controlsSummary');
+  const resultsSection = document.getElementById('resultsSection');
+  const resultsBody = document.getElementById('resultsBody');
+  const viewResultsBtn = document.getElementById('viewResultsBtn');
+  const closeResultsBtn = document.getElementById('closeResultsBtn');
+
+  // Topic list now includes "Everything" (the full-map test).
+  const DATASETS = [
+    { id: "map", label: "Countries" },
+    { id: "capitals", label: "Capitals" },
+    { id: "nationalities", label: "Nationalities" },
+    { id: "fullmap", label: "Everything" }
+  ];
+  const LEVELS = [
+    { id: 1, label: "Multiple choice" },
+    { id: 2, label: "Some help" },
+    { id: 3, label: "No help" }
+  ];
+
+  DATASETS.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = d.label;
+    btn.dataset.id = d.id;
+    btn.onclick = () => { selectDataset(d.id); };
+    datasetRow.appendChild(btn);
+  });
+  LEVELS.forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'chip level-chip';
+    btn.innerHTML = '<span class="num">' + l.id + '</span>' + l.label;
+    btn.dataset.id = l.id;
+    btn.onclick = () => { level = l.id; renderChips(); loadOrStartRound(); };
+    levelRow.appendChild(btn);
+  });
+
+  const datasetLabel = id => (DATASETS.find(d => d.id === id) || {}).label || id;
+  const levelLabel = id => (LEVELS.find(l => l.id === id) || {}).label || id;
+
+  function selectDataset(id){
+    dataset = id;
+    if(id === 'fullmap'){
+      appMode = 'fullmap';
+      renderChips();
+      showSection();
+      initFullMap();
+    } else {
+      appMode = 'topic';
+      renderChips();
+      showSection();
+      loadOrStartRound();
+    }
+  }
+
+  function showSection(){
+    const isFull = (dataset === 'fullmap');
+    topicModeSection.classList.toggle('hidden', isFull);
+    fullMapSection.classList.toggle('hidden', !isFull);
+    // Level only applies to the three practice topics
+    const showLevel = !isFull;
+    levelHeading.style.display = showLevel ? '' : 'none';
+    levelRow.style.display = showLevel ? '' : 'none';
+  }
+
+  // Collapse the controls once studying; expand via the "Change" link.
+  function collapseControls(){
+    controlsBody.classList.add('hidden');
+    controlsSummary.classList.remove('hidden');
+    controlsToggle.style.display = '';
+    controlsToggle.textContent = 'Change';
+    const parts = [datasetLabel(dataset)];
+    if(dataset !== 'fullmap') parts.push(levelLabel(level));
+    controlsSummary.innerHTML = parts.map(p => '<span class="accent">' + p + '</span>').join(' · ');
+  }
+  function expandControls(){
+    controlsBody.classList.remove('hidden');
+    controlsSummary.classList.add('hidden');
+    controlsToggle.textContent = 'Done';
+  }
+  controlsToggle.onclick = () => {
+    if(controlsBody.classList.contains('hidden')) expandControls();
+    else collapseControls();
+  };
+
+  viewResultsBtn.onclick = openResults;
+  closeResultsBtn.onclick = closeResults;
+
+  restartTopicBtn.onclick = async () => {
+    await clearRound(dataset, level);
+    startFreshRound();
+    await persist();
+    renderStart();
+  };
+
+  function renderChips(){
+    [...datasetRow.children].forEach(c => c.classList.toggle('active', c.dataset.id === dataset));
+    [...levelRow.children].forEach(c => c.classList.toggle('active', Number(c.dataset.id) === level));
+  }
+
+  function startFreshRound(){
+    masteredIds = [];
+    passQueue = shuffled(datasetItems());
+    passIdx = 0;
+    missedThisPass = [];
+    missedEver = [];
+    passNumber = 1;
+  }
+
+  async function persist(){
+    await saveRound(dataset, level, { masteredIds, passQueue, passIdx, missedThisPass, missedEver, passNumber });
+  }
+
+  async function loadOrStartRound(){
+    const myToken = ++loadToken;
+    quizArea.innerHTML = '<p class="sub">Loading your saved progress…</p>';
+    const [saved, best] = await Promise.all([ loadRound(dataset, level), loadBest(dataset, level) ]);
+    if(myToken !== loadToken) return;
+    bestPasses = best;
+
+    const total = datasetTotal();
+    if(saved && saved.masteredIds.length < total && (saved.masteredIds.length + saved.passQueue.length + saved.missedThisPass.length) >= total){
+      masteredIds = saved.masteredIds;
+      passQueue = saved.passQueue;
+      passIdx = saved.passIdx;
+      missedThisPass = saved.missedThisPass;
+      missedEver = Array.isArray(saved.missedEver) ? saved.missedEver : [];
+      passNumber = saved.passNumber || 1;
+    } else {
+      startFreshRound();
+      await persist();
+    }
+    updateStats();
+    renderStart();
+  }
+
+  function updateStats(){
+    const total = datasetTotal();
+    const remaining = total - masteredIds.length;
+    statProgress.textContent = 'Mastered ' + masteredIds.length + ' / ' + total + ' · Round ' + passNumber + (remaining > 0 ? ' · ' + remaining + ' to go' : '');
+    statBest.textContent = bestPasses ? ('Best: ' + bestPasses + (bestPasses === 1 ? ' round' : ' rounds')) : '';
+    const pct = (masteredIds.length / total) * 100;
+    progressFill.style.width = pct + '%';
+  }
+
+  function renderStart(){
+    if(dataset === 'map'){
+      renderLocatorMap();
+      return;
+    }
+    let html = '<p class="sub">Topic and level ready.';
+    if(masteredIds.length > 0){
+      html += ' Picking up where you left off: ' + masteredIds.length + ' of ' + datasetTotal() + ' already mastered.';
+    }
+    html += '</p><div class="action-row"><button class="btn btn-primary" id="startBtn">' +
+      (masteredIds.length > 0 ? 'Continue' : 'Start') + '</button></div>';
+    quizArea.innerHTML = html;
+    document.getElementById('startBtn').onclick = () => { collapseControls(); renderQuestion(); };
+  }
+
+  function getQuestionData(id){
+    if(dataset === 'map'){
+      return { eyebrow: 'Which country is this?', prompt: CLUE_BY_ID[id], answerVariants: [id], answerDisplay: id, distractorPool: ALL_IDS };
+    }
+    if(dataset === 'capitals'){
+      const item = COUNTRY_BY_ID[id];
+      return { eyebrow: 'Capital of:', prompt: item.country, answerVariants: item.capital, answerDisplay: item.capital[0], distractorPool: COUNTRIES.flatMap(c => c.capital) };
+    }
+    // nationalities: id is "Country|masc" or "Country|fem"
+    const sep = id.lastIndexOf('|');
+    const countryName = id.slice(0, sep);
+    const gender = id.slice(sep + 1);
+    const item = COUNTRY_BY_ID[countryName];
+    const label = gender === 'masc' ? 'masculine' : 'feminine';
+    return { eyebrow: 'Nationality (' + label + ') of:', prompt: item.country, answerVariants: [item[gender]], answerDisplay: item[gender], distractorPool: COUNTRIES.map(c => c[gender]) };
+  }
+
+  function renderQuestion(retry){
+    if(!retry){
+      if(passIdx >= passQueue.length){
+        if(missedThisPass.length === 0){ renderSummary(); return; }
+        passQueue = shuffled(missedThisPass);
+        missedThisPass = [];
+        passIdx = 0;
+        passNumber++;
+        persist();
+      }
+      currentId = passQueue[passIdx];
+    }
+    isRetry = !!retry;
+    answered = false;
+    updateStats();
+    const q = getQuestionData(currentId);
+    currentAnswerVariants = q.answerVariants.map(norm);
+
+    let html = '<p class="prompt-eyebrow">' + q.eyebrow + '</p>';
+    html += '<p class="prompt">' + q.prompt + '</p>';
+
+    if(level === 1) html += renderMultipleChoice(q);
+    else if(level === 2) html += renderPartialLetters(q);
+    else html += renderFreeType(q);
+
+    html += '<div class="feedback" id="feedback"></div>';
+    html += '<div class="action-row">';
+    if(level !== 1) html += '<button class="btn btn-primary" id="checkBtn">Check</button>';
+    if(level !== 1) html += '<button class="btn btn-ghost hidden" id="retryBtn">↻ Retry</button>';
+    html += '<button class="btn btn-ghost" id="nextBtn" disabled>Next →</button>';
+    html += '</div>';
+    html += '<div class="stamp" id="stampEl"></div>';
+
+    quizArea.innerHTML = html;
+    quizArea.style.position = 'relative';
+
+    if(level === 1) wireMultipleChoice(q);
+    if(level === 2) wirePartialLetters(q);
+    if(level === 3) wireFreeType(q);
+
+    const retryBtn = document.getElementById('retryBtn');
+    if(retryBtn) retryBtn.onclick = () => { markMissed(currentId); renderQuestion(true); };
+    document.getElementById('nextBtn').onclick = () => { passIdx++; renderQuestion(); };
+  }
+
+  function renderMultipleChoice(q){
+    const wrongPool = shuffled([...new Set(q.distractorPool.filter(v => norm(v) !== norm(q.answerDisplay)))]).slice(0,3);
+    const options = shuffled([q.answerDisplay, ...wrongPool]);
+    let html = '<div class="options">';
+    options.forEach((opt, i) => { html += '<button class="option-btn" data-opt="' + i + '">' + opt + '</button>'; });
+    html += '</div>';
+    window.__mcOptions = options;
+    return html;
+  }
+  function wireMultipleChoice(q){
+    const btns = [...document.querySelectorAll('.option-btn')];
+    btns.forEach(btn => {
+      btn.onclick = () => {
+        if(answered) return;
+        answered = true;
+        const chosen = window.__mcOptions[Number(btn.dataset.opt)];
+        const isCorrect = norm(chosen) === norm(q.answerDisplay);
+        btns.forEach(b => {
+          const bOpt = window.__mcOptions[Number(b.dataset.opt)];
+          if(norm(bOpt) === norm(q.answerDisplay)) b.classList.add('correct');
+          if(b === btn && !isCorrect) b.classList.add('incorrect');
+          b.disabled = true;
+        });
+        recordResult(isCorrect);
+        showFeedback(isCorrect, q);
+      };
+    });
+  }
+
+  function renderPartialLetters(q){
+    const answer = q.answerDisplay;
+    let html = '<div class="letters-row" id="lettersRow">';
+    const revealMap = [];
+    for(let i=0;i<answer.length;i++){
+      const ch = answer[i];
+      revealMap.push(/[a-zA-ZÀ-ÿñÑüÜ]/.test(ch) ? Math.random() < 0.45 : true);
+    }
+    for(let i=0;i<answer.length;i++){
+      const ch = answer[i];
+      if(ch === ' ') html += '<span class="letter-space"></span>';
+      else if(!/[a-zA-ZÀ-ÿñÑüÜ]/.test(ch)) html += '<span class="letter-fixed">' + ch + '</span>';
+      else if(revealMap[i]) html += '<span class="letter-fixed">' + ch + '</span>';
+      else html += '<input class="letter-input" maxlength="1" data-idx="' + i + '" autocomplete="off" autocapitalize="off" spellcheck="false">';
+    }
+    html += '</div>';
+    html += renderAccentRow('letters');
+    return html;
+  }
+  function wirePartialLetters(q){
+    const inputs = [...document.querySelectorAll('.letter-input')];
+    let lastFocused = inputs[0] || null;
+    inputs.forEach((inp, i) => {
+      inp.addEventListener('focus', () => { lastFocused = inp; });
+      inp.addEventListener('input', () => {
+        lastFocused = inp;
+        if(inp.value.length >= 1 && i < inputs.length - 1){
+          const next = inputs[i+1];
+          next.focus();
+          lastFocused = next;
+        }
+      });
+    });
+    wireAccentRow(() => (lastFocused && !lastFocused.disabled) ? lastFocused : (inputs.find(i => !i.disabled) || null));
+    if(inputs.length) inputs[0].focus();
+
+    document.getElementById('checkBtn').onclick = () => {
+      if(answered) return;
+      answered = true;
+      const answer = q.answerDisplay;
+      let full = '';
+      for(let i=0;i<answer.length;i++){
+        const inputEl = document.querySelector('.letter-input[data-idx="'+i+'"]');
+        full += inputEl ? inputEl.value : answer[i];
+      }
+      const isCorrect = currentAnswerVariants.includes(norm(full));
+      inputs.forEach(inp => {
+        const pos = Number(inp.dataset.idx);
+        inp.classList.add(norm(inp.value) === norm(answer[pos]) ? 'correct' : 'incorrect');
+        inp.disabled = true;
+      });
+      recordResult(isCorrect);
+      showFeedback(isCorrect, q);
+    };
+  }
+
+  function renderFreeType(q){
+    let html = '<input type="text" class="free-input" id="freeInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your answer...">';
+    html += renderAccentRow('free');
+    return html;
+  }
+  function wireFreeType(q){
+    const input = document.getElementById('freeInput');
+    wireAccentRow(() => input);
+    input.focus();
+    input.addEventListener('keydown', e => { if(e.key === 'Enter') document.getElementById('checkBtn').click(); });
+    document.getElementById('checkBtn').onclick = () => {
+      if(answered) return;
+      answered = true;
+      const isCorrect = currentAnswerVariants.includes(norm(input.value));
+      input.classList.add(isCorrect ? 'correct' : 'incorrect');
+      input.disabled = true;
+      recordResult(isCorrect);
+      showFeedback(isCorrect, q);
+    };
+  }
+
+  function renderAccentRow(){
+    const chars = ['á','é','í','ó','ú','ñ','ü'];
+    let html = '<div class="accent-row">';
+    chars.forEach(c => { html += '<button type="button" class="accent-key" data-char="'+c+'">'+c+'</button>'; });
+    html += '</div>';
+    return html;
+  }
+  function wireAccentRow(getTarget){
+    document.querySelectorAll('.accent-row .accent-key').forEach(btn => {
+      // Prevent the button from stealing focus from the input on press.
+      btn.addEventListener('mousedown', e => e.preventDefault());
+      btn.onclick = () => {
+        const target = getTarget();
+        if(!target || target.disabled) return;
+        if(target.classList.contains('letter-input')){
+          target.value = btn.dataset.char;
+          target.dispatchEvent(new Event('input'));
+        } else {
+          const start = target.selectionStart ?? target.value.length;
+          const end = target.selectionEnd ?? target.value.length;
+          target.value = target.value.slice(0,start) + btn.dataset.char + target.value.slice(end);
+          target.focus();
+          target.setSelectionRange(start+1, start+1);
+        }
+      };
+    });
+  }
+
+  function markMissed(id){
+    if(!missedEver.includes(id)) missedEver.push(id);
+    if(!missedThisPass.includes(id) && !masteredIds.includes(id)) missedThisPass.push(id);
+    persist();
+  }
+
+  function recordResult(isCorrect){
+    if(isRetry) return; // practice retries don't affect mastery
+    if(isCorrect){ if(!masteredIds.includes(currentId)) masteredIds.push(currentId); }
+    else {
+      missedThisPass.push(currentId);
+      if(!missedEver.includes(currentId)) missedEver.push(currentId);
+    }
+    persist();
+  }
+
+  function showFeedback(isCorrect, q){
+    updateStats();
+    const fb = document.getElementById('feedback');
+    fb.classList.add('show', isCorrect ? 'good' : 'bad');
+    if(isRetry){
+      fb.textContent = isCorrect
+        ? 'Correct! (practice retry — not counted)'
+        : 'The correct answer is: ' + q.answerDisplay + (q.answerVariants.length > 1 ? ' (also valid: ' + q.answerVariants.slice(1).join(', ') + ')' : '') + ' — practice retry, not counted.';
+    } else {
+      fb.textContent = isCorrect
+        ? 'Correct!'
+        : 'The correct answer is: ' + q.answerDisplay + (q.answerVariants.length > 1 ? ' (also valid: ' + q.answerVariants.slice(1).join(', ') + ')' : '') + (dataset === 'map' ? ' — go back and try it again.' : ' — it will come back next round.');
+    }
+    document.getElementById('nextBtn').disabled = false;
+    const checkBtn = document.getElementById('checkBtn');
+    if(checkBtn) checkBtn.disabled = true;
+    const retryBtn = document.getElementById('retryBtn');
+    if(retryBtn) retryBtn.classList.remove('hidden');
+    const stamp = document.getElementById('stampEl');
+    if(stamp){
+      stamp.textContent = isCorrect ? 'Correct!' : 'Again';
+      stamp.style.borderColor = isCorrect ? 'var(--good)' : 'var(--bad)';
+      stamp.style.color = isCorrect ? 'var(--good)' : 'var(--bad)';
+      stamp.classList.add('play');
+      setTimeout(() => { stamp.classList.add('fadeout'); }, 900);
+    }
+  }
+
+  // Turn an item id into a readable "prompt → correct answer" review line.
+  function reviewLine(id, ds){
+    ds = ds || dataset;
+    if(ds === 'capitals'){
+      const c = COUNTRY_BY_ID[id];
+      return { label: c ? c.country : id, answer: c ? c.capital.join(' / ') : '' };
+    }
+    if(ds === 'map'){
+      return { label: id, answer: '' };
+    }
+    if(ds === 'fullmap'){
+      // id is "Country|field"
+      const sep = id.lastIndexOf('|');
+      if(sep === -1) return { label: id, answer: '' };
+      const cid = id.slice(0, sep);
+      const f = id.slice(sep + 1);
+      const fieldName = { country:'country', capital:'capital', masc:'nationality (m)', fem:'nationality (f)' };
+      return { label: cid, answer: fieldName[f] || f };
+    }
+    // nationalities: "Country|masc" / "Country|fem"
+    const sep = id.lastIndexOf('|');
+    if(sep === -1){ const c = COUNTRY_BY_ID[id]; return { label: id, answer: c ? c.masc + ' / ' + c.fem : '' }; }
+    const country = id.slice(0, sep);
+    const gender = id.slice(sep + 1);
+    const c = COUNTRY_BY_ID[country];
+    return { label: country + ' (' + (gender === 'masc' ? 'm' : 'f') + ')', answer: c ? (gender === 'masc' ? c.masc : c.fem) : '' };
+  }
+
+  function fmtDate(ts){
+    try{
+      const d = new Date(ts);
+      return d.toLocaleDateString(undefined, { month:'short', day:'numeric' }) + ', ' +
+             d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
+    } catch(e){ return ''; }
+  }
+
+  async function openResults(){
+    // Hide study sections; show results.
+    controlsBody.classList.add('hidden');
+    controlsSummary.classList.add('hidden');
+    controlsToggle.style.display = 'none';
+    viewResultsBtn.style.display = 'none';
+    topicModeSection.classList.add('hidden');
+    fullMapSection.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
+    resultsBody.innerHTML = '<p class="results-empty">Loading…</p>';
+
+    const history = await loadHistory();
+    if(!history.length){
+      resultsBody.innerHTML = '<p class="results-empty">No completed rounds yet. Finish a topic at any level and your results — including which items you missed — will show up here so you can spot patterns.</p>';
+      return;
+    }
+
+    // Group by dataset+level.
+    const groups = {};
+    history.forEach(h => {
+      const key = h.dataset + ':' + h.level;
+      (groups[key] = groups[key] || []).push(h);
+    });
+
+    let html = '<p class="results-intro">Every completed round is saved here. The count badge shows how many times you\u2019ve missed each item across all your runs — the higher the number, the more it\u2019s worth drilling.</p>';
+
+    // Order groups by DATASETS order then level.
+    const orderKey = k => {
+      const [ds, lvl] = k.split(':');
+      const di = DATASETS.findIndex(d => d.id === ds);
+      return (di < 0 ? 99 : di) * 10 + Number(lvl);
+    };
+    Object.keys(groups).sort((a,b) => orderKey(a) - orderKey(b)).forEach(key => {
+      const [ds, lvlStr] = key.split(':');
+      const lvl = Number(lvlStr);
+      const runs = groups[key].slice().sort((a,b) => b.t - a.t); // newest first
+
+      const grpTitle = (ds === 'fullmap') ? datasetLabel(ds) : (datasetLabel(ds) + ' · ' + levelLabel(lvl));
+      html += '<p class="rp-section-title">' + grpTitle + ' — ' + runs.length + (runs.length === 1 ? ' run' : ' runs') + '</p>';
+
+      // Aggregate miss frequency across all runs in this group.
+      const freq = {};
+      runs.forEach(r => (r.missed || []).forEach(id => { freq[id] = (freq[id] || 0) + 1; }));
+      const items = Object.keys(freq).sort((a,b) => freq[b] - freq[a]);
+
+      if(items.length === 0){
+        html += '<p class="run-perfect">No misses recorded in this topic/level. 🎉</p>';
+      } else {
+        html += '<div class="miss-list">';
+        items.forEach(id => {
+          const r = reviewLine(id, ds);
+          const n = freq[id];
+          const ans = r.answer ? '<span class="miss-ans"> — ' + r.answer + '</span>' : '';
+          html += '<div class="miss-item"><div><span class="miss-name">' + r.label + '</span>' + ans + '</div>' +
+                  '<span class="miss-count ' + (n === 1 ? 'count-1' : '') + '">' + n + '×</span></div>';
+        });
+        html += '</div>';
+      }
+
+      // Per-run log.
+      html += '<div class="run-log">';
+      runs.forEach(r => {
+        let missedNames = (r.missed || []).map(id => reviewLine(id, ds).label);
+        if(ds === 'fullmap') missedNames = Array.from(new Set(missedNames)); // one entry per country
+        const missText = missedNames.length
+          ? '<span class="m">Missed:</span> ' + missedNames.join(', ')
+          : '<span class="run-perfect">Perfect run — no misses.</span>';
+        const metaMissed = (ds === 'fullmap')
+          ? missedNames.length + ' of ' + (r.total || '?') + ' countries had a miss'
+          : missedNames.length + ' missed of ' + (r.total || '?');
+        html += '<div class="run-row">' +
+                  '<span class="run-when">' + fmtDate(r.t) + '</span>' +
+                  '<span class="run-meta">' + (ds === 'fullmap' ? '' : (r.rounds + (r.rounds === 1 ? ' round' : ' rounds') + ', ')) + metaMissed + '</span>' +
+                  '<span></span>' +
+                  '<div class="run-missed">' + missText + '</div>' +
+                '</div>';
+      });
+      html += '</div>';
+    });
+
+    html += '<div class="action-row" style="margin-top:18px;"><button class="link-btn" id="clearHistoryBtn">Clear results history</button></div>';
+
+    resultsBody.innerHTML = html;
+    const clearBtn = document.getElementById('clearHistoryBtn');
+    if(clearBtn) clearBtn.onclick = async () => {
+      await clearHistory();
+      openResults();
+    };
+  }
+
+  function closeResults(){
+    resultsSection.classList.add('hidden');
+    viewResultsBtn.style.display = '';
+    // Restore the study view for the current dataset.
+    showSection();
+    // Controls: if a quiz/map is in progress the controls were collapsed; keep them so.
+    if(controlsSummary.textContent.trim()){
+      controlsBody.classList.add('hidden');
+      controlsSummary.classList.remove('hidden');
+      controlsToggle.style.display = '';
+    } else {
+      controlsBody.classList.remove('hidden');
+    }
+  }
+
+  async function renderSummary(){
+    await saveBestIfBetter(dataset, level, passNumber);
+    bestPasses = await loadBest(dataset, level);
+    await appendHistory({
+      t: Date.now(),
+      dataset: dataset,
+      level: level,
+      rounds: passNumber,
+      total: datasetTotal(),
+      missed: missedEver.slice()
+    });
+    updateStats();
+
+    let missedHtml = '';
+    if(missedEver.length){
+      const rows = missedEver.map(id => {
+        const r = reviewLine(id);
+        return '<li><span class="rev-label">' + r.label + '</span><span class="rev-ans">' + r.answer + '</span></li>';
+      }).join('');
+      missedHtml =
+        '<div class="review-block">' +
+          '<p class="review-title">Review these — you missed them at least once (' + missedEver.length + '):</p>' +
+          '<ul class="review-list">' + rows + '</ul>' +
+        '</div>';
+    } else {
+      missedHtml = '<p class="review-perfect">Perfect run — you didn\u2019t miss a single one! 🎉</p>';
+    }
+
+    quizArea.innerHTML =
+      '<div class="summary">' +
+        '<p class="big">All mastered!</p>' +
+        '<p>You did it in ' + passNumber + (passNumber === 1 ? ' round' : ' rounds') +
+        (bestPasses ? ' · Best: ' + bestPasses + (bestPasses === 1 ? ' round' : ' rounds') : '') + '</p>' +
+        missedHtml +
+        '<div class="action-row" style="justify-content:center">' +
+          '<button class="btn btn-primary" id="againBtn">Test all again</button>' +
+        '</div>' +
+      '</div>';
+    progressFill.style.width = '100%';
+    document.getElementById('againBtn').onclick = async () => {
+      await clearRound(dataset, level);
+      startFreshRound();
+      await persist();
+      updateStats();
+      renderStart();
+    };
+  }
+
+  // ===================== FULL MAP MODE =====================
+
+  let mapInitialized = false;
+
+  async function initFullMap(){
+    collapseControls();
+    mapWrap.innerHTML = '<p class="sub">Loading the map…</p>';
+    const state = await loadMapFullState();
+    mapStatuses = state.statuses || {};
+    mapValues = state.values || {};
+    mapMissed = state.missed || {};
+    buildMapSvg();
+    updateMapStats();
+    mapInitialized = true;
+  }
+
+  // (Border-on-hover is handled by a top border layer + class toggle; no DOM moves.)
+
+  function buildMapSvg(){
+    const svg = mapSvgString(shape => {
+      const status = mapStatuses[shape.id] || 'neutral';
+      return status + (shape.decoy ? ' decoy' : '');
+    });
+    mapWrap.innerHTML = '<div class="locator-stage" id="mapStage">' + svg + '</div>';
+    mapWrap.querySelectorAll('.map-fill-layer .map-shape').forEach(el => {
+      el.addEventListener('click', () => openCountryModal(el.dataset.id));
+      linkHover(mapWrap, el);
+    });
+  }
+
+  // Highlight a country's full border (top layer) while its fill is hovered.
+  // Pure class toggle — no DOM moves, so clicks are never disrupted.
+  function linkHover(root, fillEl){
+    const id = fillEl.dataset.id;
+    const border = root.querySelector('.map-border[data-border-for="' + CSS.escape(id) + '"]');
+    if(!border) return;
+    fillEl.addEventListener('mouseenter', () => border.classList.add('border-hi'));
+    fillEl.addEventListener('mouseleave', () => border.classList.remove('border-hi'));
+  }
+
+  function isDecoy(id){
+    const s = MAP_SHAPES.find(x => x.id === id);
+    return !!(s && s.decoy);
+  }
+
+  // Shared SVG string builder. classFor(shape) returns extra CSS classes for each path.
+  // Two layers: (1) fills — receive clicks; (2) borders on top — fill:none, pointer-events:none,
+  // so a hovered country's full outline is always painted above every neighbor's fill.
+  function mapSvgString(classFor){
+    let svg = '<svg viewBox="0 0 620 860" width="100%" style="max-width:600px;display:block;margin:0 auto;">';
+    svg += '<rect x="470" y="40" width="150" height="110" fill="none" stroke="#3d5088" stroke-width="1.5" stroke-dasharray="4 4" rx="6"/>';
+    svg += '<text x="545" y="34" text-anchor="middle" class="map-caption">(Europe)</text>';
+    svg += '<rect x="470" y="200" width="150" height="90" fill="none" stroke="#3d5088" stroke-width="1.5" stroke-dasharray="4 4" rx="6"/>';
+    svg += '<text x="545" y="304" text-anchor="middle" class="map-caption">(West Africa)</text>';
+    // Layer 1: fills (interactive)
+    svg += '<g class="map-fill-layer">';
+    MAP_SHAPES.forEach(shape => {
+      const extra = classFor(shape);
+      svg += '<path class="map-shape ' + extra + '" data-id="' + shape.id.replace(/"/g,'&quot;') + '" d="' + shape.d + '"></path>';
+    });
+    svg += '</g>';
+    // Layer 2: borders on top (non-interactive), highlighted on hover of the matching fill
+    svg += '<g class="map-border-layer">';
+    MAP_SHAPES.forEach(shape => {
+      const extra = classFor(shape);
+      svg += '<path class="map-border ' + extra + '" data-border-for="' + shape.id.replace(/"/g,'&quot;') + '" d="' + shape.d + '"></path>';
+    });
+    svg += '</g>';
+    svg += '</svg>';
+    return svg;
+  }
+
+  // ---------- Location (Map) topic: click a country, then name it ----------
+  let locatorPick = null; // country id currently being named
+
+  function renderLocatorMap(){
+    collapseControls();
+    locatorPick = null;
+    updateStats();
+    const masteredSet = new Set(masteredIds);
+    const remaining = SPANISH_IDS.filter(id => !masteredSet.has(id));
+    let intro = '<p class="prompt-eyebrow">Countries</p>';
+    if(remaining.length === 0){
+      renderSummary();
+      return;
+    }
+    intro += '<p class="sub" style="margin-bottom:12px;">Click a highlighted country, then name it. Grey countries are not Spanish-speaking — don\u2019t pick those. (' + (SPANISH_COUNT - remaining.length) + ' / ' + SPANISH_COUNT + ' named)</p>';
+    const svg = mapSvgString(shape => {
+      if(shape.decoy) return 'decoy locator-dim';
+      if(masteredSet.has(shape.id)) return 'locator-done';
+      return 'locator-pickable';
+    });
+    quizArea.innerHTML = intro + svg;
+    quizArea.style.position = 'relative';
+    quizArea.querySelectorAll('.map-fill-layer .map-shape').forEach(el => {
+      const id = el.dataset.id;
+      el.addEventListener('click', () => {
+        if(isDecoy(id)){ showLocatorTrap(id); return; }
+        if(masteredSet.has(id)) return; // already done
+        renderLocatorChallenge(id);
+      });
+      if(!isDecoy(id) && !masteredSet.has(id)) linkHover(quizArea, el);
+    });
+  }
+
+  function showLocatorTrap(id){
+    const fb = document.createElement('div');
+    // reuse modal overlay for a quick trap message
+    currentMapId = id;
+    modalCard.innerHTML =
+      '<p class="prompt-eyebrow">Careful — trap!</p>' +
+      '<h3 class="modal-title">' + id + '</h3>' +
+      '<p class="modal-sub">This is <strong>not</strong> a Spanish-speaking country, so it is not one to name. Pick a highlighted country instead.</p>' +
+      '<div class="action-row"><button class="btn btn-primary" id="modalCloseBtn">Got it</button></div>';
+    modalOverlay.classList.remove('hidden');
+    document.getElementById('modalCloseBtn').onclick = closeModal;
+  }
+
+  function renderLocatorChallenge(id, retry){
+    locatorPick = id;
+    isRetry = !!retry;
+    answered = false;
+    currentId = id;
+    const q = { answerVariants: [id], answerDisplay: id, distractorPool: SPANISH_IDS };
+    currentAnswerVariants = q.answerVariants.map(norm);
+
+    // Full interactive-looking map with this country highlighted gold; others dimmed.
+    const masteredSet = new Set(masteredIds);
+    const svg = mapSvgString(shape => {
+      if(shape.id === id) return 'locator-target';
+      if(shape.decoy) return 'decoy locator-dim';
+      if(masteredSet.has(shape.id)) return 'locator-done';
+      return 'locator-dim';
+    });
+
+    // Position the popup at the SAME HEIGHT as the country, on the opposite
+    // horizontal side so it sits beside (not over) the highlighted country.
+    // Centroid is in viewBox coords: 0..620 wide, 0..860 tall.
+    const shape = MAP_SHAPES.find(s => s.id === id) || { cx: 310, cy: 430 };
+    const sideClass = (shape.cx < 310) ? 'side-right' : 'side-left'; // country on left -> popup right, etc.
+    const topPct = Math.max(0, Math.min(100, (shape.cy / 860) * 100));
+
+    // Build the challenge popup contents.
+    let pop = '<p class="prompt-eyebrow">Name the highlighted country</p>';
+    if(level === 1) pop += renderMultipleChoice(q);
+    else if(level === 2) pop += renderPartialLetters(q);
+    else pop += renderFreeType(q);
+    pop += '<div class="feedback" id="feedback"></div>';
+    pop += '<div class="action-row">';
+    if(level !== 1) pop += '<button class="btn btn-primary" id="checkBtn">Check</button>';
+    if(level !== 1) pop += '<button class="btn btn-ghost hidden" id="retryBtn">↻ Retry</button>';
+    pop += '<button class="btn btn-ghost" id="nextBtn" disabled>Back to map →</button>';
+    pop += '</div>';
+
+    const html =
+      '<div class="locator-stage">' +
+        svg +
+        '<div class="loc-popup ' + sideClass + '" id="locPopup" style="top:' + topPct.toFixed(1) + '%;">' + pop + '</div>' +
+      '</div>' +
+      '<div class="stamp" id="stampEl"></div>';
+
+    quizArea.innerHTML = html;
+    quizArea.style.position = 'relative';
+
+    if(level === 1) wireMultipleChoice(q);
+    if(level === 2) wirePartialLetters(q);
+    if(level === 3) wireFreeType(q);
+
+    // Keep the popup fully on-screen: after layout, clamp its vertical position
+    // so it doesn't spill past the top/bottom of the map.
+    const popup = document.getElementById('locPopup');
+    const stage = popup && popup.parentNode;
+    if(popup && stage){
+      const stageH = stage.getBoundingClientRect().height;
+      const popH = popup.getBoundingClientRect().height;
+      if(stageH && popH){
+        let centerPx = (topPct / 100) * stageH;
+        const half = popH / 2;
+        centerPx = Math.max(half + 4, Math.min(stageH - half - 4, centerPx));
+        popup.style.top = centerPx + 'px';
+      }
+    }
+
+    const retryBtn = document.getElementById('retryBtn');
+    if(retryBtn) retryBtn.onclick = () => { markMissed(id); renderLocatorChallenge(id, true); };
+    document.getElementById('nextBtn').onclick = () => renderLocatorMap();
+  }
+
+  const SPANISH_COUNT = COUNTRIES.length; // gradeable (Spanish-speaking) countries on the map
+  const SPANISH_IDS = COUNTRIES.map(c => c.country);
+
+  function updateMapStats(){
+    const greenCount = Object.values(mapStatuses).filter(s => s === 'green').length;
+    mapStatProgress.textContent = 'Countries in green: ' + greenCount + ' / ' + SPANISH_COUNT;
+    mapProgressFill.style.width = (greenCount / SPANISH_COUNT * 100) + '%';
+  }
+
+  function clearMapSelection(){
+    const stage = document.getElementById('mapStage');
+    if(stage) stage.querySelectorAll('.map-border.sel-hi').forEach(b => b.classList.remove('sel-hi'));
+  }
+  function closeCountryPopup(){
+    const p = document.getElementById('mapPopup');
+    if(p) p.remove();
+    clearMapSelection();
+    currentMapId = null;
+  }
+
+  function openCountryModal(id){
+    currentMapId = id;
+    const status = mapStatuses[id] || 'neutral';
+    const item = COUNTRY_BY_ID[id];
+    const prior = mapValues[id] || { country:'', capital:'', masc:'', fem:'' };
+
+    // Highlight the selected country on the map and remove any prior highlight.
+    const stage = document.getElementById('mapStage');
+    clearMapSelection();
+    const selBorder = stage && stage.querySelector('.map-border[data-border-for="' + CSS.escape(id) + '"]');
+    if(selBorder) selBorder.classList.add('sel-hi');
+
+    // Build popup body for the relevant case.
+    let body;
+    if(isDecoy(id)){
+      mapStatuses[id] = 'red';
+      saveMapFullStatuses(mapStatuses);
+      const shapeEl = stage && stage.querySelector('.map-fill-layer .map-shape[data-id="' + CSS.escape(id) + '"]');
+      if(shapeEl){ shapeEl.classList.remove('green'); shapeEl.classList.add('red'); }
+      body =
+        '<p class="prompt-eyebrow">Careful — trap!</p>' +
+        '<h3 class="modal-title">' + id + '</h3>' +
+        '<p class="modal-sub">This is <strong>not</strong> a Spanish-speaking country, so it is not one to label. Only the Spanish-speaking countries count toward your green total.</p>' +
+        '<div class="feedback show bad">Skip this one and pick a Spanish-speaking country instead.</div>' +
+        '<div class="action-row"><button class="btn btn-primary" id="popCloseBtn">Got it</button></div>';
+    } else if(status === 'green'){
+      body =
+        '<p class="prompt-eyebrow">You already mastered this country!</p>' +
+        '<h3 class="modal-title">' + item.country + '</h3>' +
+        '<p class="modal-sub">Review of your correct answers:</p>' +
+        field('Country', item.country, true) +
+        field('Capital', item.capital[0] + (item.capital.length>1 ? ' (or ' + item.capital.slice(1).join(', ') + ')' : ''), true) +
+        field('Nationality (masculine)', item.masc, true) +
+        field('Nationality (feminine)', item.fem, true) +
+        '<div class="action-row"><button class="btn btn-ghost" id="popCloseBtn">Close</button></div>';
+    } else {
+      body =
+        '<p class="prompt-eyebrow">Identify this country</p>' +
+        '<p class="modal-sub" style="margin-top:2px;">Type all four. All correct = green on the map.</p>' +
+        fieldInput('modalCountry', 'Country', prior.country) +
+        fieldInput('modalCapital', 'Capital', prior.capital) +
+        fieldInput('modalMasc', 'Nationality (masculine)', prior.masc) +
+        fieldInput('modalFem', 'Nationality (feminine)', prior.fem) +
+        renderAccentRowModal() +
+        '<div class="feedback" id="modalFeedback"></div>' +
+        '<div class="action-row">' +
+          '<button class="btn btn-primary" id="modalVerifyBtn">Check</button>' +
+          '<button class="btn btn-ghost" id="popCloseBtn">Cancel</button>' +
+        '</div>';
+    }
+
+    // Position the popup at the country's height, on the side OPPOSITE the
+    // country's horizontal position so it never covers the selection.
+    const shape = MAP_SHAPES.find(s => s.id === id) || { cx: 310, cy: 430 };
+    const sideClass = (shape.cx < 310) ? 'side-right' : 'side-left'; // country on left -> popup right, etc.
+    const topPct = Math.max(0, Math.min(100, (shape.cy / 860) * 100));
+    if(stage){
+      let popup = document.getElementById('mapPopup');
+      if(popup) popup.remove();
+      popup = document.createElement('div');
+      popup.className = 'loc-popup ' + sideClass;
+      popup.id = 'mapPopup';
+      popup.style.top = topPct.toFixed(1) + '%';
+      popup.innerHTML = body;
+      stage.appendChild(popup);
+
+      // Clamp vertical position so the popup stays fully within the map.
+      const stageH = stage.getBoundingClientRect().height;
+      const popH = popup.getBoundingClientRect().height;
+      if(stageH && popH){
+        let centerPx = (topPct / 100) * stageH;
+        const half = popH / 2;
+        centerPx = Math.max(half + 4, Math.min(stageH - half - 4, centerPx));
+        popup.style.top = centerPx + 'px';
+      }
+
+      // Wire buttons and inputs within the popup.
+      const closeBtn = document.getElementById('popCloseBtn');
+      if(closeBtn) closeBtn.onclick = closeCountryPopup;
+
+      if(!isDecoy(id) && status !== 'green'){
+        ['modalCountry','modalCapital','modalMasc','modalFem'].forEach(fid => {
+          const el = document.getElementById(fid);
+          if(el) el.addEventListener('focus', () => { lastFocusedModalInput = el; });
+        });
+        lastFocusedModalInput = document.getElementById('modalCountry');
+        const first = document.getElementById('modalCountry');
+        if(first) first.focus();
+
+        popup.querySelectorAll('.accent-key').forEach(btn => {
+          btn.onclick = () => {
+            const target = lastFocusedModalInput;
+            if(!target || target.disabled) return;
+            const start = target.selectionStart ?? target.value.length;
+            const end = target.selectionEnd ?? target.value.length;
+            target.value = target.value.slice(0,start) + btn.dataset.char + target.value.slice(end);
+            target.focus();
+            target.setSelectionRange(start+1, start+1);
+          };
+        });
+
+        const verifyBtn = document.getElementById('modalVerifyBtn');
+        if(verifyBtn) verifyBtn.onclick = gradeModal;
+      }
+    }
+  }
+
+  function field(label, value, readOnly){
+    return '<div class="field-group"><label class="field-label">' + label + '</label>' +
+      '<input class="field-input" value="' + String(value).replace(/"/g,'&quot;') + '" disabled></div>';
+  }
+  function fieldInput(id, label, value){
+    return '<div class="field-group"><label class="field-label">' + label + '</label>' +
+      '<input class="field-input" id="' + id + '" value="' + String(value||'').replace(/"/g,'&quot;') + '" autocomplete="off" autocapitalize="off" spellcheck="false">' +
+      '<div class="field-hint" id="' + id + 'Hint"></div></div>';
+  }
+  function renderAccentRowModal(){
+    const chars = ['á','é','í','ó','ú','ñ','ü'];
+    let html = '<div class="accent-row">';
+    chars.forEach(c => { html += '<button type="button" class="accent-key" data-char="'+c+'">'+c+'</button>'; });
+    html += '</div>';
+    return html;
+  }
+
+  function closeModal(){
+    modalOverlay.classList.add('hidden');
+    modalCard.innerHTML = '';
+    currentMapId = null;
+  }
+
+  async function gradeModal(){
+    const id = currentMapId;
+    const item = COUNTRY_BY_ID[id];
+    const vCountry = document.getElementById('modalCountry').value;
+    const vCapital = document.getElementById('modalCapital').value;
+    const vMasc = document.getElementById('modalMasc').value;
+    const vFem = document.getElementById('modalFem').value;
+
+    const okCountry = norm(vCountry) === norm(item.country);
+    const okCapital = item.capital.some(c => norm(c) === norm(vCapital));
+    const okMasc = norm(vMasc) === norm(item.masc);
+    const okFem = norm(vFem) === norm(item.fem);
+    const allOk = okCountry && okCapital && okMasc && okFem;
+
+    markField('modalCountry', okCountry, item.country);
+    markField('modalCapital', okCapital, item.capital.join(' / '));
+    markField('modalMasc', okMasc, item.masc);
+    markField('modalFem', okFem, item.fem);
+
+    mapValues[id] = { country: vCountry, capital: vCapital, masc: vMasc, fem: vFem };
+    mapStatuses[id] = allOk ? 'green' : 'red';
+
+    // Record which specific fields were missed this run (accumulates until reset/complete).
+    if(!allOk){
+      const missedFields = [];
+      if(!okCountry) missedFields.push('country');
+      if(!okCapital) missedFields.push('capital');
+      if(!okMasc) missedFields.push('masc');
+      if(!okFem) missedFields.push('fem');
+      const prev = mapMissed[id] || [];
+      mapMissed[id] = Array.from(new Set(prev.concat(missedFields)));
+    }
+
+    await saveMapFullValues(mapValues);
+    await saveMapFullStatuses(mapStatuses);
+    await saveMapFullMissed(mapMissed);
+
+    const stage = document.getElementById('mapStage');
+    const shapeEl = stage && stage.querySelector('.map-fill-layer .map-shape[data-id="' + CSS.escape(id) + '"]');
+    if(shapeEl){
+      shapeEl.classList.remove('green','red');
+      shapeEl.classList.add(mapStatuses[id]);
+    }
+    updateMapStats();
+
+    const fb = document.getElementById('modalFeedback');
+    fb.classList.add('show', allOk ? 'good' : 'bad');
+    fb.textContent = allOk ? 'All four are correct! This country is now green.' : 'Something is wrong — check the fields marked in red. You can try again.';
+
+    const verifyBtn = document.getElementById('modalVerifyBtn');
+    const closeBtn = document.getElementById('popCloseBtn');
+    if(allOk){
+      if(verifyBtn) verifyBtn.classList.add('hidden');
+      if(closeBtn) closeBtn.textContent = 'Close';
+    } else {
+      if(verifyBtn){
+        verifyBtn.textContent = 'Try again';
+        verifyBtn.onclick = () => openCountryModal(id);
+      }
+    }
+
+    // Completion: all Spanish-speaking countries green -> record a run to history.
+    const greenCount = SPANISH_IDS.filter(cid => mapStatuses[cid] === 'green').length;
+    if(greenCount === SPANISH_COUNT){
+      // Build a flat miss list (one entry per country|field missed) for history.
+      const missedList = [];
+      Object.keys(mapMissed).forEach(cid => {
+        (mapMissed[cid] || []).forEach(f => missedList.push(cid + '|' + f));
+      });
+      await appendHistory({
+        t: Date.now(),
+        dataset: 'fullmap',
+        level: 0,
+        rounds: 1,
+        total: SPANISH_COUNT,
+        missed: missedList
+      });
+      // Reset miss tracker for the next run (statuses stay green on the board).
+      mapMissed = {};
+      await saveMapFullMissed(mapMissed);
+      showFullMapComplete(missedList);
+    }
+  }
+
+  function showFullMapComplete(missedList){
+    // Count distinct countries that had any miss.
+    const byCountry = {};
+    missedList.forEach(entry => {
+      const sep = entry.lastIndexOf('|');
+      const cid = entry.slice(0, sep);
+      (byCountry[cid] = byCountry[cid] || []).push(entry.slice(sep+1));
+    });
+    const fieldName = { country:'country', capital:'capital', masc:'nationality (m)', fem:'nationality (f)' };
+    let list = '';
+    if(Object.keys(byCountry).length){
+      list = '<div class="review-block"><p class="review-title">You missed something on these along the way (' + Object.keys(byCountry).length + '):</p><ul class="review-list">';
+      Object.keys(byCountry).forEach(cid => {
+        const fields = byCountry[cid].map(f => fieldName[f] || f).join(', ');
+        list += '<li><span class="rev-label">' + cid + '</span><span class="rev-ans">' + fields + '</span></li>';
+      });
+      list += '</ul></div>';
+    } else {
+      list = '<p class="review-perfect">Perfect — every country right the first time! 🎉</p>';
+    }
+    modalCard.innerHTML =
+      '<p class="prompt-eyebrow">Map complete!</p>' +
+      '<h3 class="modal-title">All ' + SPANISH_COUNT + ' countries labeled</h3>' +
+      list +
+      '<p class="modal-sub" style="margin-top:6px;">Saved to <strong>View results</strong>. Reset the map to run it again.</p>' +
+      '<div class="action-row"><button class="btn btn-primary" id="modalCloseBtn">Done</button></div>';
+    modalOverlay.classList.remove('hidden');
+    document.getElementById('modalCloseBtn').onclick = closeModal;
+  }
+
+  function markField(id, ok, correctValue){
+    const el = document.getElementById(id);
+    el.classList.remove('correct','incorrect');
+    el.classList.add(ok ? 'correct' : 'incorrect');
+    const hint = document.getElementById(id + 'Hint');
+    if(hint){
+      if(!ok){
+        hint.textContent = 'Correct: ' + correctValue;
+        hint.classList.add('show');
+      } else {
+        hint.classList.remove('show');
+      }
+    }
+  }
+
+  restartMapBtn.onclick = async () => {
+    mapStatuses = {};
+    mapValues = {};
+    mapMissed = {};
+    await clearMapFullState();
+    buildMapSvg();
+    updateMapStats();
+  };
+
+  modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
+
+  // ---------- Init ----------
+  expandControls();
+  controlsToggle.style.display = 'none'; // hidden until a quiz starts
+  showSection();
+  renderChips();
+  loadOrStartRound();
+
+})();
+</script>
+</body>
+</html>
