@@ -132,18 +132,26 @@ window.StudyEngine = (function(){
     async function clearHistory(){ if(!hasStore())return; try{ await window.storage.delete(histKey(),false); }catch(e){} }
 
     // ---- Lifecycle ----
-    var startedOnce = false;
+    // startRun = prepare a fresh round and show the Start screen (controls expanded).
+    // beginRound = collapse controls and show the first card (fired by the Start button).
     async function startRun(){
       renderChips();
-      // Expanded on first open so the section/mode options are visible; collapse
-      // only once the student has actually started or changed something.
-      if(startedOnce){ collapse(); } else { expand(); elControlsToggle.style.display=""; }
-      startedOnce = true;
+      expand(); elControlsToggle.style.display="";
       order=shuffle(cards().length); pos=0; reviewed=0; missed=[]; answered=false;
+      elStatProgress.textContent=""; elProgressFill.style.width="0%";
       elStatBest.textContent="";
       var best=await loadBest();
       if(best!==null) elStatBest.textContent = (mode==="mc"?"Best: "+best+" / "+cards().length : "Best: "+best+" of "+cards().length+" known");
-      renderCurrent();
+      renderStartScreen();
+    }
+    function renderStartScreen(){
+      var total=cards().length;
+      var bits=[]; if(CHOICES.length>1) bits.push(sectionLabel(sectionId)); if(modes.length>1) bits.push(MODE_LABELS[mode]||mode);
+      var line = bits.length ? bits.join(" · ") + " — " + total + (total===1?" card":" cards") + " ready." : total + (total===1?" card":" cards") + " ready.";
+      elStudyArea.innerHTML =
+        '<p class="sub" style="margin:0 0 4px;">'+esc(line)+'</p>'+
+        '<div class="action-row"><button class="btn btn-primary" id="beginBtn">Start</button></div>';
+      document.getElementById("beginBtn").onclick = function(){ collapse(); renderCurrent(); };
     }
     function updateProgress(){
       var total=cards().length;
