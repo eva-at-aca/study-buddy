@@ -24,7 +24,7 @@ if(!SITE || !Array.isArray(SITE.subjects)){
 }
 
 function pageShell(subject){
-  const title = subject.name + " — " + (SITE.siteTitle || "Study Desk");
+  const title = subject.name + " — " + (SITE.siteTitle || "Study Buddy");
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

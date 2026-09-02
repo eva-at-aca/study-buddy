@@ -1,4 +1,4 @@
-# Study Desk
+# Study Buddy
 
 A small static website that organizes the study tools we build during the year.
 Subjects on top (Spanish, History, Science, …), each with its own page listing
@@ -28,7 +28,7 @@ tools/<subject>/...      The actual study tool .html files
 You only do this setup once.
 
 1. **Make a GitHub account** at github.com if you don't have one.
-2. **Create a new repository.** Name it whatever you like (e.g. `study-desk`).
+2. **Create a new repository.** Name it whatever you like (e.g. `study-buddy`).
    Leave it **Public** (required for free GitHub Pages).
 3. **Upload the files.** On the repo page click **Add file → Upload files**,
    then drag in *everything inside this `site` folder* (the `index.html`,

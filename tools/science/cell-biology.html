@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cell Biology — Study Tool</title>
+<link rel="stylesheet" href="../../assets/study.css">
+</head>
+<body>
+  <main class="page" id="app"></main>
+  <script src="../../assets/study-engine.js"></script>
+  <script>
+    StudyEngine.mount({
+      title: "Cell Cycle, Structures & Organization",
+      subtitle: "Flashcards and write-in practice · Test on 9/4",
+      eyebrow: "Science · Cell Biology",
+      accent: "#5aa9a0",
+      storageKey: "science-cell-biology",
+      modes: ["flash", "write"],
+      sections: [
+        {
+                "id": "cellcycle",
+                "name": "Cell Division & Control",
+                "cards": [
+                        {
+                                "q": "Why do cells divide?",
+                                "a": "To grow, and to replace damaged or old cells."
+                        },
+                        {
+                                "q": "What are the stages of the cell cycle, and what happens in each?",
+                                "a": "G1 (Gap 1): the cell grows and makes proteins/building blocks for DNA. S (Synthesis): the cell copies its DNA, making pairs of chromatids joined at the centromere. G2 (Gap 2): final prep for mitosis — the cell makes energy (ATP) and proteins. Mitosis: the nucleus divides and the chromatid pairs separate."
+                        },
+                        {
+                                "q": "What is the end result of the cell cycle?",
+                                "a": "Two identical daughter cells."
+                        },
+                        {
+                                "q": "What is interphase?",
+                                "a": "The longest part of the cell's life — the cell grows and copies its DNA (G1, S, and G2 together)."
+                        },
+                        {
+                                "q": "How is mitosis different from cytokinesis?",
+                                "a": "Mitosis is the division of the cell's nucleus; cytokinesis is the division of the cytoplasm into two cells.",
+                                "orig": "Mitosis is when the cell's nucleus is diving and cytokinesis is when the cytoplasm is diving.",
+                                "changed": true
+                        },
+                        {
+                                "q": "What is asexual reproduction?",
+                                "a": "Reproduction from one parent; the offspring are genetically identical to each other and to the parent."
+                        },
+                        {
+                                "q": "Give an example of an organism that reproduces asexually (not a plant) and one that reproduces sexually.",
+                                "a": "Asexual: an amoeba splitting into two amoebae (binary fission). Sexual: humans (or most animals)."
+                        },
+                        {
+                                "q": "Briefly describe what happens during mitosis.",
+                                "a": "The copied DNA is pulled to opposite sides of the cell and the nucleus divides, forming two identical daughter cells."
+                        },
+                        {
+                                "q": "What are some internal factors that control the cell cycle?",
+                                "a": "Checkpoints that make sure the cell is the right size, is healthy, and has correctly copied its DNA before it divides."
+                        },
+                        {
+                                "q": "What are the three checkpoints of the cell cycle?",
+                                "a": "The G1 checkpoint, the G2 checkpoint, and the M (metaphase/spindle) checkpoint.",
+                                "orig": "Metaphase Checkpoint, G1 Check point, G2 Check point.",
+                                "changed": true
+                        },
+                        {
+                                "q": "What does each checkpoint look for?",
+                                "a": "G1: cell size, nutrients, growth factors, and DNA damage. G2: correct DNA replication and DNA damage. M: that chromosomes are properly attached to the spindle."
+                        },
+                        {
+                                "q": "What is the G0 phase of the cell cycle?",
+                                "a": "A resting phase — the cell is not growing or dividing."
+                        },
+                        {
+                                "q": "What happens if a cell does not pass a checkpoint?",
+                                "a": "It pauses to fix the problem, or if it can't be fixed, it undergoes apoptosis (programmed cell death)."
+                        },
+                        {
+                                "q": "What are some external factors that control the cell cycle?",
+                                "a": "Signals from the environment and proteins from outside the cell (e.g. growth factors)."
+                        },
+                        {
+                                "q": "What is apoptosis?",
+                                "a": "Programmed cell death — a cell is signaled to die (by internal or external signals), often when its DNA is damaged or the cell is harmful or no longer needed."
+                        },
+                        {
+                                "q": "Why would a cell undergo apoptosis?",
+                                "a": "Because its DNA is damaged, or the cell is harmful or unnecessary."
+                        },
+                        {
+                                "q": "What is cancer?",
+                                "a": "Uncontrolled cell division caused by mutations in the cell cycle; it can result from radiation, chemical exposure, or inherited mutations.",
+                                "orig": "Cancer is mutants is the cell cycle it can be from radiation, chemical exposure or inherited (carcinogens).",
+                                "changed": true
+                        },
+                        {
+                                "q": "When and how does cancer occur?",
+                                "a": "When cells mutate and the cell cycle stops working correctly, so cells divide out of control."
+                        },
+                        {
+                                "q": "Why are cancer cells hazardous?",
+                                "a": "They ignore checkpoints, so they keep multiplying without stopping."
+                        },
+                        {
+                                "q": "What is a tumor?",
+                                "a": "A mass (lump) of cells that may or may not be cancerous."
+                        },
+                        {
+                                "q": "What is the difference between benign and malignant tumors?",
+                                "a": "A benign tumor is not cancerous; a malignant tumor is cancerous."
+                        },
+                        {
+                                "q": "What does it mean for a tumor to metastasize?",
+                                "a": "The cancer cells break away and spread to other parts of the body."
+                        },
+                        {
+                                "q": "What are carcinogens? Give examples.",
+                                "a": "Agents that can cause cancer — for example radiation, certain chemicals, and tobacco smoke."
+                        },
+                        {
+                                "q": "How can cancer be inherited?",
+                                "a": "Through mutations in genes (such as tumor-suppressor genes) passed from parent to child, which raise the risk of cancer.",
+                                "orig": "Yes through genes.",
+                                "changed": true
+                        },
+                        {
+                                "q": "What are the two groups of genes that regulate the cell cycle, and how do they work?",
+                                "a": "Proto-oncogenes promote cell division and growth. Tumor-suppressor genes slow or stop division and prevent tumors from forming.",
+                                "orig": "Proto once genes - promote cell division and cell growth. Tumor suppressor genes - they relegate the number of cells so tumor don't form.",
+                                "changed": true
+                        },
+                        {
+                                "q": "What happens when there are mutations in growth-factor (proto-oncogene) genes?",
+                                "a": "The cells can grow out of control and keep dividing."
+                        },
+                        {
+                                "q": "What do mutated proto-oncogenes become?",
+                                "a": "Oncogenes."
+                        },
+                        {
+                                "q": "What happens if there are mutations in tumor-suppressor genes?",
+                                "a": "The 'brakes' are lost, so a tumor can form from too many cells.",
+                                "orig": "Then a tumor could form and there would be too many cells in the orangism.",
+                                "changed": true
+                        },
+                        {
+                                "q": "Is a single mutation to a growth-factor or tumor-suppressor gene going to give you cancer? Explain.",
+                                "a": "No — a single mutation alone will not cause cancer; several mutations usually need to build up."
+                        }
+                ]
+        },
+        {
+                "id": "structures",
+                "name": "Cell Structures & Functions",
+                "cards": [
+                        {
+                                "q": "What are the levels of organization for life?",
+                                "a": "atoms → molecules → macromolecules → cells → tissues → organs → organ systems → organisms → population → community → ecosystem → biosphere."
+                        },
+                        {
+                                "q": "What characteristics do all living things share?",
+                                "a": "Growth and development, energy use/metabolism, homeostasis, adaptation, response to stimuli, organization (made of cells), and reproduction. (Not 'a nucleus' — bacteria are alive but have none.)",
+                                "orig": "They all have a nucleus.",
+                                "changed": true
+                        },
+                        {
+                                "q": "What are light microscopes?",
+                                "a": "Microscopes that shine light through a specimen so it can be magnified and seen."
+                        },
+                        {
+                                "q": "Write the steps to focus a light microscope.",
+                                "a": "1) Start with the 4X objective and use the coarse focus knob to bring the object into focus. 2) Center the object in the field of view and fine-tune with the fine focus knob. 3) For more magnification, rotate the 10X objective in and use only the fine focus knob from now on. 4) If still more is needed, rotate the 40X objective in and again use the fine focus knob."
+                        },
+                        {
+                                "q": "What are the three principles of modern cell theory?",
+                                "a": "1) All organisms are made of one or more cells. 2) The cell is the basic unit of life. 3) All cells come from pre-existing cells."
+                        },
+                        {
+                                "q": "What does it mean when a cell 'differentiates' or 'specializes'?",
+                                "a": "It takes on a specific job or function within the organism."
+                        },
+                        {
+                                "q": "What is a eukaryote?",
+                                "a": "A cell that has a membrane-bound nucleus and other membrane-bound organelles."
+                        },
+                        {
+                                "q": "What is a prokaryote?",
+                                "a": "A cell with no distinct nucleus and no membrane-bound organelles."
+                        },
+                        {
+                                "q": "What is inside a nucleus?",
+                                "a": "The nucleolus, chromatin, and chromosomes."
+                        },
+                        {
+                                "q": "What is unique about the nuclear membrane?",
+                                "a": "It has pores that let materials (like nucleic acids) move in and out of the nucleus."
+                        },
+                        {
+                                "q": "What is the function of the DNA inside the nucleus?",
+                                "a": "It stores the instructions (code) that tell the cell what to do and how to make proteins.",
+                                "orig": "It makes ribosomes and chromosomes and tells the cells what to do.",
+                                "changed": true
+                        },
+                        {
+                                "q": "Why are ribosomes important?",
+                                "a": "They are the site of protein synthesis (where mRNA and tRNA build proteins).",
+                                "orig": "They are the site of mRNA and tRNA.",
+                                "changed": true
+                        },
+                        {
+                                "q": "What do ribosomes do?",
+                                "a": "They make the proteins the cell needs to function."
+                        },
+                        {
+                                "q": "In what kinds of cells do you find ribosomes?",
+                                "a": "Both eukaryotic and prokaryotic cells."
+                        },
+                        {
+                                "q": "Why are mitochondria important?",
+                                "a": "They are the 'powerhouse' of the cell and have their own DNA."
+                        },
+                        {
+                                "q": "What do mitochondria do?",
+                                "a": "They release energy for the cell to use, in the form of ATP."
+                        },
+                        {
+                                "q": "In what kinds of cells do you find mitochondria?",
+                                "a": "Eukaryotic cells."
+                        },
+                        {
+                                "q": "Why are chloroplasts important?",
+                                "a": "They let plants carry out photosynthesis."
+                        },
+                        {
+                                "q": "What do chloroplasts do?",
+                                "a": "They carry out photosynthesis in plant cells."
+                        },
+                        {
+                                "q": "Why are chloroplasts important to the organism?",
+                                "a": "They help make food (sugar) and balance oxygen levels."
+                        },
+                        {
+                                "q": "In what kind of cells do you find chloroplasts?",
+                                "a": "Plant cells (only)."
+                        },
+                        {
+                                "q": "What are the two main differences between animal and plant cells?",
+                                "a": "Plant cells have a cell wall and chloroplasts; animal cells have neither (only a cell membrane)."
+                        },
+                        {
+                                "q": "Which structure is responsible for the overall support and structure of the plant cell?",
+                                "a": "The cell wall."
+                        },
+                        {
+                                "q": "Under a microscope, how could you tell a plant cell from an animal cell?",
+                                "a": "Look for a cell wall and chloroplasts (plant) versus only a cell membrane (animal)."
+                        },
+                        {
+                                "q": "Which cells were easiest to see the nucleus in?",
+                                "a": "The animal (cheek) cells — easier than the plant cells."
+                        },
+                        {
+                                "q": "Which observed cells came from multicellular organisms?",
+                                "a": "The cheek, onion, and elodea cells."
+                        },
+                        {
+                                "q": "Which observed cells were unicellular organisms?",
+                                "a": "The paramecium."
+                        },
+                        {
+                                "q": "Why did onion and elodea cells look regular and box-like while cheek cells looked irregular?",
+                                "a": "Plant cells have a rigid cell wall that gives them a box shape; cheek cells have only a flexible cell membrane."
+                        }
+                ]
+        }
+]
+    });
+  </script>
+</body>
+</html>
