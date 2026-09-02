@@ -132,8 +132,13 @@ window.StudyEngine = (function(){
     async function clearHistory(){ if(!hasStore())return; try{ await window.storage.delete(histKey(),false); }catch(e){} }
 
     // ---- Lifecycle ----
+    var startedOnce = false;
     async function startRun(){
-      renderChips(); collapse();
+      renderChips();
+      // Expanded on first open so the section/mode options are visible; collapse
+      // only once the student has actually started or changed something.
+      if(startedOnce){ collapse(); } else { expand(); elControlsToggle.style.display=""; }
+      startedOnce = true;
       order=shuffle(cards().length); pos=0; reviewed=0; missed=[]; answered=false;
       elStatBest.textContent="";
       var best=await loadBest();
@@ -328,7 +333,7 @@ window.StudyEngine = (function(){
     elViewResults.onclick=openResults; elCloseResults.onclick=closeResults;
 
     // ---- Init ----
-    renderChips(); expand(); elControlsToggle.style.display="none"; startRun();
+    renderChips(); startRun();
   }
 
   return { mount: mount };
