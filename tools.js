@@ -43,7 +43,7 @@ window.STUDY_SITE = {
           topic: "Verbs",
           file: "tools/spanish/verbs.html",
           date: "2026-09-03",
-          note: "Present-tense verbs — multiple choice, write-in, and conjugation. -AR and -ER/-IR sections."
+          note: "Verbs — infinitive practice (multiple choice, letter bank, write-in) and present-tense conjugation (by irregularity type, single or full-table)."
         },
         {
           title: "Spanish-Speaking Countries",

@@ -18,7 +18,17 @@ Each tool declares which **modes** it offers. Available modes:
 | Flashcards  | `flash`  | Flip card: prompt on front, answer on back.                       |
 | Write-in    | `write`  | Type the answer; the tool auto-grades, student can accept/override.|
 | Multiple choice | `mc` | Pick from options; distractors are drawn from other real answers in the set.|
+| Letter bank | `build` | Show the prompt + the answer's letters scrambled as tap-tiles; tap them in order to spell it. The "in-between" step between recognition (mc) and free recall (write). Uses `card.a` as the target; spaces auto-fill for multi-word answers.|
 | Conjugation | `conj`   | Language tools: show prompt + a random pronoun; type the exact conjugated form. Needs each card to carry a `forms` array (index-aligned with `pronouns`).|
+| Conjugation table | `conjtable` | Language tools: show the prompt and blanks for all pronouns; type every form. Grades each form; the missed-list shows which specific forms were wrong.|
+
+**Navigation depth**
+- Most tools use two levels: **Section → Mode** (via `sections` + `modes`).
+- Tools that need a third level set `tracks` instead: **Track → Group → Mode**.
+  Each track has its own `groups` and `modes`, and an optional
+  `defaultModeFor(groupId)` to pick a smart default mode per group (e.g. the verb
+  tool: irregular groups default to the `conjtable`, the Regular group to `conj`).
+  Two-level tools are unaffected — `tracks` is fully opt-in.
 
 **Matching (`strictMatch`)**
 - Prose tools (Science, etc.) leave `strictMatch` off — write-in grades by keyword

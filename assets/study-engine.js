@@ -18,12 +18,13 @@ window.StudyEngine = (function(){
   function shuffleArr(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
   function hasStore(){ return typeof window!=="undefined" && window.storage && typeof window.storage.get==="function"; }
 
-  var MODE_LABELS = { flash:"Flashcards", write:"Write-in", mc:"Multiple choice", conj:"Conjugation" };
+  var MODE_LABELS = { flash:"Flashcards", write:"Write-in", mc:"Multiple choice", conj:"Random Pronoun", conjtable:"All Pronouns", build:"Letter bank" };
   var DEFAULT_PRONOUNS = ["yo","tú","él/ella","nosotros","vosotros","ellos/ellas"];
 
   function mount(cfg){
     // ---- Validate against the standard (fail loud in console, not silently) ----
-    if(!cfg || !cfg.sections || !cfg.sections.length){ console.error("StudyEngine: no sections"); return; }
+    var hasTracks = !!(cfg && cfg.tracks && cfg.tracks.length);
+    if(!cfg || (!hasTracks && (!cfg.sections || !cfg.sections.length))){ console.error("StudyEngine: no sections or tracks"); return; }
     var modes = (cfg.modes && cfg.modes.length) ? cfg.modes.slice() : ["flash"];
     var storageKey = cfg.storageKey || "tool";
     var accent = cfg.accent || "#c9a227";
@@ -33,17 +34,48 @@ window.StudyEngine = (function(){
     // pronouns for conjugation mode (index-aligned with each card's `forms` array).
     var PRONOUNS = (cfg.pronouns && cfg.pronouns.length) ? cfg.pronouns.slice() : DEFAULT_PRONOUNS;
 
-    // ---- Section choices: real sections, plus "Everything" last if >1 ----
-    var SECTIONS = cfg.sections.slice();
-    var CHOICES = SECTIONS.slice();
-    if(SECTIONS.length > 1){
-      CHOICES.push({ id:"all", name:"Everything", cards: SECTIONS.reduce(function(a,s){ return a.concat(s.cards); }, []) });
+    // ---- Navigation model ----
+    // Two-level (default): sections + modes.
+    // Three-level (opt-in via cfg.tracks): Track -> Group -> Mode.
+    //   cfg.tracks = [ { id, name, groups:[{id,name,cards}], modes:[...],
+    //                    defaultModeFor?: fn(groupId)->modeId } ]
+    var USE_TRACKS = !!(cfg.tracks && cfg.tracks.length);
+    var TRACKS = USE_TRACKS ? cfg.tracks.slice() : null;
+
+    // Two-level section choices (also used to hold the *current* track's groups).
+    var SECTIONS, CHOICES, modesForMode;
+    var trackId, groupId;
+
+    if(USE_TRACKS){
+      trackId = TRACKS[0].id;
+      // groups/modes are resolved per current track (see refreshTrack)
+    } else {
+      SECTIONS = cfg.sections.slice();
+      CHOICES = SECTIONS.slice();
+      if(SECTIONS.length > 1){
+        CHOICES.push({ id:"all", name:"Everything", cards: SECTIONS.reduce(function(a,s){ return a.concat(s.cards); }, []) });
+      }
     }
 
     // ---- State ----
-    var sectionId = CHOICES[0].id;
-    var mode = modes[0];
-    var order=[], pos=0, reviewed=0, missed=[], answered=false;
+    var sectionId = USE_TRACKS ? null : CHOICES[0].id;
+    var mode = USE_TRACKS ? null : modes[0];
+    var order=[], pos=0, reviewed=0, missed=[], answered=false, missedForms={};
+
+    function curTrack(){ return TRACKS.filter(function(t){ return t.id===trackId; })[0] || TRACKS[0]; }
+    function trackGroups(){ return curTrack().groups; }
+    function trackModes(){ return curTrack().modes; }
+    // Resolve current group/mode after a track (re)selection.
+    function refreshTrack(keepGroup, keepMode){
+      var gs=trackGroups(), ms=trackModes();
+      if(!keepGroup || !gs.some(function(g){ return g.id===groupId; })) groupId = gs[0].id;
+      // group-driven default mode (e.g. irregulars -> table)
+      var wantMode = null;
+      var t=curTrack();
+      if(!keepMode && typeof t.defaultModeFor==="function"){ wantMode = t.defaultModeFor(groupId); }
+      if(wantMode && ms.indexOf(wantMode)!==-1){ mode = wantMode; }
+      else if(!keepMode || ms.indexOf(mode)===-1){ mode = ms[0]; }
+    }
 
     // ---- Build shell ----
     document.title = cfg.title + " — Study Tool";
@@ -57,15 +89,18 @@ window.StudyEngine = (function(){
       '</header>'+
       '<div class="card" id="controlsCard">'+
         '<div class="controls-head">'+
-          '<p class="section-label" style="margin:0;">'+(CHOICES.length>1?'Section &amp; mode':'Mode')+'</p>'+
+          '<p class="section-label" style="margin:0;">'+(USE_TRACKS?'Practice, group &amp; mode':(CHOICES.length>1?'Section &amp; mode':'Mode'))+'</p>'+
           '<div class="controls-head-actions">'+
             '<button class="link-btn" id="viewResultsBtn">View results</button>'+
             '<button class="link-btn" id="controlsToggle" style="display:none;">Change</button>'+
           '</div>'+
         '</div>'+
         '<div id="controlsBody">'+
-          (CHOICES.length>1 ? '<p class="section-label controls-sub">Section</p><div class="chip-row" id="sectionRow"></div>' : '')+
-          (modes.length>1 ? '<p class="section-label controls-sub">Mode</p><div class="chip-row" id="modeRow"></div>' : '')+
+          (USE_TRACKS ? '<p class="section-label controls-sub">Practice</p><div class="chip-row" id="trackRow"></div>' : '')+
+          (USE_TRACKS ? '<p class="section-label controls-sub" id="groupHeading">Group</p><div class="chip-row" id="sectionRow"></div>'
+                      : ((CHOICES.length>1) ? '<p class="section-label controls-sub">Section</p><div class="chip-row" id="sectionRow"></div>' : ''))+
+          (USE_TRACKS ? '<p class="section-label controls-sub" id="modeHeading">Mode</p><div class="chip-row" id="modeRow"></div>'
+                      : ((modes.length>1) ? '<p class="section-label controls-sub">Mode</p><div class="chip-row" id="modeRow"></div>' : ''))+
         '</div>'+
         '<p class="controls-summary hidden" id="controlsSummary"></p>'+
       '</div>'+
@@ -98,38 +133,75 @@ window.StudyEngine = (function(){
     var elViewResults = document.getElementById("viewResultsBtn");
     var elCloseResults = document.getElementById("closeResultsBtn");
 
+    var elTrackRow = document.getElementById("trackRow");
+    var elGroupHeading = document.getElementById("groupHeading");
+    var elModeHeading = document.getElementById("modeHeading");
+
     // ---- Chips ----
-    if(CHOICES.length>1){
-      CHOICES.forEach(function(s){
-        var b=document.createElement("button"); b.className="chip"; b.textContent=s.name; b.dataset.id=s.id;
-        b.onclick=function(){ sectionId=s.id; startRun(); }; elSectionRow.appendChild(b);
-      });
-    }
-    if(modes.length>1){
-      modes.forEach(function(m){
-        var b=document.createElement("button"); b.className="chip"; b.textContent=MODE_LABELS[m]||m; b.dataset.id=m;
-        b.onclick=function(){ mode=m; startRun(); }; elModeRow.appendChild(b);
-      });
-    }
-    function renderChips(){
-      if(elSectionRow) [].forEach.call(elSectionRow.children,function(c){ c.classList.toggle("active",c.dataset.id===sectionId); });
-      if(elModeRow) [].forEach.call(elModeRow.children,function(c){ c.classList.toggle("active",c.dataset.id===mode); });
+    function makeChip(row, id, label, onClick){
+      var b=document.createElement("button"); b.className="chip"; b.textContent=label; b.dataset.id=String(id);
+      b.onclick=onClick; row.appendChild(b); return b;
     }
 
-    function choice(){ return CHOICES.filter(function(s){ return s.id===sectionId; })[0] || CHOICES[0]; }
+    function rebuildTrackChips(){
+      if(!USE_TRACKS) return;
+      elSectionRow.innerHTML=""; elModeRow.innerHTML="";
+      trackGroups().forEach(function(g){
+        makeChip(elSectionRow, g.id, g.name, function(){ groupId=g.id; refreshTrack(true,false); renderChips(); startRun(); });
+      });
+      var ms=trackModes();
+      if(elModeHeading) elModeHeading.style.display = ms.length>1 ? "" : "none";
+      elModeRow.style.display = ms.length>1 ? "" : "none";
+      ms.forEach(function(m){
+        makeChip(elModeRow, m, MODE_LABELS[m]||m, function(){ mode=m; refreshTrack(true,true); renderChips(); startRun(); });
+      });
+    }
+
+    if(USE_TRACKS){
+      TRACKS.forEach(function(t){
+        makeChip(elTrackRow, t.id, t.name, function(){ trackId=t.id; refreshTrack(false,false); rebuildTrackChips(); renderChips(); startRun(); });
+      });
+      refreshTrack(false,false);
+      rebuildTrackChips();
+    } else {
+      if(CHOICES.length>1){
+        CHOICES.forEach(function(s){ makeChip(elSectionRow, s.id, s.name, function(){ sectionId=s.id; startRun(); }); });
+      }
+      if(modes.length>1){
+        modes.forEach(function(m){ makeChip(elModeRow, m, MODE_LABELS[m]||m, function(){ mode=m; startRun(); }); });
+      }
+    }
+
+    function renderChips(){
+      if(USE_TRACKS && elTrackRow) [].forEach.call(elTrackRow.children,function(c){ c.classList.toggle("active",c.dataset.id===String(trackId)); });
+      if(elSectionRow) [].forEach.call(elSectionRow.children,function(c){ c.classList.toggle("active",c.dataset.id===String(USE_TRACKS?groupId:sectionId)); });
+      if(elModeRow) [].forEach.call(elModeRow.children,function(c){ c.classList.toggle("active",c.dataset.id===String(mode)); });
+    }
+
+    function choice(){
+      if(USE_TRACKS){ return trackGroups().filter(function(g){ return g.id===groupId; })[0] || trackGroups()[0]; }
+      return CHOICES.filter(function(s){ return s.id===sectionId; })[0] || CHOICES[0];
+    }
     function cards(){ return choice().cards; }
-    function sectionLabel(id){ var s=CHOICES.filter(function(x){ return x.id===id; })[0]; return s?s.name:id; }
+    function sectionLabel(id){
+      if(USE_TRACKS){ var g=trackGroups().filter(function(x){ return x.id===id; })[0]; return g?g.name:id; }
+      var s=CHOICES.filter(function(x){ return x.id===id; })[0]; return s?s.name:id;
+    }
+    function trackLabel(id){ var t=TRACKS.filter(function(x){ return x.id===id; })[0]; return t?t.name:id; }
 
     function collapse(){
       elControlsBody.classList.add("hidden"); elControlsSummary.classList.remove("hidden"); elControlsToggle.style.display="";
-      var parts=[]; if(CHOICES.length>1) parts.push(sectionLabel(sectionId)); if(modes.length>1) parts.push(MODE_LABELS[mode]||mode);
+      var parts=[];
+      if(USE_TRACKS){ parts.push(trackLabel(trackId)); parts.push(sectionLabel(groupId)); if(trackModes().length>1) parts.push(MODE_LABELS[mode]||mode); }
+      else { if(CHOICES.length>1) parts.push(sectionLabel(sectionId)); if(modes.length>1) parts.push(MODE_LABELS[mode]||mode); }
       elControlsSummary.innerHTML = parts.map(function(p){ return '<span class="accent">'+esc(p)+'</span>'; }).join(" · ") || '<span class="accent">'+esc(MODE_LABELS[mode]||mode)+'</span>';
     }
     function expand(){ elControlsBody.classList.remove("hidden"); elControlsSummary.classList.add("hidden"); }
     elControlsToggle.onclick=function(){ if(elControlsBody.classList.contains("hidden")) expand(); else collapse(); };
 
     // ---- Storage: best + history ----
-    function bestKey(){ return storageKey+":best:"+sectionId+":"+mode; }
+    function scopeId(){ return USE_TRACKS ? (trackId+":"+groupId) : sectionId; }
+    function bestKey(){ return storageKey+":best:"+scopeId()+":"+mode; }
     function histKey(){ return storageKey+":history"; }
     async function loadBest(){ if(!hasStore())return null; try{ var r=await window.storage.get(bestKey(),false); return r&&r.value?Number(r.value):null; }catch(e){ return null; } }
     async function saveBest(v){ if(!hasStore())return; try{ var c=await loadBest(); if(c===null||v>c) await window.storage.set(bestKey(),String(v),false); }catch(e){} }
@@ -143,7 +215,7 @@ window.StudyEngine = (function(){
     async function startRun(){
       renderChips();
       expand(); elControlsToggle.style.display="";
-      order=shuffle(cards().length); pos=0; reviewed=0; missed=[]; answered=false;
+      order=shuffle(cards().length); pos=0; reviewed=0; missed=[]; missedForms={}; answered=false;
       elStatProgress.textContent=""; elProgressFill.style.width="0%";
       elStatBest.textContent="";
       var best=await loadBest();
@@ -152,7 +224,9 @@ window.StudyEngine = (function(){
     }
     function renderStartScreen(){
       var total=cards().length;
-      var bits=[]; if(CHOICES.length>1) bits.push(sectionLabel(sectionId)); if(modes.length>1) bits.push(MODE_LABELS[mode]||mode);
+      var bits=[];
+      if(USE_TRACKS){ bits.push(trackLabel(trackId)); bits.push(sectionLabel(groupId)); if(trackModes().length>1) bits.push(MODE_LABELS[mode]||mode); }
+      else { if(CHOICES.length>1) bits.push(sectionLabel(sectionId)); if(modes.length>1) bits.push(MODE_LABELS[mode]||mode); }
       var line = bits.length ? bits.join(" · ") + " — " + total + (total===1?" card":" cards") + " ready." : total + (total===1?" card":" cards") + " ready.";
       elStudyArea.innerHTML =
         '<p class="sub" style="margin:0 0 4px;">'+esc(line)+'</p>'+
@@ -171,6 +245,8 @@ window.StudyEngine = (function(){
       if(mode==="flash") renderFlash(card);
       else if(mode==="mc") renderMC(card);
       else if(mode==="conj") renderConj(card);
+      else if(mode==="conjtable") renderConjTable(card);
+      else if(mode==="build") renderBuild(card);
       else renderWrite(card);
     }
 
@@ -334,9 +410,10 @@ window.StudyEngine = (function(){
       var pronoun = PRONOUNS[pi];
       var answer = forms[pi];
       var badge=card.changed?'<span class="changed-badge">corrected</span>':'';
+      var stemNote = card.stemType ? ' <span style="color:var(--ink-dim);font-weight:400;">('+esc(card.stemType)+')</span>' : '';
       elStudyArea.innerHTML=
-        '<p class="prompt-eyebrow">Conjugate — '+esc(card.grpLabel||"")+'</p>'+
-        '<p class="prompt">'+esc(card.q)+'<br><span style="color:var(--accent);font-weight:600;">'+esc(pronoun)+'</span></p>'+
+        '<p class="prompt-eyebrow">Conjugate — present tense</p>'+
+        '<p class="prompt">'+esc(card.q)+stemNote+'<br><span style="color:var(--accent);font-weight:600;">'+esc(pronoun)+'</span></p>'+
         '<textarea class="write-area" id="writeBox" rows="1" placeholder="Type the conjugated verb..."></textarea>'+
         accentRow("writeBox")+
         '<div class="action-row"><button class="btn btn-primary" id="checkBtn">Check answer</button></div>'+
@@ -368,18 +445,214 @@ window.StudyEngine = (function(){
       };
     }
 
-    // ---- Summary (missed list per round) ----
+    // ---- Conjugation TABLE: fill in all pronouns; grade each ----
+    function renderConjTable(card){
+      var forms = card.forms || [];
+      if(!forms.length){
+        elStudyArea.innerHTML='<p class="sub">This card has no conjugation data.</p>'+
+          '<div class="action-row"><button class="btn btn-primary" id="skipBtn">Next &rsaquo;</button></div>';
+        document.getElementById("skipBtn").onclick=function(){ reviewed++; pos++; renderCurrent(); };
+        return;
+      }
+      var n = Math.min(PRONOUNS.length, forms.length);
+      var badge=card.changed?'<span class="changed-badge">corrected</span>':'';
+      var stemNote = card.stemType ? ' <span style="color:var(--ink-dim);font-weight:400;">('+esc(card.stemType)+')</span>' : '';
+      var rows='';
+      for(var i=0;i<n;i++){
+        rows+='<div class="conj-row">'+
+          '<label class="conj-pron">'+esc(PRONOUNS[i])+'</label>'+
+          '<input class="conj-input" id="ct'+i+'" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">'+
+        '</div>';
+      }
+      elStudyArea.innerHTML=
+        '<p class="prompt-eyebrow">Conjugate all forms — present tense</p>'+
+        '<p class="prompt">'+esc(card.q)+stemNote+'</p>'+
+        '<div class="conj-table" id="conjTable">'+rows+'</div>'+
+        accentRow("ct0")+
+        '<div class="action-row"><button class="btn btn-primary" id="checkBtn">Check answers</button></div>'+
+        '<div id="revealArea"></div>';
+      // Accent keys target the last-focused conj input.
+      var lastBox=document.getElementById("ct0");
+      for(var j=0;j<n;j++){ (function(el){ el.addEventListener("focus",function(){ lastBox=el; }); })(document.getElementById("ct"+j)); }
+      var arow=elStudyArea.querySelector(".accent-row");
+      if(arow){ arow.querySelectorAll(".accent-key").forEach(function(btn){
+        btn.addEventListener("mousedown",function(e){ e.preventDefault(); });
+        btn.onclick=function(){ var b=lastBox; if(!b||b.disabled)return; var s=b.selectionStart==null?b.value.length:b.selectionStart,e=b.selectionEnd==null?b.value.length:b.selectionEnd; b.value=b.value.slice(0,s)+btn.dataset.char+b.value.slice(e); b.focus(); try{ b.setSelectionRange(s+1,s+1); }catch(_){}}; }); }
+      document.getElementById("ct0").focus();
+
+      document.getElementById("checkBtn").onclick=function(){
+        if(answered)return; answered=true;
+        var wrongForms=[]; var anyWrong=false;
+        for(var i=0;i<n;i++){
+          var el=document.getElementById("ct"+i); el.disabled=true;
+          var ok = strictEqual(el.value, forms[i]);
+          el.classList.add(ok?"conj-ok":"conj-bad");
+          if(!ok){ anyWrong=true; wrongForms.push(PRONOUNS[i]); }
+        }
+        document.getElementById("checkBtn").disabled=true;
+        var correctByDefault=!anyWrong;
+        // Build the answer key + which were wrong.
+        var keyRows='';
+        for(var k=0;k<n;k++){ keyRows+='<div class="conj-key-row"><span class="conj-pron">'+esc(PRONOUNS[k])+'</span><span>'+esc(forms[k])+'</span></div>'; }
+        function renderVerdict(isCorrect){
+          var sub = isCorrect ? "All forms correct." : (wrongForms.length+" of "+n+" forms were off: "+wrongForms.join(", ")+".");
+          var banner='<div class="verdict '+(isCorrect?"correct":"wrong")+'">'+
+            '<p class="v-line">'+(isCorrect?"Marked correct":"Marked as missed")+'</p>'+
+            '<p class="v-sub">'+esc(sub)+' You can change this below.</p></div>';
+          var actions='<div class="verdict-actions"><p class="lead">'+(isCorrect?"Not right after all?":"Actually got it?")+'</p>'+
+            '<div class="action-row">'+
+              (isCorrect?'<button class="btn btn-ghost" id="flipBtn">Change to missed</button>':'<button class="btn btn-ghost" id="flipBtn">Change to correct</button>')+
+              '<button class="btn btn-primary" id="acceptBtn">Accept &amp; continue &rsaquo;</button>'+
+            '</div></div>';
+          document.getElementById("verdictWrap").innerHTML=banner+actions;
+          document.getElementById("flipBtn").onclick=function(){ renderVerdict(!isCorrect); };
+          document.getElementById("acceptBtn").onclick=function(){
+            if(!isCorrect){ missed.push(order[pos]); missedForms[order[pos]]=(missedForms[order[pos]]||[]).concat(wrongForms); }
+            reviewed++; pos++; renderCurrent();
+          };
+        }
+        document.getElementById("revealArea").innerHTML=
+          '<div class="model-answer"><p class="ma-tag">Answer key'+badge+'</p><div class="conj-key">'+keyRows+'</div></div>'+
+          changedNote(card)+'<div id="verdictWrap"></div>';
+        renderVerdict(correctByDefault);
+      };
+    }
+
+    function renderBuild(card){
+      var answer = card.a || "";
+      var chars = answer.split("");                       // includes spaces
+      var letterIdx = [];                                 // indices in `chars` that are letters (not spaces)
+      chars.forEach(function(ch,i){ if(ch !== " ") letterIdx.push(i); });
+      var needed = letterIdx.length;
+
+      // Tiles: one per letter, shuffled. Each tile knows its character.
+      var tiles = letterIdx.map(function(i,k){ return { id:k, ch:chars[i] }; });
+      var bankOrder = shuffle(tiles.length); // display order of tiles in the bank
+      var placed = [];                        // tile ids placed, in order
+      var badge = card.changed ? '<span class="changed-badge">corrected</span>' : '';
+
+      elStudyArea.innerHTML =
+        '<p class="prompt-eyebrow">Build the Spanish — tap the letters in order</p>'+
+        '<p class="prompt">'+esc(card.q)+'</p>'+
+        '<div class="build-zone" id="buildZone"></div>'+
+        '<div class="bank" id="bank"></div>'+
+        '<div class="action-row">'+
+          '<button class="btn btn-ghost" id="undoBtn">Undo</button>'+
+          '<button class="btn btn-ghost" id="clearBtn">Clear</button>'+
+          '<button class="btn btn-ghost" id="revealBtn">Show answer</button>'+
+        '</div>'+
+        '<p class="build-hint" id="buildHint"></p>'+
+        '<div id="revealArea"></div>';
+
+      var zone = document.getElementById("buildZone");
+      var bank = document.getElementById("bank");
+
+      function currentString(){
+        // Reconstruct with spaces auto-filled at the right positions.
+        var out = "", li = 0;
+        for(var i=0;i<chars.length;i++){
+          if(chars[i]===" "){ out += " "; }
+          else { out += (li < placed.length ? tiles[placed[li]].ch : ""); li++; }
+        }
+        return out;
+      }
+
+      function drawBank(){
+        bank.innerHTML = bankOrder.map(function(tid){
+          var used = placed.indexOf(tid) !== -1;
+          return '<button class="bank-tile'+(used?' used':'')+'" data-tid="'+tid+'">'+esc(tiles[tid].ch)+'</button>';
+        }).join("");
+        bank.querySelectorAll(".bank-tile").forEach(function(btn){
+          btn.onclick = function(){
+            if(answered) return;
+            var tid = Number(btn.dataset.tid);
+            if(placed.indexOf(tid) !== -1) return;
+            placed.push(tid);
+            drawZone(); drawBank();
+            if(placed.length === needed) autoCheck();
+          };
+        });
+      }
+
+      function drawZone(){
+        if(placed.length === 0){
+          zone.className = "build-zone";
+          zone.innerHTML = '<span class="build-placeholder">Tap letters below…</span>';
+          return;
+        }
+        // Render placed letters with spaces shown as gaps.
+        var html = "", li = 0;
+        for(var i=0;i<chars.length;i++){
+          if(chars[i]===" "){ if(li>0 && li<=placed.length){ html += '<span class="build-slot space"></span>'; } }
+          else {
+            if(li < placed.length){ html += '<span class="build-slot" data-pos="'+li+'">'+esc(tiles[placed[li]].ch)+'</span>'; }
+            li++;
+          }
+        }
+        zone.innerHTML = html;
+        zone.querySelectorAll(".build-slot[data-pos]").forEach(function(sl){
+          sl.onclick = function(){
+            if(answered) return;
+            var pos = Number(sl.dataset.pos);
+            placed.splice(pos, 1);   // remove that letter, shift the rest back
+            zone.className = "build-zone";
+            drawZone(); drawBank();
+          };
+        });
+      }
+
+      function finish(isCorrectDefault){
+        answered = true;
+        var badge2 = card.changed ? '<span class="changed-badge">corrected</span>' : '';
+        function renderVerdict(isCorrect){
+          zone.className = "build-zone " + (isCorrect ? "correct" : "wrong");
+          var banner='<div class="verdict '+(isCorrect?"correct":"wrong")+'">'+
+            '<p class="v-line">'+(isCorrect?"Correct!":"Not quite")+'</p>'+
+            '<p class="v-sub">You can change this below.</p></div>';
+          var actions='<div class="verdict-actions"><p class="lead">'+(isCorrect?"Not right after all?":"Actually got it?")+'</p>'+
+            '<div class="action-row">'+
+              (isCorrect?'<button class="btn btn-ghost" id="flipBtn">Change to missed</button>':'<button class="btn btn-ghost" id="flipBtn">Change to correct</button>')+
+              '<button class="btn btn-primary" id="acceptBtn">Accept &amp; continue &rsaquo;</button>'+
+            '</div></div>';
+          document.getElementById("revealArea").innerHTML =
+            '<div class="model-answer"><p class="ma-tag">Answer'+badge2+'</p><p>'+esc(answer)+'</p></div>'+
+            changedNote(card)+'<div id="verdictWrap2">'+banner+actions+'</div>';
+          document.getElementById("flipBtn").onclick=function(){ renderVerdict(!isCorrect); };
+          document.getElementById("acceptBtn").onclick=function(){ if(!isCorrect) missed.push(order[pos]); reviewed++; pos++; renderCurrent(); };
+        }
+        renderVerdict(isCorrectDefault);
+      }
+
+      function autoCheck(){
+        var ok = currentString().trim().toLowerCase() === answer.trim().toLowerCase();
+        finish(ok);
+      }
+
+      document.getElementById("undoBtn").onclick = function(){ if(answered||!placed.length) return; placed.pop(); zone.className="build-zone"; drawZone(); drawBank(); };
+      document.getElementById("clearBtn").onclick = function(){ if(answered) return; placed=[]; zone.className="build-zone"; drawZone(); drawBank(); };
+      document.getElementById("revealBtn").onclick = function(){ if(answered) return; finish(false); };
+
+      drawZone(); drawBank();
+    }
+
     async function renderSummary(){
       elProgressFill.style.width="100%"; elStatProgress.textContent="Done";
       var total=cards().length; var score=total-uniq(missed).length;
       await saveBest(score);
-      await appendHistory({ t:Date.now(), section:sectionId, mode:mode, total:total, score:score, missed:uniq(missed).map(function(i){ return cards()[i].q; }) });
+      await appendHistory({ t:Date.now(), section:scopeId(), sectionLabel:(USE_TRACKS?(trackLabel(trackId)+" · "+sectionLabel(groupId)):sectionLabel(sectionId)), mode:mode, total:total, score:score, missed:uniq(missed).map(function(i){ return cards()[i].q; }) });
       var best=await loadBest();
       elStatBest.textContent=(mode==="mc"?"Best: "+best+" / "+total:"Best: "+best+" of "+total+" known");
 
       var reviewHtml, um=uniq(missed);
       if(um.length){
-        var rows=um.map(function(i){ var c=cards()[i]; var b=c.changed?'<span class="rc">corrected</span>':''; return '<li><span class="rq">'+esc(c.q)+'</span>'+b+'<span class="ra">'+esc(c.a)+'</span></li>'; }).join("");
+        var rows=um.map(function(i){
+          var c=cards()[i];
+          var b=c.changed?'<span class="rc">corrected</span>':'';
+          var wf = (mode==="conjtable" && missedForms[i] && missedForms[i].length)
+            ? '<span class="ra">missed: '+esc(uniqStr(missedForms[i]).join(", "))+'</span>'
+            : '<span class="ra">'+esc(c.a)+'</span>';
+          return '<li><span class="rq">'+esc(c.q)+'</span>'+b+wf+'</li>';
+        }).join("");
         reviewHtml='<div class="review-block"><p class="review-title">Review these ('+um.length+'):</p><ul class="review-list">'+rows+'</ul></div>';
       } else {
         reviewHtml='<p class="review-perfect">Perfect — you knew them all! 🎉</p>';
@@ -391,6 +664,7 @@ window.StudyEngine = (function(){
       document.getElementById("restartBtn").onclick=startRun;
     }
     function uniq(arr){ var s={},o=[]; arr.forEach(function(i){ if(!s[i]){ s[i]=1; o.push(i); } }); return o; }
+    function uniqStr(arr){ var s={},o=[]; (arr||[]).forEach(function(x){ if(!s[x]){ s[x]=1; o.push(x); } }); return o; }
 
     // ---- Results / patterns screen ----
     async function openResults(){
@@ -402,11 +676,13 @@ window.StudyEngine = (function(){
       if(!history.length){ elResultsBody.innerHTML='<p class="results-empty">No completed rounds yet. Finish a round and your results — including which questions you missed — will show up here.</p>'; return; }
 
       var groups={};
-      history.forEach(function(h){ var k=h.section+":"+h.mode; (groups[k]=groups[k]||[]).push(h); });
+      history.forEach(function(h){ var k=h.section+"|@|"+h.mode; (groups[k]=groups[k]||[]).push(h); });
       var html='<p class="results-intro">Every completed round is saved here. The badge shows how many times you\u2019ve missed each question across all your runs — the higher, the more worth drilling.</p>';
       Object.keys(groups).forEach(function(key){
-        var parts=key.split(":"); var runs=groups[key].slice().sort(function(a,b){ return b.t-a.t; });
-        html+='<p class="rp-title">'+esc(sectionLabel(parts[0]))+' · '+esc(MODE_LABELS[parts[1]]||parts[1])+' — '+runs.length+(runs.length===1?" run":" runs")+'</p>';
+        var runs=groups[key].slice().sort(function(a,b){ return b.t-a.t; });
+        var modeId=key.split("|@|")[1];
+        var label=(runs[0] && runs[0].sectionLabel) ? runs[0].sectionLabel : key.split("|@|")[0];
+        html+='<p class="rp-title">'+esc(label)+' · '+esc(MODE_LABELS[modeId]||modeId)+' — '+runs.length+(runs.length===1?" run":" runs")+'</p>';
         var freq={}; runs.forEach(function(r){ (r.missed||[]).forEach(function(q){ freq[q]=(freq[q]||0)+1; }); });
         var items=Object.keys(freq).sort(function(a,b){ return freq[b]-freq[a]; });
         if(!items.length){ html+='<p class="run-perfect">No misses recorded here. 🎉</p>'; }
