@@ -39,7 +39,7 @@ window.STUDY_SITE = {
       accent: "#d98a2b",
       tools: [
         {
-          title: "Spanish Verbs",
+          title: "Verbs - Senderos 1",
           topic: "Verbs",
           file: "tools/spanish/verbs.html",
           date: "2026-09-03",
