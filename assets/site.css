@@ -81,6 +81,49 @@ body{
   color: #fff;
 }
 
+/* ---------- Status filter (Active / All) ---------- */
+.status-bar{
+  display: flex;
+  gap: 6px;
+  margin: 0 0 16px;
+}
+.status-tile{
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.status-tile:hover{ border-color: var(--ink-soft); }
+.status-tile:focus-visible{ outline: 2px solid var(--ink); outline-offset: 2px; }
+.status-tile.active{
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+/* ---------- List section labels (Active / Done) ---------- */
+.list-section-label{
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 4px 0 8px;
+}
+.list-section-label.done{ margin-top: 20px; }
+
+/* Done tools read as secondary (muted) but stay usable. */
+.done-list .tool{ opacity: 0.62; }
+.done-list .tool:hover,
+.done-list .tool:focus-visible{ opacity: 1; }
+
 /* ---------- Flat tool list ---------- */
 .tool-list{ list-style: none; margin: 0; padding: 0; }
 .tool-li.hidden{ display: none; }

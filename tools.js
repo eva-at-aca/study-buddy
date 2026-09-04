@@ -16,6 +16,7 @@
    topic    Groups tools within a subject. e.g. "Vocabulary".  (required)
    file     Path to the HTML file, relative to the site root.  (required)
    date     "YYYY-MM-DD" — when you added it. Used for sorting. (required)
+   status   "done" to move it into the Done section (test finished). Omit for active. (optional)
    note     One short line describing what it drills.           (optional)
 
    FIELD REFERENCE (per subject)
@@ -50,6 +51,7 @@ window.STUDY_SITE = {
           topic: "Geography",
           file: "tools/spanish/countries.html",
           date: "2026-09-02",
+          status: "done",
           note: "Countries, capitals, nationalities, and map locations — three levels."
         }
         // Add more Spanish tools here, e.g.:
@@ -79,6 +81,7 @@ window.STUDY_SITE = {
           topic: "Cell Biology",
           file: "tools/science/cell-biology.html",
           date: "2026-09-02",
+          status: "done",
           note: "Cell cycle, cell structures, and levels of organization — flashcards and write-in. Test on 9/4."
         }
       ]

@@ -29,6 +29,7 @@
       (sub.tools || []).forEach(function(t){
         list.push({
           title: t.title, topic: t.topic, file: t.file, date: t.date, note: t.note,
+          status: (t.status === "done") ? "done" : "active",
           subjectId: sub.id, subjectName: sub.name, accent: sub.accent || "#c9a227"
         });
       });
@@ -42,7 +43,8 @@
   }
 
   var TOOLS = allTools();
-  var activeSubject = "all"; // "all" or a subject id
+  var activeSubject = "all";     // "all" or a subject id
+  var statusFilter = "all";      // "all" or "active"
 
   function toolRowHtml(t){
     var note = t.note ? '<p class="tool-note">' + esc(t.note) + '</p>' : '';
@@ -62,17 +64,48 @@
       '</li>';
   }
 
+  // Build the list HTML for the current filters.
+  // - subject filter narrows by subject.
+  // - statusFilter "active": flat list of active tools only.
+  // - statusFilter "all": two sections, Active then Done.
+  function listHtml(){
+    function bySubject(t){ return activeSubject === "all" || t.subjectId === activeSubject; }
+    var pool = TOOLS.filter(bySubject);
+
+    if(statusFilter === "active"){
+      var act = pool.filter(function(t){ return t.status === "active"; });
+      if(!act.length) return '<p class="empty">No active tools here.</p>';
+      return '<ul class="tool-list">' + act.map(toolRowHtml).join("") + '</ul>';
+    }
+
+    // "all" -> Active section, then Done section (only render a section if non-empty)
+    var active = pool.filter(function(t){ return t.status === "active"; });
+    var done = pool.filter(function(t){ return t.status === "done"; });
+    var html = "";
+    if(active.length){
+      html += '<p class="list-section-label">Active</p>' +
+              '<ul class="tool-list">' + active.map(toolRowHtml).join("") + '</ul>';
+    }
+    if(done.length){
+      html += '<p class="list-section-label done">Done</p>' +
+              '<ul class="tool-list done-list">' + done.map(toolRowHtml).join("") + '</ul>';
+    }
+    if(!html) html = '<p class="empty">No tools here.</p>';
+    return html;
+  }
+
   function applyFilter(){
-    var lis = document.querySelectorAll(".tool-li");
-    var shown = 0;
-    [].forEach.call(lis, function(li){
-      var match = (activeSubject === "all") || (li.getAttribute("data-subject") === activeSubject);
-      li.classList.toggle("hidden", !match);
-      if(match) shown++;
-    });
-    var tiles = document.querySelectorAll(".subject-tile");
-    [].forEach.call(tiles, function(tile){
+    var listEl = document.getElementById("toolListArea");
+    if(listEl) listEl.innerHTML = listHtml();
+    // subject tile active state
+    [].forEach.call(document.querySelectorAll(".subject-tile"), function(tile){
       var on = tile.getAttribute("data-id") === activeSubject;
+      tile.classList.toggle("active", on);
+      tile.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    // status tile active state
+    [].forEach.call(document.querySelectorAll(".status-tile"), function(tile){
+      var on = tile.getAttribute("data-status") === statusFilter;
       tile.classList.toggle("active", on);
       tile.setAttribute("aria-pressed", on ? "true" : "false");
     });
@@ -99,14 +132,20 @@
     });
     var tileBar = '<div class="tile-bar" id="tileBar">' + tiles + '</div>';
 
-    var rows = TOOLS.map(toolRowHtml).join("");
+    // Status filter (Active / All), defaults to All.
+    var statusBar =
+      '<div class="status-bar" id="statusBar">' +
+        '<button class="status-tile" data-status="active" aria-pressed="false">Active</button>' +
+        '<button class="status-tile active" data-status="all" aria-pressed="true">All</button>' +
+      '</div>';
+
     var list = TOOLS.length
-      ? '<ul class="tool-list">' + rows + '</ul>'
+      ? '<div id="toolListArea"></div>'
       : '<div class="empty">No tools yet. Add one in <code>tools.js</code>.</div>';
 
     var foot = '<p class="foot">Saved on this device as you study. Works offline once loaded.</p>';
 
-    host.innerHTML = head + tileBar + list + foot;
+    host.innerHTML = head + tileBar + statusBar + list + foot;
 
     var bar = document.getElementById("tileBar");
     if(bar){
@@ -114,6 +153,15 @@
         tile.addEventListener("click", function(){
           var id = tile.getAttribute("data-id");
           activeSubject = (id === activeSubject && id !== "all") ? "all" : id;
+          applyFilter();
+        });
+      });
+    }
+    var sbar = document.getElementById("statusBar");
+    if(sbar){
+      [].forEach.call(sbar.querySelectorAll(".status-tile"), function(tile){
+        tile.addEventListener("click", function(){
+          statusFilter = tile.getAttribute("data-status");
           applyFilter();
         });
       });

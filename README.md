@@ -70,6 +70,20 @@ That's it. Bookmark that URL on your kids' devices.
 
 No need to touch any HTML on the home page. It reads `tools.js` automatically.
 
+### Marking a tool as done
+
+When a test is over, add `status: "done"` to that tool's entry in `tools.js`:
+
+```js
+{ title: "Cell Biology Review", topic: "Cell Biology",
+  file: "tools/science/cell-biology.html", date: "2026-09-02",
+  status: "done", note: "..." }
+```
+
+The home page has an **Active / All** filter. "All" (the default) shows two
+sections — Active first, then Done (dimmed). "Active" hides the done tools so she
+can focus on what's current. Remove the `status` line to make a tool active again.
+
 ---
 
 ## Add a new subject (less common)
