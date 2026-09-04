@@ -48,14 +48,14 @@
     var note = t.note ? '<p class="tool-note">' + esc(t.note) + '</p>' : '';
     return '' +
       '<li class="tool-li" data-subject="' + esc(t.subjectId) + '">' +
-        '<a class="tool" href="' + esc(t.file) + '" style="--stripe:' + esc(t.accent) + '">' +
+        '<a class="tool' + (t.note ? ' has-note' : '') + '" href="' + esc(t.file) + '" style="--stripe:' + esc(t.accent) + '">' +
           '<span class="tool-top">' +
-            '<span class="tool-title">' + esc(t.title) + '</span>' +
+            '<span class="tool-head">' +
+              '<span class="tool-title">' + esc(t.title) + '</span>' +
+              '<span class="tool-dot">·</span>' +
+              '<span class="tool-subject" style="color:' + esc(t.accent) + '">' + esc(t.subjectName) + '</span>' +
+            '</span>' +
             '<span class="tool-date">' + prettyDate(t.date) + '</span>' +
-          '</span>' +
-          '<span class="tool-meta">' +
-            '<span class="tool-subject" style="color:' + esc(t.accent) + '">' + esc(t.subjectName) + '</span>' +
-            (t.topic ? '<span class="tool-dot">&middot;</span><span class="tool-topic">' + esc(t.topic) + '</span>' : '') +
           '</span>' +
           note +
         '</a>' +
