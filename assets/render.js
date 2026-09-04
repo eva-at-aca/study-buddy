@@ -103,13 +103,12 @@
       tile.classList.toggle("active", on);
       tile.setAttribute("aria-pressed", on ? "true" : "false");
     });
-    // single status toggle: label by the action it performs
+    // status switch: "on" when done tools are shown (statusFilter === "all")
     var toggle = document.getElementById("statusToggle");
     if(toggle){
-      var filtering = (statusFilter === "active");
-      toggle.textContent = filtering ? "Show all" : "Active only";
-      toggle.classList.toggle("on", filtering);
-      toggle.setAttribute("aria-pressed", filtering ? "true" : "false");
+      var showingDone = (statusFilter === "all");
+      toggle.classList.toggle("on", showingDone);
+      toggle.setAttribute("aria-checked", showingDone ? "true" : "false");
     }
   }
 
@@ -123,7 +122,10 @@
     var head = '' +
       '<header class="masthead">' +
         '<h1>' + esc(SITE.siteTitle || "Study Buddy") + '</h1>' +
-        '<button class="status-toggle" id="statusToggle" type="button"></button>' +
+        '<button class="status-switch" id="statusToggle" type="button" role="switch" aria-label="Show done tools">' +
+          '<span class="switch-label">Show done</span>' +
+          '<span class="switch-track"><span class="switch-thumb"></span></span>' +
+        '</button>' +
       '</header>';
 
     var tiles = '<button class="subject-tile active" data-id="all" aria-pressed="true">All</button>';

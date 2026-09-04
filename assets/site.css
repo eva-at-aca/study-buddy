@@ -85,28 +85,52 @@ body{
   color: #fff;
 }
 
-/* ---------- Status toggle (sits in the header, opposite the title) ---------- */
-.status-toggle{
+/* ---------- Status switch (in the header, opposite the title) ---------- */
+.status-switch{
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.status-switch .switch-label{
   font-family: var(--sans);
   font-size: 12.5px;
   font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--rule);
-  background: transparent;
   color: var(--ink-soft);
-  cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.status-toggle:hover{ border-color: var(--ink-soft); color: var(--ink); }
-.status-toggle:focus-visible{ outline: 2px solid var(--ink); outline-offset: 2px; }
-.status-toggle.on{
+.status-switch .switch-track{
+  position: relative;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  transition: background 0.15s ease, border-color 0.15s ease;
+  flex: 0 0 auto;
+}
+.status-switch .switch-thumb{
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: 0 1px 2px var(--shadow);
+  transition: left 0.15s ease;
+}
+.status-switch.on .switch-track{
   background: var(--ink);
   border-color: var(--ink);
-  color: #fff;
 }
+.status-switch.on .switch-thumb{ left: 18px; }
+.status-switch.on .switch-label{ color: var(--ink); }
+.status-switch:focus-visible{ outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 999px; }
 
 /* ---------- List section labels (Active / Done) ---------- */
 .list-section-label{
