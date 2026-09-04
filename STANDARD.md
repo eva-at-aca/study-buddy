@@ -17,7 +17,16 @@ Each tool declares which **modes** it offers. Available modes:
 |-------------|----------|-------------------------------------------------------------------|
 | Flashcards  | `flash`  | Flip card: prompt on front, answer on back.                       |
 | Write-in    | `write`  | Type the answer; the tool auto-grades, student can accept/override.|
-| Multiple choice | `mc` | Pick from options; auto-built distractors.                        |
+| Multiple choice | `mc` | Pick from options; distractors are drawn from other real answers in the set.|
+| Conjugation | `conj`   | Language tools: show prompt + a random pronoun; type the exact conjugated form. Needs each card to carry a `forms` array (index-aligned with `pronouns`).|
+
+**Matching (`strictMatch`)**
+- Prose tools (Science, etc.) leave `strictMatch` off — write-in grades by keyword
+  overlap (forgiving), since answers are sentences.
+- Word-precise tools (vocab, verbs) set `strictMatch: true` — write-in and
+  conjugation require an **exact** match, accents included (case-insensitive).
+  These tools show an accent-key row (á é í ó ú ñ ü) for easy typing.
+- Either way, the student can still accept/override the verdict.
 
 **Rules**
 - **MUST** — Every tool offers at least one mode.

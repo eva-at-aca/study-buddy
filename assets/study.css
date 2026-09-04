@@ -78,6 +78,9 @@ h1{ font-family:var(--font-display); font-weight:700; font-size:26px; margin:0 0
 /* Write-in */
 .write-area{ width:100%; min-height:90px; font-family:var(--font-body); font-size:15px; line-height:1.5; padding:12px 14px; border-radius:8px; border:1px solid var(--rule); background:var(--panel-2); color:var(--ink); resize:vertical; }
 .write-area:focus{ outline:none; border-color:var(--accent); }
+.accent-row{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.accent-key{ font-family:var(--font-body); font-size:15px; min-width:38px; min-height:38px; padding:6px 10px; border-radius:8px; border:1px solid var(--rule); background:var(--panel-2); color:var(--ink); cursor:pointer; }
+.accent-key:hover{ border-color:var(--gold-dim); }
 .model-answer{ margin-top:14px; border:1px solid var(--good); background:#20402f; border-radius:8px; padding:14px; }
 .model-answer .ma-tag{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--good); margin:0 0 6px; }
 .model-answer p{ margin:0; font-size:15px; line-height:1.55; }

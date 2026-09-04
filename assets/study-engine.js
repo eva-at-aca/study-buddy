@@ -18,7 +18,8 @@ window.StudyEngine = (function(){
   function shuffleArr(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
   function hasStore(){ return typeof window!=="undefined" && window.storage && typeof window.storage.get==="function"; }
 
-  var MODE_LABELS = { flash:"Flashcards", write:"Write-in", mc:"Multiple choice" };
+  var MODE_LABELS = { flash:"Flashcards", write:"Write-in", mc:"Multiple choice", conj:"Conjugation" };
+  var DEFAULT_PRONOUNS = ["yo","tú","él/ella","nosotros","vosotros","ellos/ellas"];
 
   function mount(cfg){
     // ---- Validate against the standard (fail loud in console, not silently) ----
@@ -26,6 +27,11 @@ window.StudyEngine = (function(){
     var modes = (cfg.modes && cfg.modes.length) ? cfg.modes.slice() : ["flash"];
     var storageKey = cfg.storageKey || "tool";
     var accent = cfg.accent || "#c9a227";
+    // strictMatch: exact string compare for write-in / conjugation (accents required).
+    // When false (default), write-in uses the forgiving prose keyword heuristic.
+    var strictMatch = !!cfg.strictMatch;
+    // pronouns for conjugation mode (index-aligned with each card's `forms` array).
+    var PRONOUNS = (cfg.pronouns && cfg.pronouns.length) ? cfg.pronouns.slice() : DEFAULT_PRONOUNS;
 
     // ---- Section choices: real sections, plus "Everything" last if >1 ----
     var SECTIONS = cfg.sections.slice();
@@ -164,6 +170,7 @@ window.StudyEngine = (function(){
       var card=cards()[order[pos]];
       if(mode==="flash") renderFlash(card);
       else if(mode==="mc") renderMC(card);
+      else if(mode==="conj") renderConj(card);
       else renderWrite(card);
     }
 
@@ -244,27 +251,60 @@ window.StudyEngine = (function(){
     }
 
     // ---- Write-in (auto-grade + accept/override) ----
+    // Strict tools (strictMatch) require an exact match incl. accents; loose
+    // tools use the forgiving prose keyword heuristic.
+    function strictEqual(a,b){ return String(a).trim().toLowerCase() === String(b).trim().toLowerCase(); }
+    var ACCENT_KEYS = ["á","é","í","ó","ú","ñ","ü"];
+    function accentRow(targetId){
+      return '<div class="accent-row" data-target="'+targetId+'">'+
+        ACCENT_KEYS.map(function(c){ return '<button type="button" class="accent-key" data-char="'+c+'">'+c+'</button>'; }).join("")+
+        '</div>';
+    }
+    function wireAccents(scope, box){
+      var row = scope.querySelector(".accent-row"); if(!row) return;
+      row.querySelectorAll(".accent-key").forEach(function(btn){
+        btn.addEventListener("mousedown", function(e){ e.preventDefault(); });
+        btn.onclick=function(){
+          if(box.disabled) return;
+          var s=box.selectionStart==null?box.value.length:box.selectionStart;
+          var e=box.selectionEnd==null?box.value.length:box.selectionEnd;
+          box.value=box.value.slice(0,s)+btn.dataset.char+box.value.slice(e);
+          box.focus(); try{ box.setSelectionRange(s+1,s+1); }catch(_){}
+        };
+      });
+    }
+
     function renderWrite(card){
+      var accents = strictMatch ? accentRow("writeBox") : "";
       elStudyArea.innerHTML=
         '<p class="prompt-eyebrow">Write your answer, then check it</p><p class="prompt">'+esc(card.q)+'</p>'+
-        '<textarea class="write-area" id="writeBox" placeholder="Type what you remember..."></textarea>'+
+        '<textarea class="write-area" id="writeBox" rows="'+(strictMatch?1:3)+'" placeholder="Type your answer..."></textarea>'+
+        accents+
         '<div class="action-row"><button class="btn btn-primary" id="checkBtn">Check answer</button></div>'+
         '<div id="revealArea"></div>';
       var box=document.getElementById("writeBox"); box.focus();
+      if(strictMatch) wireAccents(elStudyArea, box);
       document.getElementById("checkBtn").onclick=function(){
         if(answered)return; answered=true; box.disabled=true; document.getElementById("checkBtn").disabled=true;
-        var typed=norm(box.value);
-        var aw=norm(card.a).split(" ").filter(function(w){ return w.length>4; });
-        var uw=aw.filter(function(w,i){ return aw.indexOf(w)===i; });
-        var hit=uw.filter(function(w){ return typed.indexOf(w)!==-1; }).length;
-        var pct=uw.length?Math.round(hit/uw.length*100):0;
         var blank=!box.value.trim();
-        var autoCorrect=!blank && pct>=55;
         var badge=card.changed?'<span class="changed-badge">corrected</span>':'';
+        var autoCorrect, subLine;
+        if(strictMatch){
+          autoCorrect = !blank && strictEqual(box.value, card.a);
+          subLine = blank ? "Nothing was typed." : (autoCorrect ? "Exact match." : "That doesn\u2019t match — check spelling and accents.");
+        } else {
+          var typed=norm(box.value);
+          var aw=norm(card.a).split(" ").filter(function(w){ return w.length>4; });
+          var uw=aw.filter(function(w,i){ return aw.indexOf(w)===i; });
+          var hit=uw.filter(function(w){ return typed.indexOf(w)!==-1; }).length;
+          var pct=uw.length?Math.round(hit/uw.length*100):0;
+          autoCorrect=!blank && pct>=55;
+          subLine = blank ? "Nothing was typed." : ("Your answer matched about "+pct+"% of the key terms.");
+        }
         function renderVerdict(isCorrect){
           var banner='<div class="verdict '+(isCorrect?"correct":"wrong")+'">'+
             '<p class="v-line">'+(isCorrect?"Marked correct":"Marked as missed")+'</p>'+
-            '<p class="v-sub">'+(blank?"Nothing was typed.":"Your answer matched about "+pct+"% of the key terms.")+' You can change this below.</p></div>';
+            '<p class="v-sub">'+subLine+' You can change this below.</p></div>';
           var actions='<div class="verdict-actions"><p class="lead">'+(isCorrect?"Not right after all?":"Actually got it?")+'</p>'+
             '<div class="action-row">'+
               (isCorrect?'<button class="btn btn-ghost" id="flipBtn">Change to missed</button>':'<button class="btn btn-ghost" id="flipBtn">Change to correct</button>')+
@@ -275,9 +315,56 @@ window.StudyEngine = (function(){
           document.getElementById("acceptBtn").onclick=function(){ if(!isCorrect) missed.push(order[pos]); reviewed++; pos++; renderCurrent(); };
         }
         document.getElementById("revealArea").innerHTML=
-          '<div class="model-answer"><p class="ma-tag">Model answer'+badge+'</p><p>'+esc(card.a)+'</p></div>'+
+          '<div class="model-answer"><p class="ma-tag">Answer'+badge+'</p><p>'+esc(card.a)+'</p></div>'+
           changedNote(card)+'<div id="verdictWrap"></div>';
         renderVerdict(autoCorrect);
+      };
+    }
+
+    // ---- Conjugation (Spanish): show English + a random pronoun, type the form ----
+    function renderConj(card){
+      var forms = card.forms || [];
+      if(!forms.length){ // safety: card without forms
+        elStudyArea.innerHTML='<p class="sub">This card has no conjugation data.</p>'+
+          '<div class="action-row"><button class="btn btn-primary" id="skipBtn">Next &rsaquo;</button></div>';
+        document.getElementById("skipBtn").onclick=function(){ reviewed++; pos++; renderCurrent(); };
+        return;
+      }
+      var pi = Math.floor(Math.random()*Math.min(PRONOUNS.length, forms.length));
+      var pronoun = PRONOUNS[pi];
+      var answer = forms[pi];
+      var badge=card.changed?'<span class="changed-badge">corrected</span>':'';
+      elStudyArea.innerHTML=
+        '<p class="prompt-eyebrow">Conjugate — '+esc(card.grpLabel||"")+'</p>'+
+        '<p class="prompt">'+esc(card.q)+'<br><span style="color:var(--accent);font-weight:600;">'+esc(pronoun)+'</span></p>'+
+        '<textarea class="write-area" id="writeBox" rows="1" placeholder="Type the conjugated verb..."></textarea>'+
+        accentRow("writeBox")+
+        '<div class="action-row"><button class="btn btn-primary" id="checkBtn">Check answer</button></div>'+
+        '<div id="revealArea"></div>';
+      var box=document.getElementById("writeBox"); box.focus();
+      wireAccents(elStudyArea, box);
+      document.getElementById("checkBtn").onclick=function(){
+        if(answered)return; answered=true; box.disabled=true; document.getElementById("checkBtn").disabled=true;
+        var blank=!box.value.trim();
+        var isRight=!blank && strictEqual(box.value, answer);
+        var sub = blank?"Nothing was typed.":(isRight?"Exact match.":"That doesn\u2019t match — check spelling and accents.");
+        function renderVerdict(isCorrect){
+          var banner='<div class="verdict '+(isCorrect?"correct":"wrong")+'">'+
+            '<p class="v-line">'+(isCorrect?"Marked correct":"Marked as missed")+'</p>'+
+            '<p class="v-sub">'+sub+' You can change this below.</p></div>';
+          var actions='<div class="verdict-actions"><p class="lead">'+(isCorrect?"Not right after all?":"Actually got it?")+'</p>'+
+            '<div class="action-row">'+
+              (isCorrect?'<button class="btn btn-ghost" id="flipBtn">Change to missed</button>':'<button class="btn btn-ghost" id="flipBtn">Change to correct</button>')+
+              '<button class="btn btn-primary" id="acceptBtn">Accept &amp; continue &rsaquo;</button>'+
+            '</div></div>';
+          document.getElementById("verdictWrap").innerHTML=banner+actions;
+          document.getElementById("flipBtn").onclick=function(){ renderVerdict(!isCorrect); };
+          document.getElementById("acceptBtn").onclick=function(){ if(!isCorrect) missed.push(order[pos]); reviewed++; pos++; renderCurrent(); };
+        }
+        document.getElementById("revealArea").innerHTML=
+          '<div class="model-answer"><p class="ma-tag">Answer'+badge+'</p><p>'+esc(pronoun)+' '+esc(answer)+'</p></div>'+
+          changedNote(card)+'<div id="verdictWrap"></div>';
+        renderVerdict(isRight);
       };
     }
 

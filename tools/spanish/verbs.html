@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spanish Verbs — Study Tool</title>
+<link rel="stylesheet" href="../../assets/study.css">
+</head>
+<body>
+  <main class="page" id="app"></main>
+  <script src="../../assets/study-engine.js"></script>
+  <script>
+    StudyEngine.mount({
+      title: "Spanish Verbs",
+      subtitle: "Multiple choice, write-in, and conjugation \u00b7 present tense",
+      eyebrow: "Spanish \u00b7 Verbs",
+      accent: "#d98a2b",
+      storageKey: "spanish-verbs",
+      strictMatch: true,
+      modes: ["mc", "write", "conj"],
+      pronouns: ["yo","t\u00fa","\u00e9l/ella","nosotros","vosotros","ellos/ellas"],
+      sections: [
+      {
+            "id": "ar",
+            "name": "-AR verbs",
+            "cards": [
+                  {
+                        "q": "to have lunch",
+                        "a": "almorzar",
+                        "forms": [
+                              "almuerzo",
+                              "almuerzas",
+                              "almuerza",
+                              "almorzamos",
+                              "almorzáis",
+                              "almuerzan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to close",
+                        "a": "cerrar",
+                        "forms": [
+                              "cierro",
+                              "cierras",
+                              "cierra",
+                              "cerramos",
+                              "cerráis",
+                              "cierran"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to begin",
+                        "a": "comenzar",
+                        "forms": [
+                              "comienzo",
+                              "comienzas",
+                              "comienza",
+                              "comenzamos",
+                              "comenzáis",
+                              "comienzan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to count; to tell",
+                        "a": "contar",
+                        "forms": [
+                              "cuento",
+                              "cuentas",
+                              "cuenta",
+                              "contamos",
+                              "contáis",
+                              "cuentan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to begin (empezar)",
+                        "a": "empezar",
+                        "forms": [
+                              "empiezo",
+                              "empiezas",
+                              "empieza",
+                              "empezamos",
+                              "empezáis",
+                              "empiezan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to find",
+                        "a": "encontrar",
+                        "forms": [
+                              "encuentro",
+                              "encuentras",
+                              "encuentra",
+                              "encontramos",
+                              "encontráis",
+                              "encuentran"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to play (a sport or game)",
+                        "a": "jugar",
+                        "forms": [
+                              "juego",
+                              "juegas",
+                              "juega",
+                              "jugamos",
+                              "jugáis",
+                              "juegan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to show",
+                        "a": "mostrar",
+                        "forms": [
+                              "muestro",
+                              "muestras",
+                              "muestra",
+                              "mostramos",
+                              "mostráis",
+                              "muestran"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to ask; to request",
+                        "a": "preguntar",
+                        "forms": [
+                              "pregunto",
+                              "preguntas",
+                              "pregunta",
+                              "preguntamos",
+                              "preguntáis",
+                              "preguntan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to think",
+                        "a": "pensar",
+                        "forms": [
+                              "pienso",
+                              "piensas",
+                              "piensa",
+                              "pensamos",
+                              "pensáis",
+                              "piensan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to intend",
+                        "a": "intentar",
+                        "forms": [
+                              "intento",
+                              "intentas",
+                              "intenta",
+                              "intentamos",
+                              "intentáis",
+                              "intentan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to think about",
+                        "a": "pensar en",
+                        "forms": [
+                              "pienso en",
+                              "piensas en",
+                              "piensa en",
+                              "pensamos en",
+                              "pensáis en",
+                              "piensan en"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to remember",
+                        "a": "recordar",
+                        "forms": [
+                              "recuerdo",
+                              "recuerdas",
+                              "recuerda",
+                              "recordamos",
+                              "recordáis",
+                              "recuerdan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to return (go back)",
+                        "a": "regresar",
+                        "forms": [
+                              "regreso",
+                              "regresas",
+                              "regresa",
+                              "regresamos",
+                              "regresáis",
+                              "regresan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to skateboard",
+                        "a": "patinar",
+                        "forms": [
+                              "patino",
+                              "patinas",
+                              "patina",
+                              "patinamos",
+                              "patináis",
+                              "patinan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to scuba dive",
+                        "a": "bucear",
+                        "forms": [
+                              "buceo",
+                              "buceas",
+                              "bucea",
+                              "buceamos",
+                              "buceáis",
+                              "bucean"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to climb mountains",
+                        "a": "escalar montañas",
+                        "forms": [
+                              "escalo montañas",
+                              "escalas montañas",
+                              "escala montañas",
+                              "escalamos montañas",
+                              "escaláis montañas",
+                              "escalan montañas"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to ski",
+                        "a": "esquiar",
+                        "forms": [
+                              "esquío",
+                              "esquías",
+                              "esquía",
+                              "esquiamos",
+                              "esquiáis",
+                              "esquían"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to win",
+                        "a": "ganar",
+                        "forms": [
+                              "gano",
+                              "ganas",
+                              "gana",
+                              "ganamos",
+                              "ganáis",
+                              "ganan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to go on a hike",
+                        "a": "escalar",
+                        "forms": [
+                              "escalo",
+                              "escalas",
+                              "escala",
+                              "escalamos",
+                              "escaláis",
+                              "escalan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to swim",
+                        "a": "nadar",
+                        "forms": [
+                              "nado",
+                              "nadas",
+                              "nada",
+                              "nadamos",
+                              "nadáis",
+                              "nadan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to take a walk",
+                        "a": "caminar",
+                        "forms": [
+                              "camino",
+                              "caminas",
+                              "camina",
+                              "caminamos",
+                              "camináis",
+                              "caminan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to skate",
+                        "a": "patinar",
+                        "forms": [
+                              "patino",
+                              "patinas",
+                              "patina",
+                              "patinamos",
+                              "patináis",
+                              "patinan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to play sports",
+                        "a": "jugar deportes",
+                        "forms": [
+                              "juego deportes",
+                              "juegas deportes",
+                              "juega deportes",
+                              "jugamos deportes",
+                              "jugáis deportes",
+                              "juegan deportes"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to sunbathe",
+                        "a": "tomar el sol",
+                        "forms": [
+                              "tomo el sol",
+                              "tomas el sol",
+                              "toma el sol",
+                              "tomamos el sol",
+                              "tomáis el sol",
+                              "toman el sol"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to dance",
+                        "a": "bailar",
+                        "forms": [
+                              "bailo",
+                              "bailas",
+                              "baila",
+                              "bailamos",
+                              "bailáis",
+                              "bailan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to look for",
+                        "a": "buscar",
+                        "forms": [
+                              "busco",
+                              "buscas",
+                              "busca",
+                              "buscamos",
+                              "buscáis",
+                              "buscan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to walk",
+                        "a": "caminar",
+                        "forms": [
+                              "camino",
+                              "caminas",
+                              "camina",
+                              "caminamos",
+                              "camináis",
+                              "caminan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to sing",
+                        "a": "cantar",
+                        "forms": [
+                              "canto",
+                              "cantas",
+                              "canta",
+                              "cantamos",
+                              "cantáis",
+                              "cantan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to have dinner",
+                        "a": "cenar",
+                        "forms": [
+                              "ceno",
+                              "cenas",
+                              "cena",
+                              "cenamos",
+                              "cenáis",
+                              "cenan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to buy",
+                        "a": "comprar",
+                        "forms": [
+                              "compro",
+                              "compras",
+                              "compra",
+                              "compramos",
+                              "compráis",
+                              "compran"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to answer",
+                        "a": "contestar",
+                        "forms": [
+                              "contesto",
+                              "contestas",
+                              "contesta",
+                              "contestamos",
+                              "contestáis",
+                              "contestan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to converse; to chat",
+                        "a": "conversar",
+                        "forms": [
+                              "converso",
+                              "conversas",
+                              "conversa",
+                              "conversamos",
+                              "conversáis",
+                              "conversan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to have breakfast",
+                        "a": "desayunar",
+                        "forms": [
+                              "desayuno",
+                              "desayunas",
+                              "desayuna",
+                              "desayunamos",
+                              "desayunáis",
+                              "desayunan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to rest",
+                        "a": "descansar",
+                        "forms": [
+                              "descanso",
+                              "descansas",
+                              "descansa",
+                              "descansamos",
+                              "descansáis",
+                              "descansan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to wish; to desire",
+                        "a": "desear",
+                        "forms": [
+                              "deseo",
+                              "deseas",
+                              "desea",
+                              "deseamos",
+                              "deseáis",
+                              "desean"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to draw",
+                        "a": "dibujar",
+                        "forms": [
+                              "dibujo",
+                              "dibujas",
+                              "dibuja",
+                              "dibujamos",
+                              "dibujáis",
+                              "dibujan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to teach",
+                        "a": "enseñar",
+                        "forms": [
+                              "enseño",
+                              "enseñas",
+                              "enseña",
+                              "enseñamos",
+                              "enseñáis",
+                              "enseñan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to listen (to) the radio/music",
+                        "a": "escuchar",
+                        "forms": [
+                              "escucho",
+                              "escuchas",
+                              "escucha",
+                              "escuchamos",
+                              "escucháis",
+                              "escuchan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to wait (for); to hope",
+                        "a": "esperar",
+                        "forms": [
+                              "espero",
+                              "esperas",
+                              "espera",
+                              "esperamos",
+                              "esperáis",
+                              "esperan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to study",
+                        "a": "estudiar",
+                        "forms": [
+                              "estudio",
+                              "estudias",
+                              "estudia",
+                              "estudiamos",
+                              "estudiáis",
+                              "estudian"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to explain",
+                        "a": "explicar",
+                        "forms": [
+                              "explico",
+                              "explicas",
+                              "explica",
+                              "explicamos",
+                              "explicáis",
+                              "explican"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to talk; to speak",
+                        "a": "hablar",
+                        "forms": [
+                              "hablo",
+                              "hablas",
+                              "habla",
+                              "hablamos",
+                              "habláis",
+                              "hablan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to arrive",
+                        "a": "llegar",
+                        "forms": [
+                              "llego",
+                              "llegas",
+                              "llega",
+                              "llegamos",
+                              "llegáis",
+                              "llegan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to carry",
+                        "a": "llevar",
+                        "forms": [
+                              "llevo",
+                              "llevas",
+                              "lleva",
+                              "llevamos",
+                              "lleváis",
+                              "llevan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to look (at); to watch",
+                        "a": "mirar",
+                        "forms": [
+                              "miro",
+                              "miras",
+                              "mira",
+                              "miramos",
+                              "miráis",
+                              "miran"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to need",
+                        "a": "necesitar",
+                        "forms": [
+                              "necesito",
+                              "necesitas",
+                              "necesita",
+                              "necesitamos",
+                              "necesitáis",
+                              "necesitan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to practice",
+                        "a": "practicar",
+                        "forms": [
+                              "practico",
+                              "practicas",
+                              "practica",
+                              "practicamos",
+                              "practicáis",
+                              "practican"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to ask",
+                        "a": "preguntar (ask)",
+                        "forms": [
+                              "pregunto",
+                              "preguntas",
+                              "pregunta",
+                              "preguntamos",
+                              "preguntáis",
+                              "preguntan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to prepare",
+                        "a": "preparar",
+                        "forms": [
+                              "preparo",
+                              "preparas",
+                              "prepara",
+                              "preparamos",
+                              "preparáis",
+                              "preparan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to return (regresar)",
+                        "a": "regresar (return)",
+                        "forms": [
+                              "regreso",
+                              "regresas",
+                              "regresa",
+                              "regresamos",
+                              "regresáis",
+                              "regresan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to end; to finish",
+                        "a": "terminar",
+                        "forms": [
+                              "termino",
+                              "terminas",
+                              "termina",
+                              "terminamos",
+                              "termináis",
+                              "terminan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to take; to drink",
+                        "a": "tomar",
+                        "forms": [
+                              "tomo",
+                              "tomas",
+                              "toma",
+                              "tomamos",
+                              "tomáis",
+                              "toman"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to work",
+                        "a": "trabajar",
+                        "forms": [
+                              "trabajo",
+                              "trabajas",
+                              "trabaja",
+                              "trabajamos",
+                              "trabajáis",
+                              "trabajan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to travel",
+                        "a": "viajar",
+                        "forms": [
+                              "viajo",
+                              "viajas",
+                              "viaja",
+                              "viajamos",
+                              "viajáis",
+                              "viajan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to watch movies",
+                        "a": "mirar películas",
+                        "forms": [
+                              "miro películas",
+                              "miras películas",
+                              "mira películas",
+                              "miramos películas",
+                              "miráis películas",
+                              "miran películas"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to visit monuments",
+                        "a": "visitar monumentos",
+                        "forms": [
+                              "visito monumentos",
+                              "visitas monumentos",
+                              "visita monumentos",
+                              "visitamos monumentos",
+                              "visitáis monumentos",
+                              "visitan monumentos"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to scream",
+                        "a": "gritar",
+                        "forms": [
+                              "grito",
+                              "gritas",
+                              "grita",
+                              "gritamos",
+                              "gritáis",
+                              "gritan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to chat",
+                        "a": "charlar",
+                        "forms": [
+                              "charlo",
+                              "charlas",
+                              "charla",
+                              "charlamos",
+                              "charláis",
+                              "charlan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  },
+                  {
+                        "q": "to give",
+                        "a": "dar",
+                        "forms": [
+                              "doy",
+                              "das",
+                              "da",
+                              "damos",
+                              "dais",
+                              "dan"
+                        ],
+                        "grpLabel": "-ar verb"
+                  }
+            ]
+      },
+      {
+            "id": "erir",
+            "name": "-ER / -IR verbs",
+            "cards": [
+                  {
+                        "q": "to receive",
+                        "a": "recibir",
+                        "forms": [
+                              "recibo",
+                              "recibes",
+                              "recibe",
+                              "recibimos",
+                              "recibís",
+                              "reciben"
+                        ],
+                        "grpLabel": "-ir verb",
+                        "orig": "ireabir",
+                        "changed": true
+                  },
+                  {
+                        "q": "to have",
+                        "a": "tener",
+                        "forms": [
+                              "tengo",
+                              "tienes",
+                              "tiene",
+                              "tenemos",
+                              "tenéis",
+                              "tienen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to come",
+                        "a": "venir",
+                        "forms": [
+                              "vengo",
+                              "vienes",
+                              "viene",
+                              "venimos",
+                              "venís",
+                              "vienen"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to live",
+                        "a": "vivir",
+                        "forms": [
+                              "vivo",
+                              "vives",
+                              "vive",
+                              "vivimos",
+                              "vivís",
+                              "viven"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "should; ought to",
+                        "a": "deber",
+                        "forms": [
+                              "debo",
+                              "debes",
+                              "debe",
+                              "debemos",
+                              "debéis",
+                              "deben"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to get; to obtain",
+                        "a": "conseguir",
+                        "forms": [
+                              "consigo",
+                              "consigues",
+                              "consigue",
+                              "conseguimos",
+                              "conseguís",
+                              "consiguen"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to say; to tell",
+                        "a": "decir",
+                        "forms": [
+                              "digo",
+                              "dices",
+                              "dice",
+                              "decimos",
+                              "decís",
+                              "dicen"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to sleep",
+                        "a": "dormir",
+                        "forms": [
+                              "duermo",
+                              "duermes",
+                              "duerme",
+                              "dormimos",
+                              "dormís",
+                              "duermen"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to understand (entender)",
+                        "a": "entender",
+                        "forms": [
+                              "entiendo",
+                              "entiendes",
+                              "entiende",
+                              "entendemos",
+                              "entendéis",
+                              "entienden"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to do; to make",
+                        "a": "hacer",
+                        "forms": [
+                              "hago",
+                              "haces",
+                              "hace",
+                              "hacemos",
+                              "hacéis",
+                              "hacen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to go",
+                        "a": "ir",
+                        "forms": [
+                              "voy",
+                              "vas",
+                              "va",
+                              "vamos",
+                              "vais",
+                              "van"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to hear",
+                        "a": "oír",
+                        "forms": [
+                              "oigo",
+                              "oyes",
+                              "oye",
+                              "oímos",
+                              "oís",
+                              "oyen"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to lose; to miss",
+                        "a": "perder",
+                        "forms": [
+                              "pierdo",
+                              "pierdes",
+                              "pierde",
+                              "perdemos",
+                              "perdéis",
+                              "pierden"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to be able to; can",
+                        "a": "poder",
+                        "forms": [
+                              "puedo",
+                              "puedes",
+                              "puede",
+                              "podemos",
+                              "podéis",
+                              "pueden"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to put; to place",
+                        "a": "poner",
+                        "forms": [
+                              "pongo",
+                              "pones",
+                              "pone",
+                              "ponemos",
+                              "ponéis",
+                              "ponen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to prefer",
+                        "a": "preferir",
+                        "forms": [
+                              "prefiero",
+                              "prefieres",
+                              "prefiere",
+                              "preferimos",
+                              "preferís",
+                              "prefieren"
+                        ],
+                        "grpLabel": "-ir verb",
+                        "orig": "pieferir",
+                        "changed": true
+                  },
+                  {
+                        "q": "to want; to love",
+                        "a": "querer",
+                        "forms": [
+                              "quiero",
+                              "quieres",
+                              "quiere",
+                              "queremos",
+                              "queréis",
+                              "quieren"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to repeat",
+                        "a": "repetir",
+                        "forms": [
+                              "repito",
+                              "repites",
+                              "repite",
+                              "repetimos",
+                              "repetís",
+                              "repiten"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to leave; to go out",
+                        "a": "salir",
+                        "forms": [
+                              "salgo",
+                              "sales",
+                              "sale",
+                              "salimos",
+                              "salís",
+                              "salen"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to follow; to continue",
+                        "a": "seguir",
+                        "forms": [
+                              "sigo",
+                              "sigues",
+                              "sigue",
+                              "seguimos",
+                              "seguís",
+                              "siguen"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to suppose",
+                        "a": "suponer",
+                        "forms": [
+                              "supongo",
+                              "supones",
+                              "supone",
+                              "suponemos",
+                              "suponéis",
+                              "suponen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to bring",
+                        "a": "traer",
+                        "forms": [
+                              "traigo",
+                              "traes",
+                              "trae",
+                              "traemos",
+                              "traéis",
+                              "traen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to see",
+                        "a": "ver",
+                        "forms": [
+                              "veo",
+                              "ves",
+                              "ve",
+                              "vemos",
+                              "veis",
+                              "ven"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to write a letter",
+                        "a": "escribir una carta",
+                        "forms": [
+                              "escribo una carta",
+                              "escribes una carta",
+                              "escribe una carta",
+                              "escribimos una carta",
+                              "escribís una carta",
+                              "escriben una carta"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to know; to be acquainted with",
+                        "a": "conocer",
+                        "forms": [
+                              "conozco",
+                              "conoces",
+                              "conoce",
+                              "conocemos",
+                              "conocéis",
+                              "conocen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to open",
+                        "a": "abrir",
+                        "forms": [
+                              "abro",
+                              "abres",
+                              "abre",
+                              "abrimos",
+                              "abrís",
+                              "abren"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to learn",
+                        "a": "aprender",
+                        "forms": [
+                              "aprendo",
+                              "aprendes",
+                              "aprende",
+                              "aprendemos",
+                              "aprendéis",
+                              "aprenden"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to attend",
+                        "a": "asistir",
+                        "forms": [
+                              "asisto",
+                              "asistes",
+                              "asiste",
+                              "asistimos",
+                              "asistís",
+                              "asisten"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to drink",
+                        "a": "beber",
+                        "forms": [
+                              "bebo",
+                              "bebes",
+                              "bebe",
+                              "bebemos",
+                              "bebéis",
+                              "beben"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to eat",
+                        "a": "comer",
+                        "forms": [
+                              "como",
+                              "comes",
+                              "come",
+                              "comemos",
+                              "coméis",
+                              "comen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to share",
+                        "a": "compartir",
+                        "forms": [
+                              "comparto",
+                              "compartes",
+                              "comparte",
+                              "compartimos",
+                              "compartís",
+                              "comparten"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to understand",
+                        "a": "comprender",
+                        "forms": [
+                              "comprendo",
+                              "comprendes",
+                              "comprende",
+                              "comprendemos",
+                              "comprendéis",
+                              "comprenden"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to run",
+                        "a": "correr",
+                        "forms": [
+                              "corro",
+                              "corres",
+                              "corre",
+                              "corremos",
+                              "corréis",
+                              "corren"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to believe (in)",
+                        "a": "creer",
+                        "forms": [
+                              "creo",
+                              "crees",
+                              "cree",
+                              "creemos",
+                              "creéis",
+                              "creen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to describe",
+                        "a": "describir",
+                        "forms": [
+                              "describo",
+                              "describes",
+                              "describe",
+                              "describimos",
+                              "describís",
+                              "describen"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to write",
+                        "a": "escribir",
+                        "forms": [
+                              "escribo",
+                              "escribes",
+                              "escribe",
+                              "escribimos",
+                              "escribís",
+                              "escriben"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to read",
+                        "a": "leer",
+                        "forms": [
+                              "leo",
+                              "lees",
+                              "lee",
+                              "leemos",
+                              "leéis",
+                              "leen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to drive",
+                        "a": "conducir",
+                        "forms": [
+                              "conduzco",
+                              "conduces",
+                              "conduce",
+                              "conducimos",
+                              "conducís",
+                              "conducen"
+                        ],
+                        "grpLabel": "-ir verb",
+                        "orig": "conduar",
+                        "changed": true
+                  },
+                  {
+                        "q": "to decide",
+                        "a": "decidir",
+                        "forms": [
+                              "decido",
+                              "decides",
+                              "decide",
+                              "decidimos",
+                              "decidís",
+                              "deciden"
+                        ],
+                        "grpLabel": "-ir verb"
+                  },
+                  {
+                        "q": "to offer",
+                        "a": "ofrecer",
+                        "forms": [
+                              "ofrezco",
+                              "ofreces",
+                              "ofrece",
+                              "ofrecemos",
+                              "ofrecéis",
+                              "ofrecen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to seem",
+                        "a": "parecer",
+                        "forms": [
+                              "parezco",
+                              "pareces",
+                              "parece",
+                              "parecemos",
+                              "parecéis",
+                              "parecen"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to know; to know how",
+                        "a": "saber",
+                        "forms": [
+                              "sé",
+                              "sabes",
+                              "sabe",
+                              "sabemos",
+                              "sabéis",
+                              "saben"
+                        ],
+                        "grpLabel": "-er verb"
+                  },
+                  {
+                        "q": "to translate",
+                        "a": "traducir",
+                        "forms": [
+                              "traduzco",
+                              "traduces",
+                              "traduce",
+                              "traducimos",
+                              "traducís",
+                              "traducen"
+                        ],
+                        "grpLabel": "-ir verb"
+                  }
+            ]
+      }
+]
+    });
+  </script>
+</body>
+</html>

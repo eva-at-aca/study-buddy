@@ -39,6 +39,13 @@ window.STUDY_SITE = {
       accent: "#d98a2b",
       tools: [
         {
+          title: "Spanish Verbs",
+          topic: "Verbs",
+          file: "tools/spanish/verbs.html",
+          date: "2026-09-03",
+          note: "Present-tense verbs — multiple choice, write-in, and conjugation. -AR and -ER/-IR sections."
+        },
+        {
           title: "Spanish-Speaking Countries",
           topic: "Geography",
           file: "tools/spanish/countries.html",
