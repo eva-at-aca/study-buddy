@@ -103,12 +103,12 @@
       tile.classList.toggle("active", on);
       tile.setAttribute("aria-pressed", on ? "true" : "false");
     });
-    // status switch: "on" when done tools are shown (statusFilter === "all")
+    // status switch labeled "Active only": on = show active tools only.
     var toggle = document.getElementById("statusToggle");
     if(toggle){
-      var showingDone = (statusFilter === "all");
-      toggle.classList.toggle("on", showingDone);
-      toggle.setAttribute("aria-checked", showingDone ? "true" : "false");
+      var activeOnly = (statusFilter === "active");
+      toggle.classList.toggle("on", activeOnly);
+      toggle.setAttribute("aria-checked", activeOnly ? "true" : "false");
     }
   }
 
@@ -122,8 +122,8 @@
     var head = '' +
       '<header class="masthead">' +
         '<h1>' + esc(SITE.siteTitle || "Study Buddy") + '</h1>' +
-        '<button class="status-switch" id="statusToggle" type="button" role="switch" aria-label="Show done tools">' +
-          '<span class="switch-label">Show done</span>' +
+        '<button class="status-switch" id="statusToggle" type="button" role="switch" aria-label="Active only">' +
+          '<span class="switch-label">Active only</span>' +
           '<span class="switch-track"><span class="switch-thumb"></span></span>' +
         '</button>' +
       '</header>';
