@@ -103,12 +103,14 @@
       tile.classList.toggle("active", on);
       tile.setAttribute("aria-pressed", on ? "true" : "false");
     });
-    // status tile active state
-    [].forEach.call(document.querySelectorAll(".status-tile"), function(tile){
-      var on = tile.getAttribute("data-status") === statusFilter;
-      tile.classList.toggle("active", on);
-      tile.setAttribute("aria-pressed", on ? "true" : "false");
-    });
+    // single status toggle: label by the action it performs
+    var toggle = document.getElementById("statusToggle");
+    if(toggle){
+      var filtering = (statusFilter === "active");
+      toggle.textContent = filtering ? "Show all" : "Active only";
+      toggle.classList.toggle("on", filtering);
+      toggle.setAttribute("aria-pressed", filtering ? "true" : "false");
+    }
   }
 
   function renderHome(){
@@ -121,7 +123,7 @@
     var head = '' +
       '<header class="masthead">' +
         '<h1>' + esc(SITE.siteTitle || "Study Buddy") + '</h1>' +
-        (SITE.siteTagline ? '<p>' + esc(SITE.siteTagline) + '</p>' : '') +
+        '<button class="status-toggle" id="statusToggle" type="button"></button>' +
       '</header>';
 
     var tiles = '<button class="subject-tile active" data-id="all" aria-pressed="true">All</button>';
@@ -132,20 +134,13 @@
     });
     var tileBar = '<div class="tile-bar" id="tileBar">' + tiles + '</div>';
 
-    // Status filter (Active / All), defaults to All.
-    var statusBar =
-      '<div class="status-bar" id="statusBar">' +
-        '<button class="status-tile" data-status="active" aria-pressed="false">Active</button>' +
-        '<button class="status-tile active" data-status="all" aria-pressed="true">All</button>' +
-      '</div>';
-
     var list = TOOLS.length
       ? '<div id="toolListArea"></div>'
       : '<div class="empty">No tools yet. Add one in <code>tools.js</code>.</div>';
 
     var foot = '<p class="foot">Saved on this device as you study. Works offline once loaded.</p>';
 
-    host.innerHTML = head + tileBar + statusBar + list + foot;
+    host.innerHTML = head + tileBar + list + foot;
 
     var bar = document.getElementById("tileBar");
     if(bar){
@@ -157,13 +152,11 @@
         });
       });
     }
-    var sbar = document.getElementById("statusBar");
-    if(sbar){
-      [].forEach.call(sbar.querySelectorAll(".status-tile"), function(tile){
-        tile.addEventListener("click", function(){
-          statusFilter = tile.getAttribute("data-status");
-          applyFilter();
-        });
+    var toggle = document.getElementById("statusToggle");
+    if(toggle){
+      toggle.addEventListener("click", function(){
+        statusFilter = (statusFilter === "all") ? "active" : "all";
+        applyFilter();
       });
     }
     applyFilter();
