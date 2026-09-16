@@ -396,7 +396,7 @@ function genProblemProperty(n, kind){
   return {
     number: n,
     prompt: `Use the property to copy and complete the statement.<br><b>${p.name}:</b> ${p.prompt}`,
-    inputsHtml: `<div class="fill-row"><input class="fill-input wide"></div>`,
+    inputsHtml: proofSymbolRow() + `<div class="fill-row"><input class="fill-input wide"></div>`,
     modelHtml: `<p><b>${p.answer}</b></p>`
   };
 }
@@ -410,7 +410,7 @@ function genProblemBisector(n){
   return {
     number: n,
     prompt: `In the diagram, ray <b>CE</b> bisects &ang;DCF. If m&ang;DCF = ${total}&deg;, find m&ang;DCE and m&ang;ECF. Explain your reasoning.`,
-    inputsHtml: diagramBisector(total) + `<div class="fill-row"><input class="fill-input" placeholder="m∠DCE"><input class="fill-input" placeholder="m∠ECF"></div><textarea class="write-area" rows="2" placeholder="Explain your reasoning..."></textarea>`,
+    inputsHtml: diagramBisector(total) + proofSymbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="m∠DCE"><input class="fill-input" placeholder="m∠ECF"></div><textarea class="write-area" rows="2" placeholder="Explain your reasoning..."></textarea>`,
     modelHtml: `<p>m&ang;DCE = m&ang;ECF = <b>${half}&deg;</b> &mdash; a bisector splits an angle into two congruent halves, so each half is ${total}&deg; &divide; 2 = ${half}&deg;.</p>`
   };
 }
@@ -446,7 +446,7 @@ function genProblemVerticalAngles(n){
   return {
     number: n,
     prompt: `Two lines intersect at point <b>X</b>, forming &ang;1, &ang;2, &ang;3, and &ang;4 in order around the point. If m&ang;1 = ${a1}&deg;, name all pairs of congruent angles and find the measures of &ang;2, &ang;3, and &ang;4.`,
-    inputsHtml: diagramXIntersection(a1) + `<div class="fill-row"><input class="fill-input" placeholder="m∠2"><input class="fill-input" placeholder="m∠3"><input class="fill-input" placeholder="m∠4"></div><textarea class="write-area" rows="2" placeholder="Congruent pairs: ..."></textarea>`,
+    inputsHtml: diagramXIntersection(a1) + proofSymbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="m∠2"><input class="fill-input" placeholder="m∠3"><input class="fill-input" placeholder="m∠4"></div><textarea class="write-area" rows="2" placeholder="Congruent pairs: ..."></textarea>`,
     modelHtml: `<p>&ang;1 &cong; &ang;3 and &ang;2 &cong; &ang;4 (vertical angles). m&ang;2 = m&ang;4 = <b>${a2}&deg;</b> (linear pair with &ang;1, so they sum to 180&deg;). m&ang;3 = <b>${a1}&deg;</b> (vertical angle with &ang;1).</p>`
   };
 }
@@ -1313,7 +1313,7 @@ function generateTest(){
 // she last focused, so they stay usable even after rows are added dynamically.
 let lastFocusedInput = null;
 document.addEventListener('focusin', (e) => {
-  if (e.target.matches && e.target.matches('.blank-proof-table input')){
+  if (e.target.matches && e.target.matches('.blank-proof-table input, .fill-input, .write-area')){
     lastFocusedInput = e.target;
   }
 });
