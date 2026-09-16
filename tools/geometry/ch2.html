@@ -1059,53 +1059,101 @@ function diagramFourCollinearPoints(p1,p2,p3,p4){
 const DEFINITION_CHAIN = {
   rightAngle(){
     const n1 = randInt(1,9);
-    return { given: `&ang;${n1} is a right angle.`, correct: `m&ang;${n1} = 90&deg;`, reason: 'Definition of a Right Angle' };
+    return {
+      given: `&ang;${n1} is a right angle.`,
+      correct: `m&ang;${n1} = 90&deg;`,
+      reason: 'Definition of a Right Angle',
+      wrongs: [`m&ang;${n1} = 180&deg;`, `m&ang;${n1} = 45&deg;`, `&ang;${n1} is a straight angle.`]
+    };
   },
   complementary(){
     const [n1,n2] = shuffle([1,2,3,4,5,6,7,8,9]).slice(0,2);
-    return { given: `&ang;${n1} and &ang;${n2} are complementary angles.`, correct: `m&ang;${n1} + m&ang;${n2} = 90&deg;`, reason: 'Definition of Complementary Angles' };
+    return {
+      given: `&ang;${n1} and &ang;${n2} are complementary angles.`,
+      correct: `m&ang;${n1} + m&ang;${n2} = 90&deg;`,
+      reason: 'Definition of Complementary Angles',
+      wrongs: [`m&ang;${n1} + m&ang;${n2} = 180&deg;`, `&ang;${n1} &cong; &ang;${n2}`, `m&ang;${n1} = m&ang;${n2}`]
+    };
   },
   supplementary(){
     const [n1,n2] = shuffle([1,2,3,4,5,6,7,8,9]).slice(0,2);
-    return { given: `&ang;${n1} and &ang;${n2} are supplementary angles.`, correct: `m&ang;${n1} + m&ang;${n2} = 180&deg;`, reason: 'Definition of Supplementary Angles' };
+    return {
+      given: `&ang;${n1} and &ang;${n2} are supplementary angles.`,
+      correct: `m&ang;${n1} + m&ang;${n2} = 180&deg;`,
+      reason: 'Definition of Supplementary Angles',
+      wrongs: [`m&ang;${n1} + m&ang;${n2} = 90&deg;`, `&ang;${n1} &cong; &ang;${n2}`, `&ang;${n1} and &ang;${n2} are a linear pair.`]
+    };
   },
   linearPair(){
     const [n1,n2] = shuffle([1,2,3,4,5,6,7,8,9]).slice(0,2);
-    return { given: `&ang;${n1} and &ang;${n2} are a linear pair.`, correct: `&ang;${n1} and &ang;${n2} are supplementary angles.`, reason: 'Linear Pair Postulate' };
+    return {
+      given: `&ang;${n1} and &ang;${n2} are a linear pair.`,
+      correct: `&ang;${n1} and &ang;${n2} are supplementary angles.`,
+      reason: 'Linear Pair Postulate',
+      wrongs: [`m&ang;${n1} + m&ang;${n2} = 180&deg;`, `&ang;${n1} &cong; &ang;${n2}`, `m&ang;${n1} = 90&deg;`]
+    };
   },
   perpendicular(){
-    const [l1,l2] = shuffle(['AB','CD','EF','GH','JK','LM']).slice(0,2);
-    return { given: `Line ${l1} is perpendicular to line ${l2}.`, correct: `The angles formed at their intersection are right angles.`, reason: 'Definition of Perpendicular Lines' };
+    const [l1a,l1b,l2a,l2b,pX] = shuffle(['A','B','C','D','E','F','G','H','J']).slice(0,5);
+    return {
+      given: `Line ${l1a}${l1b} is perpendicular to line ${l2a}${l2b} at point ${pX}.`,
+      correct: `The angles formed at ${pX} are right angles.`,
+      reason: 'Definition of Perpendicular Lines',
+      wrongs: [`m&ang;${l1a}${pX}${l2a} = 90&deg;`, `${l1a}${pX} &cong; ${pX}${l2a}`, `Line ${l1a}${l1b} and line ${l2a}${l2b} are parallel.`]
+    };
   },
   angleBisector(){
     const [p1,pV,p2,p3] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,4);
-    return { given: `Ray ${pV}${p2} bisects &ang;${p1}${pV}${p3}.`, correct: `&ang;${p1}${pV}${p2} &cong; &ang;${p2}${pV}${p3}`, reason: 'Definition of Angle Bisector' };
+    return {
+      given: `Ray ${pV}${p2} bisects &ang;${p1}${pV}${p3}.`,
+      correct: `&ang;${p1}${pV}${p2} &cong; &ang;${p2}${pV}${p3}`,
+      reason: 'Definition of Angle Bisector',
+      wrongs: [`m&ang;${p1}${pV}${p2} + m&ang;${p2}${pV}${p3} = 180&deg;`, `&ang;${p1}${pV}${p2} &cong; &ang;${p1}${pV}${p3}`, `${p1}${pV} &cong; ${pV}${p3}`]
+    };
   },
   segmentBisector(){
     const [a,m,b] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,3);
-    return { given: `Point ${m} bisects segment ${a}${b}.`, correct: `${a}${m} &cong; ${m}${b}`, reason: 'Definition of Segment Bisector' };
+    return {
+      given: `Point ${m} bisects segment ${a}${b}.`,
+      correct: `${a}${m} &cong; ${m}${b}`,
+      reason: 'Definition of Segment Bisector',
+      wrongs: [`${a}${m} &cong; ${a}${b}`, `${m}${b} &gt; ${a}${m}`, `Segment ${a}${b} bisects point ${m}.`]
+    };
   },
   midpoint(){
     const [a,m,b] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,3);
-    return { given: `${m} is the midpoint of segment ${a}${b}.`, correct: `${a}${m} &cong; ${m}${b}`, reason: 'Definition of Midpoint' };
+    return {
+      given: `${m} is the midpoint of segment ${a}${b}.`,
+      correct: `${a}${m} &cong; ${m}${b}`,
+      reason: 'Definition of Midpoint',
+      wrongs: [`${a}${m} &cong; ${a}${b}`, `${m}${b} &gt; ${a}${m}`, `${b} is the midpoint of segment ${a}${m}.`]
+    };
   },
   segmentAddition(){
     const [a,b,c] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,3);
-    return { given: `Point ${b} is between points ${a} and ${c} on segment ${a}${c}.`, correct: `${a}${b} + ${b}${c} = ${a}${c}`, reason: 'Segment Addition Postulate' };
+    return {
+      given: `Point ${b} is between points ${a} and ${c} on segment ${a}${c}.`,
+      correct: `${a}${b} + ${b}${c} = ${a}${c}`,
+      reason: 'Segment Addition Postulate',
+      wrongs: [`${a}${b} &cong; ${b}${c}`, `${a}${c} + ${b}${c} = ${a}${b}`, `${a}${b} = ${a}${c}`]
+    };
   },
   angleAddition(){
     const [a,b,c,d] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,4);
-    return { given: `Ray ${b}${d} lies between rays ${b}${a} and ${b}${c}.`, correct: `m&ang;${a}${b}${d} + m&ang;${d}${b}${c} = m&ang;${a}${b}${c}`, reason: 'Angle Addition Postulate' };
+    return {
+      given: `Ray ${b}${d} lies between rays ${b}${a} and ${b}${c}.`,
+      correct: `m&ang;${a}${b}${d} + m&ang;${d}${b}${c} = m&ang;${a}${b}${c}`,
+      reason: 'Angle Addition Postulate',
+      wrongs: [`&ang;${a}${b}${d} &cong; &ang;${d}${b}${c}`, `m&ang;${a}${b}${c} + m&ang;${d}${b}${c} = m&ang;${a}${b}${d}`, `m&ang;${a}${b}${d} = m&ang;${a}${b}${c}`]
+    };
   }
 };
 
 function genProblemFirstStepMC(n){
-  const keys = shuffle(Object.keys(DEFINITION_CHAIN));
-  const correctKey = keys[0];
-  const distractorKeys = keys.slice(1,4);
-  const item = DEFINITION_CHAIN[correctKey]();
-  const distractors = distractorKeys.map(k => DEFINITION_CHAIN[k]().correct);
-  const options = shuffle([item.correct, ...distractors]);
+  const keys = Object.keys(DEFINITION_CHAIN);
+  const key = pick(keys);
+  const item = DEFINITION_CHAIN[key]();
+  const options = shuffle([item.correct, ...item.wrongs]);
   const correctIndex = options.indexOf(item.correct);
   return {
     number: n,
