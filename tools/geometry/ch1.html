@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch1: Basics of Geometry — Study Tool</title>
+<link rel="stylesheet" href="../../assets/study.css">
+<style>
+  /* Extra styles for this worksheet-style tool (on top of the shared study.css) */
+  body{ --accent:#4f9fd6; }
+  .toolbar{ display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 22px; }
+  .problem{ counter-increment:none; }
+  .problem-num{ display:inline-block; font-family:var(--font-mono); font-size:12px; color:var(--accent); border:1px solid var(--rule); border-radius:999px; padding:2px 10px; margin-bottom:10px; }
+  .problem-prompt{ font-size:15.5px; line-height:1.55; margin:0 0 12px; }
+  .problem-prompt b{ color:var(--ink); }
+  .sub-part{ margin:10px 0 14px; }
+  .sub-part-label{ font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); margin:0 0 4px; }
+  .fill-row{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:4px 0 10px; font-size:15px; }
+  .fill-input{ font-family:var(--font-body); font-size:15px; padding:8px 10px; border-radius:8px; border:1px solid var(--rule); background:var(--panel-2); color:var(--ink); width:110px; }
+  .fill-input.wide{ width:260px; }
+  .fill-input:focus{ outline:none; border-color:var(--accent); }
+  .diagram-wrap{ display:flex; justify-content:center; margin:6px 0 14px; }
+  .diagram-wrap svg{ max-width:100%; height:auto; }
+  .reveal-btn{ margin-top:2px; }
+  .model-answer{ display:none; }
+  .model-answer.show{ display:block; }
+  .model-answer ol{ margin:6px 0 0; padding-left:20px; }
+  .model-answer li{ margin-bottom:4px; }
+  .model-answer p{ margin:0 0 8px; }
+  .model-answer p:last-child{ margin-bottom:0; }
+  .notation-blue{ color:#7cc4ff; font-weight:600; }
+  .notation-green{ color:#5ee6a0; font-weight:600; }
+  .accent-row{ margin-bottom:8px; }
+  .test-meta{ font-size:13px; color:var(--ink-dim); margin:0 0 4px; }
+  @media print{
+    .toolbar, .back-link, .reveal-btn{ display:none !important; }
+    .model-answer{ display:block !important; }
+    body{ background:#fff; color:#000; }
+    .card{ border-color:#999; background:#fff; page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <a class="back-link" href="../../index.html">&lsaquo; Study Buddy</a>
+  <div class="masthead">
+    <p class="eyebrow">Geometry &middot; Ch1</p>
+    <h1>Ch1: Basics of Geometry</h1>
+    <p class="sub">A brand-new practice test every time you open this &mdash; points/lines/planes, segment &amp; angle addition, midpoint &amp; distance, coordinate geometry, and angle-pair algebra.</p>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="newTestBtn">&#8635; New practice test</button>
+    <button class="btn" id="toggleAllBtn">Show all answers</button>
+    <button class="btn btn-ghost" id="printBtn">Print</button>
+  </div>
+  <p class="test-meta" id="testMeta"></p>
+
+  <div id="test"></div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="newTestBtn2">&#8635; New practice test</button>
+  </div>
+</main>
+
+<script>
+/* =============================================================================
+   Ch1 Practice Test Generator — Basics of Geometry
+   Mirrors the Ch2 tool's approach (randomized every open, diagrams, reveal
+   answers, symbol-insert buttons) but scoped to Ch1 content: no two-column
+   proofs (that's a Ch2 topic in this curriculum) — instead points/lines/
+   planes vocabulary, segment & angle addition postulates, the midpoint and
+   distance formulas, coordinate-geometry perimeter/area, and angle-pair
+   algebra (complementary/supplementary/linear pairs/vertical angles).
+   ============================================================================= */
+
+function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr){ return arr[randInt(0, arr.length - 1)]; }
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = randInt(0, i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ---------------------------------------------------------------------------
+   Shared helper: place a label near `vertex`, in the wedge between the rays
+   toward `towardA` and `towardB` — keeps angle-number labels unambiguously
+   anchored to the correct vertex/wedge instead of drifting toward some other
+   point in the diagram.
+   --------------------------------------------------------------------------- */
+function angleLabelPos(vertex, towardA, towardB, radius){
+  function unit(from, to){
+    const dx = to[0] - from[0], dy = to[1] - from[1];
+    const len = Math.hypot(dx, dy) || 1;
+    return [dx / len, dy / len];
+  }
+  const uA = unit(vertex, towardA), uB = unit(vertex, towardB);
+  let ux = uA[0] + uB[0], uy = uA[1] + uB[1];
+  const ulen = Math.hypot(ux, uy) || 1;
+  ux /= ulen; uy /= ulen;
+  return [vertex[0] + ux * radius, vertex[1] + uy * radius];
+}
+
+/* ---------------------------------------------------------------------------
+   Symbol-insert toolbar (&ang; / &cong;) — same pattern as the Ch2 tool and
+   the Spanish tool's accent-key buttons: insert at the cursor position of
+   whichever text input she last focused.
+   --------------------------------------------------------------------------- */
+function symbolRow(){
+  return `<div class="accent-row">
+    <button type="button" class="accent-key" data-symbol="&ang;" title="Insert angle symbol">&ang;</button>
+    <button type="button" class="accent-key" data-symbol="&cong;" title="Insert congruent symbol">&cong;</button>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   Number formatting helpers
+   --------------------------------------------------------------------------- */
+function simplifyRadical(n){
+  let coef = 1, rad = n;
+  for (let i = Math.floor(Math.sqrt(n)); i >= 2; i--){
+    if (n % (i*i) === 0){ coef = i; rad = n / (i*i); break; }
+  }
+  return { coef, rad };
+}
+function radicalStr(n){
+  const { coef, rad } = simplifyRadical(n);
+  if (rad === 1) return `${coef}`;
+  if (coef === 1) return `&radic;${rad}`;
+  return `${coef}&radic;${rad}`;
+}
+function fmtNum(n){
+  // trims to at most 1 decimal place, matching the worksheet's "round to nearest 10th"
+  return Math.round(n * 10) / 10;
+}
+
+/* =============================================================================
+   1. Points, Lines, and Planes (multi-part, one shared 3D box diagram)
+   ============================================================================= */
+function buildBoxLabeling(){
+  const letters = shuffle(['A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R','S','T']).slice(0,10);
+  const [cFTL,cFTR,cFBR,cFBL,cBTL,cBTR,cBBR,cBBL,mid1,mid2] = letters;
+  const faces = {
+    top: [cFTL,cFTR,cBTR,cBTL],
+    bottom: [cFBL,cFBR,cBBR,cBBL],
+    front: [cFTL,cFTR,cFBR,cFBL],
+    back: [cBTL,cBTR,cBBR,cBBL],
+    left: [cFTL,cBTL,cBBL,cFBL],
+    right: [cFTR,cBTR,cBBR,cFBR]
+  };
+  const parallelPairs = [['top','bottom'],['front','back'],['left','right']];
+  const adjacency = [
+    ['top','front',[cFTL,cFTR]], ['top','back',[cBTL,cBTR]], ['top','left',[cFTL,cBTL]], ['top','right',[cFTR,cBTR]],
+    ['front','left',[cFTL,cFBL]], ['front','right',[cFTR,cFBR]],
+    ['back','left',[cBTL,cBBL]], ['back','right',[cBTR,cBBR]],
+    ['bottom','front',[cFBL,cFBR]], ['bottom','back',[cBBL,cBBR]], ['bottom','left',[cFBL,cBBL]], ['bottom','right',[cFBR,cBBR]]
+  ];
+  return { cFTL,cFTR,cFBR,cFBL,cBTL,cBTR,cBBR,cBBL, mid1, mid2, faces, parallelPairs, adjacency };
+}
+
+const VOCAB_TEMPLATES = [
+  function qCoplanar(box){
+    const faceName = pick(Object.keys(box.faces));
+    const corners = box.faces[faceName];
+    const shown = shuffle(corners).slice(0,3);
+    const answer = corners.find(c => !shown.includes(c));
+    return { q: `Name a point that is coplanar with points ${shown.join(', ')}.`, a: answer };
+  },
+  function qPlaneIntersection(box){
+    const [f1,f2,edge] = pick(box.adjacency);
+    const name1 = box.faces[f1].slice(0,3).join('');
+    const name2 = box.faces[f2].slice(0,3).join('');
+    return { q: `Name the intersection of plane ${name1} and plane ${name2}.`, a: edge.join('') };
+  },
+  function qCollinear(box){
+    const useMid1 = Math.random() < 0.5;
+    const edge = useMid1 ? [box.cFTL, box.cBTL] : [box.cBBR, box.cBBL];
+    const midLetter = useMid1 ? box.mid1 : box.mid2;
+    return { q: `Name a point that is collinear with ${edge.join('')}.`, a: midLetter };
+  },
+  function qPlaneContaining(box){
+    const faceName = pick(Object.keys(box.faces));
+    const corners = shuffle(box.faces[faceName]);
+    const line = corners.slice(0,2), point = corners[2];
+    return { q: `Name a plane that contains ${line.join('')} and point ${point}.`, a: [...line,point].join('') };
+  },
+  function qParallelPlanes(box){
+    const [f1,f2] = pick(box.parallelPairs);
+    return { q: `Name two planes that do not intersect.`, a: `plane ${box.faces[f1].slice(0,3).join('')} and plane ${box.faces[f2].slice(0,3).join('')}` };
+  },
+  function qOppositeRays(box){
+    const useMid1 = Math.random() < 0.5;
+    const [c1,c2] = useMid1 ? [box.cFTL,box.cBTL] : [box.cBBR,box.cBBL];
+    const midLetter = useMid1 ? box.mid1 : box.mid2;
+    return { q: `Name two opposite rays.`, a: `ray ${midLetter}${c1} and ray ${midLetter}${c2}` };
+  },
+  function qLineIntersection(box){
+    const edgesByCorner = {};
+    const allEdges = [
+      [box.cFTL,box.cFTR],[box.cFTR,box.cFBR],[box.cFBR,box.cFBL],[box.cFBL,box.cFTL],
+      [box.cBTL,box.cBTR],[box.cBTR,box.cBBR],[box.cBBR,box.cBBL],[box.cBBL,box.cBTL],
+      [box.cFTL,box.cBTL],[box.cFTR,box.cBTR],[box.cFBR,box.cBBR],[box.cFBL,box.cBBL]
+    ];
+    for (const [a,b] of allEdges){
+      (edgesByCorner[a] = edgesByCorner[a] || []).push(b);
+      (edgesByCorner[b] = edgesByCorner[b] || []).push(a);
+    }
+    const corner = pick(Object.keys(edgesByCorner));
+    const others = shuffle(edgesByCorner[corner]).slice(0,2);
+    return { q: `Name the intersection of line ${corner}${others[0]} and line ${corner}${others[1]}.`, a: corner };
+  }
+];
+
+function diagramBox(box){
+  const FTL=[70,70], FTR=[170,70], FBR=[170,170], FBL=[70,170];
+  const BTL=[130,30], BTR=[230,30], BBR=[230,130], BBL=[130,130];
+  const mid1pt = [(FTL[0]+BTL[0])/2, (FTL[1]+BTL[1])/2];
+  const mid2pt = [(BBR[0]+BBL[0])/2, (BBR[1]+BBL[1])/2];
+  function seg(p1,p2,dashed){
+    return `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="currentColor" stroke-width="1.5" ${dashed?'stroke-dasharray="4 3"':''}/>`;
+  }
+  const solidEdges = [
+    [FTL,FTR],[FTR,FBR],[FBR,FBL],[FBL,FTL], // front face
+    [BTL,BTR],[BTR,BBR], // back top + back right (visible)
+    [FTL,BTL],[FTR,BTR],[FBR,BBR] // depth edges not touching hidden corner
+  ];
+  const dashedEdges = [ [BBR,BBL],[BBL,BTL],[BBL,FBL] ]; // touching the hidden back-bottom-left corner
+  const linesSvg = solidEdges.map(([a,b]) => seg(a,b,false)).join('') + dashedEdges.map(([a,b]) => seg(a,b,true)).join('');
+  const dots = [FTL,FTR,FBR,FBL,BTL,BTR,BBR,BBL,mid1pt,mid2pt];
+  const labels = [box.cFTL,box.cFTR,box.cFBR,box.cFBL,box.cBTL,box.cBTR,box.cBBR,box.cBBL,box.mid1,box.mid2];
+  const labelOffsets = [ [-10,4],[6,4],[6,14],[-10,14],[-4,-8],[6,-8],[8,6],[-12,10],[6,-2],[6,10] ];
+  const dotsSvg = dots.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="currentColor"/>`).join('');
+  const labelsSvg = dots.map((p,i) => `<text x="${p[0]+labelOffsets[i][0]}" y="${p[1]+labelOffsets[i][1]}" font-size="12" fill="currentColor">${labels[i]}</text>`).join('');
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 190" width="260" height="190">
+    ${linesSvg}${dotsSvg}${labelsSvg}
+  </svg></div>`;
+}
+
+function genProblemPointsLinesPlanes(n){
+  const box = buildBoxLabeling();
+  const chosen = shuffle(VOCAB_TEMPLATES).slice(0,4).map(fn => fn(box));
+  const labels = ['a','b','c','d'];
+  const partsHtml = chosen.map((item,i) => `
+    <div class="sub-part">
+      <p class="sub-part-label">${labels[i]})</p>
+      <p class="problem-prompt" style="margin-bottom:6px;">${esc(item.q)}</p>
+      <div class="fill-row"><input class="fill-input wide"></div>
+    </div>`).join('');
+  const modelParts = chosen.map((item,i) => `<p><b>${labels[i]})</b> ${esc(item.a)}</p>`).join('');
+  return {
+    number: n,
+    prompt: `Use the diagram below for parts (a)&ndash;(d).`,
+    inputsHtml: diagramBox(box) + partsHtml,
+    modelHtml: modelParts
+  };
+}
+
+/* =============================================================================
+   2. Segment Addition Postulate
+   ============================================================================= */
+function genProblemSegmentAddition(n){
+  const [pA,pB,pC] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,3);
+  const xTarget = randInt(3, 15);
+  const aAB = randInt(1,4), bAB = randInt(5,20);
+  const bcConst = randInt(5,25);
+  let aAC = randInt(1,4);
+  while (aAC === aAB) aAC = randInt(1,4);
+  const acTotal = aAB*xTarget + bAB + bcConst;
+  const bAC = acTotal - aAC*xTarget;
+  const bACstr = bAC >= 0 ? `+ ${bAC}` : `- ${Math.abs(bAC)}`;
+  const abExpr = `${aAB}x ${bAB>=0?'+ '+bAB:'- '+Math.abs(bAB)}`;
+  const acExpr = `${aAC}x ${bACstr}`;
+  const abValue = aAB*xTarget+bAB;
+  const acValue = aAC*xTarget+bAC;
+  return {
+    number: n,
+    prompt: `Point ${pB} is between ${pA} and ${pC} on <b>${pA}${pC}</b>. Find ${pA}${pB} and ${pA}${pC}.<br>${pA}${pB} = ${abExpr}<br>${pB}${pC} = ${bcConst}<br>${pA}${pC} = ${acExpr}<br>What postulate does this use?`,
+    inputsHtml: symbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="x ="><input class="fill-input wide" placeholder="${pA}${pB} ="><input class="fill-input wide" placeholder="${pA}${pC} ="></div><textarea class="write-area" rows="2" placeholder="Postulate + work..."></textarea>`,
+    modelHtml: `<p><b>Segment Addition Postulate:</b> ${pA}${pB} + ${pB}${pC} = ${pA}${pC}</p>
+      <p>(${abExpr}) + ${bcConst} = ${acExpr}<br>${aAB}x + ${bAB+bcConst} = ${acExpr}<br>x = <b>${xTarget}</b></p>
+      <p>${pA}${pB} = <b>${abValue}</b>, ${pA}${pC} = <b>${acValue}</b></p>`
+  };
+}
+
+/* =============================================================================
+   3. Segment Bisector
+   ============================================================================= */
+function genProblemSegmentBisector(n){
+  const [pS,pM,pT] = shuffle(['S','T','M','P','Q','R','V','W']).slice(0,3);
+  const xTarget = randInt(3,15);
+  const aSM = randInt(2,6), bSM = randInt(-10,10);
+  let aMT = randInt(1,5);
+  while (aMT === aSM) aMT = randInt(1,5);
+  const smValue = aSM*xTarget + bSM;
+  const bMT = smValue - aMT*xTarget;
+  const smExpr = `${aSM}x ${bSM>=0?'+ '+bSM:'- '+Math.abs(bSM)}`;
+  const mtExpr = `${aMT}x ${bMT>=0?'+ '+bMT:'- '+Math.abs(bMT)}`;
+  const total = smValue*2;
+  return {
+    number: n,
+    prompt: `${pM} is the midpoint of <b>${pS}${pT}</b> (${pM} bisects ${pS}${pT}). ${pS}${pM} = ${smExpr} and ${pM}${pT} = ${mtExpr}. Find ${pS}${pT}.`,
+    inputsHtml: symbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="x ="><input class="fill-input wide" placeholder="${pS}${pT} ="></div><textarea class="write-area" rows="2" placeholder="Show your work..."></textarea>`,
+    modelHtml: `<p>Since ${pM} bisects ${pS}${pT}: ${pS}${pM} = ${pM}${pT}<br>${smExpr} = ${mtExpr}<br>x = <b>${xTarget}</b></p>
+      <p>${pS}${pM} = ${pM}${pT} = <b>${smValue}</b><br>${pS}${pT} = ${smValue} + ${smValue} = <b>${total}</b></p>`
+  };
+}
+
+/* =============================================================================
+   4a. Midpoint Formula (always included)
+   ============================================================================= */
+function genProblemMidpointFormula(n){
+  const [pF,pG,pM] = shuffle(['F','G','P','Q','R','S','J','K']).slice(0,3);
+  const givenMidpoint = Math.random() < 0.5;
+  const fx = randInt(-12,12), fy = randInt(-12,12);
+  if (givenMidpoint){
+    // Given midpoint + one endpoint, find the other endpoint (reverse formula)
+    const mx = randInt(-10,10), my = randInt(-10,10);
+    const gx = 2*mx - fx, gy = 2*my - fy;
+    return {
+      number: n,
+      prompt: `One endpoint of <b>${pF}${pG}</b> is ${pF}(${fx}, ${fy}) and the midpoint is ${pM}(${mx}, ${my}). Find the coordinates of the other endpoint ${pG}.`,
+      inputsHtml: `<div class="fill-row"><input class="fill-input wide" placeholder="${pG} = ( , )"></div><textarea class="write-area" rows="2" placeholder="Show your work..."></textarea>`,
+      modelHtml: `<p>${pM} = ((${fx}+x)/2, (${fy}+y)/2) = (${mx}, ${my})<br>${fx} + x = ${2*mx} &rarr; x = ${gx}<br>${fy} + y = ${2*my} &rarr; y = ${gy}</p>
+        <p>${pG} = <b>(${gx}, ${gy})</b></p>`
+    };
+  } else {
+    // Given both endpoints, find the midpoint (direct formula)
+    const gx = randInt(-12,12), gy = randInt(-12,12);
+    const mx = (fx+gx)/2, my = (fy+gy)/2;
+    return {
+      number: n,
+      prompt: `The endpoints of <b>${pF}${pG}</b> are ${pF}(${fx}, ${fy}) and ${pG}(${gx}, ${gy}). Find the coordinates of the midpoint ${pM}.`,
+      inputsHtml: `<div class="fill-row"><input class="fill-input wide" placeholder="${pM} = ( , )"></div><textarea class="write-area" rows="2" placeholder="Show your work..."></textarea>`,
+      modelHtml: `<p>${pM} = ((${fx}+${gx})/2, (${fy}+${gy})/2) = (${mx}, ${my})</p>
+        <p>${pM} = <b>(${mx}, ${my})</b></p>`
+    };
+  }
+}
+
+/* =============================================================================
+   4b. Distance Formula (always included)
+   ============================================================================= */
+function genProblemDistanceFormula(n){
+  const [pA,pB] = shuffle(['A','B','C','D','P','Q','R','S']).slice(0,2);
+  const ax = randInt(-8,8), ay = randInt(-8,8);
+  const bx = randInt(-8,8), by = randInt(-8,8);
+  const distSq = (bx-ax)*(bx-ax) + (by-ay)*(by-ay);
+  const dist = fmtNum(Math.sqrt(distSq));
+  return {
+    number: n,
+    prompt: `Find the distance between ${pA}(${ax}, ${ay}) and ${pB}(${bx}, ${by}). Round to the nearest 10th.`,
+    inputsHtml: diagramTwoPoints(pA,ax,ay,pB,bx,by) + `<div class="fill-row"><input class="fill-input wide" placeholder="${pA}${pB} ="></div><textarea class="write-area" rows="2" placeholder="Show your work..."></textarea>`,
+    modelHtml: `<p>${pA}${pB} = &radic;((${bx}&minus;(${ax}))&sup2; + (${by}&minus;(${ay}))&sup2;) = &radic;((${bx-ax})&sup2; + (${by-ay})&sup2;) = &radic;${distSq} &approx; <b>${dist}</b> units</p>`
+  };
+}
+
+function diagramTwoPoints(l1,x1,y1,l2,x2,y2){
+  const minX = Math.min(x1,x2)-2, maxX = Math.max(x1,x2)+2;
+  const minY = Math.min(y1,y2)-2, maxY = Math.max(y1,y2)+2;
+  const W = 240, H = 200;
+  const scale = Math.min((W-40)/(maxX-minX), (H-40)/(maxY-minY));
+  function toScreen(x,y){ return [20+(x-minX)*scale, H-20-(y-minY)*scale]; }
+  const [sx1,sy1] = toScreen(x1,y1), [sx2,sy2] = toScreen(x2,y2);
+  let gridSvg = '';
+  for (let gx = Math.ceil(minX); gx <= Math.floor(maxX); gx++){
+    const [a,b] = toScreen(gx,minY), [c,d] = toScreen(gx,maxY);
+    gridSvg += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>`;
+  }
+  for (let gy = Math.ceil(minY); gy <= Math.floor(maxY); gy++){
+    const [a,b] = toScreen(minX,gy), [c,d] = toScreen(maxX,gy);
+    gridSvg += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>`;
+  }
+  const axesSvg = (minX <= 0 && 0 <= maxX ? (() => {
+      const [a,b] = toScreen(0,minY), [c,d] = toScreen(0,maxY);
+      return `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="currentColor" stroke-width="1" opacity="0.5"/>`;
+    })() : '') +
+    (minY <= 0 && 0 <= maxY ? (() => {
+      const [a,b] = toScreen(minX,0), [c,d] = toScreen(maxX,0);
+      return `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="currentColor" stroke-width="1" opacity="0.5"/>`;
+    })() : '');
+  return `<div class="diagram-wrap"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${gridSvg}${axesSvg}
+    <line x1="${sx1}" y1="${sy1}" x2="${sx2}" y2="${sy2}" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/>
+    <circle cx="${sx1}" cy="${sy1}" r="2.5" fill="currentColor"/>
+    <circle cx="${sx2}" cy="${sy2}" r="2.5" fill="currentColor"/>
+    <text x="${sx1+6}" y="${sy1-6}" font-size="12" fill="currentColor">${l1}(${x1}, ${y1})</text>
+    <text x="${sx2+6}" y="${sy2-6}" font-size="12" fill="currentColor">${l2}(${x2}, ${y2})</text>
+  </svg></div>`;
+}
+
+/* =============================================================================
+   4c. Number-line distance (absolute value) — 1.2 foundational skill
+   ============================================================================= */
+function genProblemNumberLineDistance(n){
+  const x1 = randInt(-15,15), x2 = randInt(-15,15);
+  const dist = Math.abs(x2-x1);
+  const x1Str = x1 >= 0 ? `${x1}` : `${x1}`;
+  const x2Str = x2 >= 0 ? `${x2}` : `${x2}`;
+  return {
+    number: n,
+    prompt: `Find the distance between the points with x-values <b>x = ${x1Str}</b> and <b>x = ${x2Str}</b> using absolute value.`,
+    inputsHtml: `<div class="fill-row"><input class="fill-input"></div>`,
+    modelHtml: `<p>|${x2Str} &minus; (${x1Str})| = |${x2-x1}| = <b>${dist}</b></p>`
+  };
+}
+
+/* =============================================================================
+   5. Coordinate Geometry — Perimeter & Area
+   ============================================================================= */
+function genProblemCoordGeometry(n){
+  const [pP,pQ,pS] = shuffle(['P','Q','S','R','T','U']).slice(0,3);
+  const px = randInt(-6,2), py = randInt(-2,6);
+  const qy = py - randInt(3,9); // Q directly below P (vertical side PQ)
+  const sx = px + pick([-1,1]) * randInt(3,8);
+  const sy = randInt(-6,6);
+  const pqLen = Math.abs(py - qy);
+  const qsSq = (sx-px)*(sx-px) + (sy-qy)*(sy-qy);
+  const spSq = (sx-px)*(sx-px) + (sy-py)*(sy-py);
+  const perimeterStr = `${pqLen} + ${radicalStr(qsSq)} + ${radicalStr(spSq)}`;
+  const area = 0.5 * pqLen * Math.abs(sx - px);
+  return {
+    number: n,
+    prompt: `Find the perimeter and area of the triangle with vertices ${pP}(${px}, ${py}), ${pQ}(${px}, ${qy}), and ${pS}(${sx}, ${sy}). Give the perimeter in exact, simplified form.`,
+    inputsHtml: diagramTriangleGrid(pP,px,py,pQ,px,qy,pS,sx,sy) + `<div class="fill-row"><input class="fill-input wide" placeholder="Perimeter ="><input class="fill-input" placeholder="Area ="></div>`,
+    modelHtml: `<p>${pP}${pQ} = ${pqLen} (vertical side)<br>${pQ}${pS} = &radic;${qsSq} = ${radicalStr(qsSq)}<br>${pS}${pP} = &radic;${spSq} = ${radicalStr(spSq)}</p>
+      <p>Perimeter = <b>${perimeterStr}</b></p>
+      <p>Area = &frac12; &times; base &times; height = &frac12; &times; ${pqLen} &times; ${Math.abs(sx-px)} = <b>${area}</b></p>`
+  };
+}
+
+function diagramTriangleGrid(l1,x1,y1,l2,x2,y2,l3,x3,y3){
+  const allX = [x1,x2,x3], allY = [y1,y2,y3];
+  const minX = Math.min(...allX)-2, maxX = Math.max(...allX)+2;
+  const minY = Math.min(...allY)-2, maxY = Math.max(...allY)+2;
+  const W = 260, H = 220;
+  const scaleX = (W-40) / (maxX-minX), scaleY = (H-40) / (maxY-minY);
+  const scale = Math.min(scaleX, scaleY);
+  function toScreen(x,y){
+    return [20 + (x-minX)*scale, H-20 - (y-minY)*scale];
+  }
+  let gridSvg = '';
+  for (let gx = Math.ceil(minX); gx <= Math.floor(maxX); gx++){
+    const [sx1,sy1] = toScreen(gx, minY), [sx2,sy2] = toScreen(gx, maxY);
+    gridSvg += `<line x1="${sx1}" y1="${sy1}" x2="${sx2}" y2="${sy2}" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>`;
+  }
+  for (let gy = Math.ceil(minY); gy <= Math.floor(maxY); gy++){
+    const [sx1,sy1] = toScreen(minX, gy), [sx2,sy2] = toScreen(maxX, gy);
+    gridSvg += `<line x1="${sx1}" y1="${sy1}" x2="${sx2}" y2="${sy2}" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>`;
+  }
+  const axesSvg = (minX <= 0 && 0 <= maxX ? (() => {
+      const [ax0,ay0] = toScreen(0,minY), [ax1,ay1] = toScreen(0,maxY);
+      return `<line x1="${ax0}" y1="${ay0}" x2="${ax1}" y2="${ay1}" stroke="currentColor" stroke-width="1" opacity="0.5"/>`;
+    })() : '') +
+    (minY <= 0 && 0 <= maxY ? (() => {
+      const [bx0,by0] = toScreen(minX,0), [bx1,by1] = toScreen(maxX,0);
+      return `<line x1="${bx0}" y1="${by0}" x2="${bx1}" y2="${by1}" stroke="currentColor" stroke-width="1" opacity="0.5"/>`;
+    })() : '');
+  const pts = [[x1,y1,l1],[x2,y2,l2],[x3,y3,l3]];
+  const screenPts = pts.map(([x,y]) => toScreen(x,y));
+  const triSvg = `<polygon points="${screenPts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="currentColor" stroke-width="2"/>`;
+  const dotsSvg = screenPts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.5" fill="currentColor"/>`).join('');
+  const labelsSvg = pts.map(([x,y,l],i) => {
+    const [sx,sy] = screenPts[i];
+    return `<text x="${sx+6}" y="${sy-6}" font-size="12" fill="currentColor">${l}(${x}, ${y})</text>`;
+  }).join('');
+  return `<div class="diagram-wrap"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${gridSvg}${axesSvg}${triSvg}${dotsSvg}${labelsSvg}</svg></div>`;
+}
+
+/* =============================================================================
+   6/7. Complement & Supplement — basic algebra
+   ============================================================================= */
+function genProblemComplement(n){
+  const [n1,n2] = shuffle([1,2,3,4,5,6,7,8]).slice(0,2);
+  const m2 = randInt(10,80);
+  const m1 = 90 - m2;
+  return {
+    number: n,
+    prompt: `&ang;${n1} is a complement of &ang;${n2}, and m&ang;${n2} = ${m2}&deg;. Find m&ang;${n1}.`,
+    inputsHtml: symbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="m∠${n1} ="></div>`,
+    modelHtml: `<p>m&ang;${n1} + m&ang;${n2} = 90&deg;<br>m&ang;${n1} + ${m2}&deg; = 90&deg;<br>m&ang;${n1} = <b>${m1}&deg;</b></p>`
+  };
+}
+function genProblemSupplement(n){
+  const [n1,n2] = shuffle([1,2,3,4,5,6,7,8]).slice(0,2);
+  const m2 = randInt(20,160);
+  const m1 = 180 - m2;
+  return {
+    number: n,
+    prompt: `&ang;${n1} is a supplement of &ang;${n2}, and m&ang;${n2} = ${m2}&deg;. Find m&ang;${n1}.`,
+    inputsHtml: symbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="m∠${n1} ="></div>`,
+    modelHtml: `<p>m&ang;${n1} + m&ang;${n2} = 180&deg;<br>m&ang;${n1} + ${m2}&deg; = 180&deg;<br>m&ang;${n1} = <b>${m1}&deg;</b></p>`
+  };
+}
+
+/* =============================================================================
+   8/9. Supplementary / Complementary angle-pair algebra (linear expressions)
+   ============================================================================= */
+function genProblemSupplementaryPair(n){
+  const [pA,pB,pC,pD] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,4);
+  const divisors = [4,5,6,9,10,12,15,18,20,24,30,36];
+  const sum = pick(divisors);
+  const a = randInt(1, sum-1);
+  const b = sum - a;
+  const x = 180 / sum;
+  const m1 = a*x, m2 = b*x;
+  return {
+    number: n,
+    prompt: `&ang;${pA}${pB}${pC} and &ang;${pC}${pB}${pD} are supplementary angles, m&ang;${pA}${pB}${pC} = ${a}x&deg; and m&ang;${pC}${pB}${pD} = ${b}x&deg;. Find the measure of each angle.`,
+    inputsHtml: symbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="x ="><input class="fill-input wide" placeholder="m∠${pA}${pB}${pC} ="><input class="fill-input wide" placeholder="m∠${pC}${pB}${pD} ="></div>`,
+    modelHtml: `<p>&ang;${pA}${pB}${pC} + &ang;${pC}${pB}${pD} = 180&deg;<br>${a}x + ${b}x = 180<br>${sum}x = 180<br>x = <b>${x}</b></p>
+      <p>m&ang;${pA}${pB}${pC} = <b>${m1}&deg;</b>, m&ang;${pC}${pB}${pD} = <b>${m2}&deg;</b></p>`
+  };
+}
+function genProblemComplementaryPair(n){
+  const [pW,pX,pY,pZ] = shuffle(['W','X','Y','Z','P','Q','R','S']).slice(0,4);
+  const xTarget = randInt(3,15);
+  const a = randInt(1,4);
+  let d = randInt(1,4);
+  while (d === a) d = randInt(1,4);
+  const c1 = randInt(1,15);
+  const c2 = 90 - (a+d)*xTarget - c1;
+  const c1Str = c1 >= 0 ? `+ ${c1}` : `- ${Math.abs(c1)}`;
+  const c2Str = c2 >= 0 ? `+ ${c2}` : `- ${Math.abs(c2)}`;
+  const m1 = a*xTarget + c1, m2 = d*xTarget + c2;
+  return {
+    number: n,
+    prompt: `&ang;${pW}${pX}${pY} and &ang;${pY}${pX}${pZ} are complementary angles, m&ang;${pW}${pX}${pY} = (${a}x ${c1Str})&deg;, and m&ang;${pY}${pX}${pZ} = (${d}x ${c2Str})&deg;. Find the measure of each angle.`,
+    inputsHtml: symbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="x ="><input class="fill-input wide" placeholder="m∠${pW}${pX}${pY} ="><input class="fill-input wide" placeholder="m∠${pY}${pX}${pZ} ="></div>`,
+    modelHtml: `<p>(${a}x ${c1Str}) + (${d}x ${c2Str}) = 90<br>${a+d}x ${(c1+c2)>=0?'+ '+(c1+c2):'- '+Math.abs(c1+c2)} = 90<br>x = <b>${xTarget}</b></p>
+      <p>m&ang;${pW}${pX}${pY} = <b>${m1}&deg;</b>, m&ang;${pY}${pX}${pZ} = <b>${m2}&deg;</b></p>`
+  };
+}
+
+/* =============================================================================
+   10. Angle relationship word problem
+   ============================================================================= */
+function genProblemAngleWordProblem(n){
+  const isComplement = Math.random() < 0.5;
+  const total = isComplement ? 90 : 180;
+  const relWord = isComplement ? 'complement' : 'supplement';
+  const validCombos = [];
+  for (const J of [2,3,4]){
+    for (let y = 4; y <= (isComplement ? 35 : 80); y++){
+      const K = total - (J+1)*y;
+      if (K > 0 && K <= 60 && Number.isInteger(K)) validCombos.push({J,y,K});
+    }
+  }
+  const combo = pick(validCombos);
+  const y = combo.y, K = combo.K, J = combo.J;
+  const x = total - y;
+  return {
+    number: n,
+    prompt: `The measure of an angle is ${K} more than ${J} times the measure of its ${relWord}. Find the measures of both angles.`,
+    inputsHtml: `<div class="fill-row"><input class="fill-input wide" placeholder="Angle ="><input class="fill-input wide" placeholder="${relWord[0].toUpperCase()+relWord.slice(1)} ="></div><textarea class="write-area" rows="2" placeholder="Let x = the angle, y = its ${relWord}..."></textarea>`,
+    modelHtml: `<p>Let x = the angle, y = its ${relWord}.<br>x = ${K} + ${J}y, and x + y = ${total}<br>(${K} + ${J}y) + y = ${total}<br>${J+1}y = ${total-K}<br>y = <b>${y}&deg;</b></p>
+      <p>x = ${total} &minus; ${y} = <b>${x}&deg;</b></p>
+      <p>Angle measure: <b>${x}&deg;</b>, ${relWord}: <b>${y}&deg;</b></p>`
+  };
+}
+
+/* =============================================================================
+   11. Linear pair word problem
+   ============================================================================= */
+function genProblemLinearPairWordProblem(n){
+  const validJ = [2,3,4,5,8];
+  const J = pick(validJ);
+  const y = 180/(J+1);
+  const x = 180 - y;
+  return {
+    number: n,
+    prompt: `Two angles form a linear pair. The measure of one angle is ${J} times the measure of the other angle. Find the measure of each angle.`,
+    inputsHtml: `<div class="fill-row"><input class="fill-input wide" placeholder="Larger angle ="><input class="fill-input wide" placeholder="Smaller angle ="></div><textarea class="write-area" rows="2" placeholder="Let x = smaller angle..."></textarea>`,
+    modelHtml: `<p>Let y = the smaller angle; the larger angle = ${J}y.<br>y + ${J}y = 180<br>${J+1}y = 180<br>y = <b>${y}&deg;</b></p>
+      <p>Larger angle = ${J} &times; ${y} = <b>${x}&deg;</b></p>
+      <p>Measures: <b>${x}&deg;</b> and <b>${y}&deg;</b></p>`
+  };
+}
+
+/* =============================================================================
+   12. Angle-pair identification (adjacent/nonadjacent complementary/supplementary)
+   ============================================================================= */
+function genProblemAnglePairID(n){
+  const [vE, pD, pA, pB, pC] = shuffle(['E','D','A','B','C','X','Y','Z']).slice(0,5);
+  const [vF, pK, pJ, pH, pG] = shuffle(['F','K','J','H','G','M','N','P']).slice(0,5);
+  const p2 = randInt(10,70);
+  const p1 = 90;
+  const p3 = 90 - p2;
+  const q1 = 90 - p2;
+  const q3 = 180 - p1;
+  const q2 = 180 - q1 - q3;
+  return {
+    number: n,
+    prompt: `In the first diagram, ${pD}, ${vE}, ${pC} are collinear. m&ang;${pD}${vE}${pA} = ${p1}&deg;, m&ang;${pA}${vE}${pB} = ${p2}&deg;, m&ang;${pB}${vE}${pC} = ${p3}&deg;.<br>In the second diagram, ${pK}, ${vF}, ${pG} are collinear. m&ang;${pK}${vF}${pJ} = ${q1}&deg;, m&ang;${pJ}${vF}${pH} = ${q2}&deg;, m&ang;${pH}${vF}${pG} = ${q3}&deg;.<br>a) Name a pair of adjacent complementary angles.<br>b) Name a pair of nonadjacent complementary angles.<br>c) Name a pair of nonadjacent supplementary angles.`,
+    inputsHtml: diagramTwoFans(vE,pD,pA,pB,pC,p1,p2,p3,vF,pK,pJ,pH,pG,q1,q2,q3) + `<textarea class="write-area" rows="3" placeholder="a) ...&#10;b) ...&#10;c) ..."></textarea>`,
+    modelHtml: `<p>a) &ang;${pA}${vE}${pB} and &ang;${pB}${vE}${pC} (adjacent, ${p2}&deg; + ${p3}&deg; = 90&deg;)</p>
+      <p>b) &ang;${pA}${vE}${pB} and &ang;${pK}${vF}${pJ} (different figures, ${p2}&deg; + ${q1}&deg; = 90&deg;)</p>
+      <p>c) &ang;${pD}${vE}${pA} and &ang;${pH}${vF}${pG} (different figures, ${p1}&deg; + ${q3}&deg; = 180&deg;)</p>`
+  };
+}
+
+function diagramTwoFans(vE,pD,pA,pB,pC,p1,p2,p3,vF,pK,pJ,pH,pG,q1,q2,q3){
+  function fanSvg(cx, vLabel, labels, degs){
+    // degs = [p1,p2,p3] consecutive angles summing to 180. Sweep from 0° to
+    // 180° exactly (never offset) so the whole fan stays in the upper half
+    // plane — an offset start would push the far ray below the horizon and
+    // off the bottom of the canvas.
+    const d1 = 0, d2 = degs[0], d3 = degs[0] + degs[1], d4 = 180;
+    function pt(deg, r){
+      const rad = deg * Math.PI / 180;
+      return [cx + r * Math.cos(rad), 140 - r * Math.sin(rad)];
+    }
+    const R1 = pt(d1,75), R2 = pt(d2,70), R3 = pt(d3,70), R4 = pt(d4,75);
+    const [l1x,l1y] = angleLabelPos([cx,140], R1, R2, 45);
+    const [l2x,l2y] = angleLabelPos([cx,140], R2, R3, 38);
+    const [l3x,l3y] = angleLabelPos([cx,140], R3, R4, 45);
+    return `
+      <line x1="${cx}" y1="140" x2="${R1[0]}" y2="${R1[1]}" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="${cx}" y1="140" x2="${R2[0]}" y2="${R2[1]}" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="${cx}" y1="140" x2="${R3[0]}" y2="${R3[1]}" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="${cx}" y1="140" x2="${R4[0]}" y2="${R4[1]}" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="${cx}" cy="140" r="2.2" fill="currentColor"/>
+      <text x="${R1[0]+2}" y="${R1[1]-2}" font-size="11" fill="currentColor">${labels[0]}</text>
+      <text x="${R2[0]-2}" y="${R2[1]-6}" font-size="11" fill="currentColor">${labels[1]}</text>
+      <text x="${R3[0]-2}" y="${R3[1]-6}" font-size="11" fill="currentColor">${labels[2]}</text>
+      <text x="${R4[0]-10}" y="${R4[1]-2}" font-size="11" fill="currentColor">${labels[3]}</text>
+      <text x="${cx-6}" y="154" font-size="11" fill="currentColor">${vLabel}</text>
+      <text x="${l1x-6}" y="${l1y}" font-size="10.5" fill="currentColor">${degs[0]}&deg;</text>
+      <text x="${l2x-6}" y="${l2y}" font-size="10.5" fill="currentColor">${degs[1]}&deg;</text>
+      <text x="${l3x-6}" y="${l3y}" font-size="10.5" fill="currentColor">${degs[2]}&deg;</text>`;
+  }
+  const fan1 = fanSvg(95, vE, [pD,pA,pB,pC], [p1,p2,p3]);
+  const fan2 = fanSvg(325, vF, [pK,pJ,pH,pG], [q1,q2,q3]);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 420 160" width="420" height="160">${fan1}${fan2}</svg></div>`;
+}
+
+/* =============================================================================
+   13. Linear pairs & vertical angles identification (X-intersection)
+   ============================================================================= */
+function genProblemLinearVerticalID(n){
+  const a1 = randInt(2,17) * 5;
+  return {
+    number: n,
+    prompt: `Two lines intersect at point <b>X</b>, forming &ang;1, &ang;2, &ang;3, and &ang;4 in order around the point.<br>a) Identify the linear pair(s) that include &ang;1.<br>b) Are &ang;2 and &ang;4 vertical angles? Explain your reasoning.`,
+    inputsHtml: diagramXIntersection(a1) + symbolRow() + `<textarea class="write-area" rows="3" placeholder="a) ...&#10;b) ..."></textarea>`,
+    modelHtml: `<p>a) &ang;1 &amp; &ang;2 and &ang;1 &amp; &ang;4 (each shares a ray with &ang;1 and together forms a straight line).</p>
+      <p>b) Yes &mdash; &ang;2 and &ang;4 are formed by the same two intersecting lines and are on opposite sides of the intersection point (they don't share a ray), so they're vertical angles.</p>`
+  };
+}
+
+function diagramXIntersection(a1){
+  const cx = 130, cy = 90, r = 75;
+  const halfDeg = a1 / 2;
+  function pt(deg, radius){
+    const rad = deg * Math.PI / 180;
+    return [cx + radius * Math.cos(rad), cy - radius * Math.sin(rad)];
+  }
+  const [x1,y1] = pt(halfDeg, r);
+  const [x2,y2] = pt(halfDeg + 180, r);
+  const [x3,y3] = pt(halfDeg + a1, r);
+  const [x4,y4] = pt(halfDeg + a1 + 180, r);
+  const lab1 = pt(halfDeg + a1/2, 40);
+  const lab2 = pt(halfDeg + a1 + (180-a1)/2, 40);
+  const lab3 = pt(halfDeg + 180 + a1/2, 40);
+  const lab4 = pt(halfDeg + a1 + 180 + (180-a1)/2, 40);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 180" width="260" height="180">
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${x3}" y1="${y3}" x2="${x4}" y2="${y4}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${cx}" cy="${cy}" r="2.5" fill="currentColor"/>
+    <text x="${lab1[0]-4}" y="${lab1[1]}" font-size="12" fill="currentColor">1</text>
+    <text x="${lab2[0]-4}" y="${lab2[1]}" font-size="12" fill="currentColor">2</text>
+    <text x="${lab3[0]-4}" y="${lab3[1]}" font-size="12" fill="currentColor">3</text>
+    <text x="${lab4[0]-4}" y="${lab4[1]}" font-size="12" fill="currentColor">4</text>
+    <text x="${cx+8}" y="${cy+16}" font-size="11" fill="currentColor">X</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   Color-code notation in revealed answers: blue for "measure of angle" (m∠)
+   and "equal" (=); green for "angle" (∠) and "congruent" (≅). Only touches
+   text content, never HTML tag attributes.
+   --------------------------------------------------------------------------- */
+function colorizeNotation(html){
+  if (!html) return html;
+  return html.replace(/<[^>]*>|[^<]+/g, (segment) => {
+    if (segment.startsWith('<')) return segment;
+    return segment.replace(/m&ang;|&ang;|&cong;|=/g, (sym) => {
+      if (sym === 'm&ang;') return '<span class="notation-blue">m&ang;</span>';
+      if (sym === '&ang;') return '<span class="notation-green">&ang;</span>';
+      if (sym === '&cong;') return '<span class="notation-green">&cong;</span>';
+      if (sym === '=') return '<span class="notation-blue">=</span>';
+      return sym;
+    });
+  });
+}
+
+/* ---------------------------------------------------------------------------
+   Notation self-check (dev safety net, invisible to the student) — same as
+   the Ch2 tool: flags "∠X = ..." (should be m∠ or ≅) and "m∠X ≅ ..."
+   (should be =) if a future edit ever reintroduces the mix-up.
+   --------------------------------------------------------------------------- */
+function auditNotation(problems){
+  const issues = [];
+  function scan(text, where){
+    if (!text) return;
+    for (let i = 0; i < text.length; i++){
+      if (text.startsWith('&ang;', i)){
+        const precededByM = text[i-1] === 'm';
+        let j = i + 5;
+        while (j < text.length && /[A-Za-z0-9]/.test(text[j])) j++;
+        const rest = text.slice(j).replace(/^\s+/, '');
+        if (!precededByM && rest.startsWith('=') && !rest.startsWith('==')){
+          issues.push(where + ': "∠" (object) used with "=" — should be "m∠" or "≅"');
+        }
+        if (precededByM && rest.startsWith('&cong;')){
+          issues.push(where + ': "m∠" (measure) used with "≅" — should be "="');
+        }
+      }
+    }
+  }
+  problems.forEach(p => {
+    scan(p.prompt, 'Problem ' + p.number + ' prompt');
+    scan(p.modelHtml, 'Problem ' + p.number + ' model answer');
+  });
+  if (issues.length){
+    console.warn('[notation self-check] Found ' + issues.length + ' issue(s):');
+    issues.forEach(i => console.warn('  - ' + i));
+  }
+}
+
+/* =============================================================================
+   14. Angle Addition Postulate algebra
+   ============================================================================= */
+function genProblemAngleAdditionAlgebra(n){
+  const [pA,pB,pC,pD] = shuffle(['A','B','C','D','X','Y','Z','W']).slice(0,4);
+  const total = randInt(4,17) * 10; // whole angle, a clean multiple of 10
+  const xTarget = randInt(3,15);
+  const a1 = randInt(1,4), b1 = randInt(1,20);
+  const part1 = a1*xTarget + b1;
+  const part2 = total - part1;
+  let a2 = randInt(1,4);
+  while (a2 === a1) a2 = randInt(1,4);
+  const b2 = part2 - a2*xTarget;
+  const b1Str = b1 >= 0 ? `+ ${b1}` : `- ${Math.abs(b1)}`;
+  const b2Str = b2 >= 0 ? `+ ${b2}` : `- ${Math.abs(b2)}`;
+  return {
+    number: n,
+    prompt: `Ray ${pB}${pD} lies in the interior of &ang;${pA}${pB}${pC}, so m&ang;${pA}${pB}${pD} + m&ang;${pD}${pB}${pC} = m&ang;${pA}${pB}${pC}.<br>m&ang;${pA}${pB}${pD} = ${a1}x ${b1Str}, m&ang;${pD}${pB}${pC} = ${a2}x ${b2Str}, and m&ang;${pA}${pB}${pC} = ${total}&deg;. Find each angle measure.`,
+    inputsHtml: symbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="x ="><input class="fill-input wide" placeholder="m∠${pA}${pB}${pD} ="><input class="fill-input wide" placeholder="m∠${pD}${pB}${pC} ="></div>`,
+    modelHtml: `<p>m&ang;${pA}${pB}${pD} + m&ang;${pD}${pB}${pC} = m&ang;${pA}${pB}${pC}<br>(${a1}x ${b1Str}) + (${a2}x ${b2Str}) = ${total}<br>${a1+a2}x ${(b1+b2)>=0?'+ '+(b1+b2):'- '+Math.abs(b1+b2)} = ${total}<br>x = <b>${xTarget}</b></p>
+      <p>m&ang;${pA}${pB}${pD} = <b>${part1}&deg;</b>, m&ang;${pD}${pB}${pC} = <b>${part2}&deg;</b></p>`
+  };
+}
+
+/* =============================================================================
+   15. Angle Bisector algebra
+   ============================================================================= */
+function genProblemAngleBisectorAlgebra(n){
+  const [pP,pQ,pR,pS] = shuffle(['P','Q','R','S','X','Y','Z','W']).slice(0,4);
+  const xTarget = randInt(3,15);
+  const a1 = randInt(2,6), b1 = randInt(-10,10);
+  let a2 = randInt(1,5);
+  while (a2 === a1) a2 = randInt(1,5);
+  const partValue = a1*xTarget + b1;
+  const b2 = partValue - a2*xTarget;
+  const expr1 = `${a1}x ${b1>=0?'+ '+b1:'- '+Math.abs(b1)}`;
+  const expr2 = `${a2}x ${b2>=0?'+ '+b2:'- '+Math.abs(b2)}`;
+  const total = partValue * 2;
+  return {
+    number: n,
+    prompt: `Ray ${pQ}${pR} bisects &ang;${pP}${pQ}${pS}. m&ang;${pP}${pQ}${pR} = ${expr1} and m&ang;${pR}${pQ}${pS} = ${expr2}. Find m&ang;${pP}${pQ}${pR} and m&ang;${pP}${pQ}${pS}.`,
+    inputsHtml: symbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="x ="><input class="fill-input wide" placeholder="m∠${pP}${pQ}${pR} ="><input class="fill-input wide" placeholder="m∠${pP}${pQ}${pS} ="></div>`,
+    modelHtml: `<p>Since ${pQ}${pR} bisects &ang;${pP}${pQ}${pS}: m&ang;${pP}${pQ}${pR} = m&ang;${pR}${pQ}${pS}<br>${expr1} = ${expr2}<br>x = <b>${xTarget}</b></p>
+      <p>m&ang;${pP}${pQ}${pR} = <b>${partValue}&deg;</b><br>m&ang;${pP}${pQ}${pS} = ${partValue} + ${partValue} = <b>${total}&deg;</b></p>`
+  };
+}
+
+/* =============================================================================
+   16. Vertical Angles algebra (with diagram)
+   ============================================================================= */
+function genProblemVerticalAnglesAlgebra(n){
+  const divisors = [4,5,6,9,10,12,15,18,20,24,30,36];
+  const sum = pick(divisors);
+  const a = randInt(1, sum-1);
+  const b = sum - a;
+  const x = 180 / sum;
+  const m1 = a*x, m2 = b*x;
+  return {
+    number: n,
+    prompt: `&ang;1 and &ang;2 are a linear pair, m&ang;1 = ${a}x&deg;, and m&ang;2 = ${b}x&deg;. Find x and the measures of all four angles (&ang;1, &ang;2, &ang;3, &ang;4) shown, where &ang;3 is vertical to &ang;1 and &ang;4 is vertical to &ang;2.`,
+    inputsHtml: diagramXIntersection(m1) + symbolRow() + `<div class="fill-row"><input class="fill-input" placeholder="x ="><input class="fill-input" placeholder="m∠1 ="><input class="fill-input" placeholder="m∠2 ="><input class="fill-input" placeholder="m∠3 ="><input class="fill-input" placeholder="m∠4 ="></div>`,
+    modelHtml: `<p>m&ang;1 + m&ang;2 = 180&deg; (linear pair)<br>${a}x + ${b}x = 180<br>${sum}x = 180<br>x = <b>${x}</b></p>
+      <p>m&ang;1 = <b>${m1}&deg;</b>, m&ang;2 = <b>${m2}&deg;</b><br>m&ang;3 = m&ang;1 = <b>${m1}&deg;</b> (vertical angles)<br>m&ang;4 = m&ang;2 = <b>${m2}&deg;</b> (vertical angles)</p>`
+  };
+}
+
+/* =============================================================================
+   17. Naming Angles — vertex, sides, alternate names
+   ============================================================================= */
+function genProblemNamingAngle(n){
+  const [vB,pA,pC] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,3);
+  const angleNum = randInt(1,9);
+  const total = randInt(30,150);
+  return {
+    number: n,
+    prompt: `Use the diagram below.<br>a) Name the vertex of &ang;${angleNum}.<br>b) Name the sides of &ang;${angleNum} (as two rays).<br>c) Give two other names for &ang;${angleNum}.`,
+    inputsHtml: diagramNamingAngle(vB,pA,pC,angleNum,total) + `<textarea class="write-area" rows="3" placeholder="a) ...&#10;b) ...&#10;c) ..."></textarea>`,
+    modelHtml: `<p>a) Vertex: <b>${vB}</b></p>
+      <p>b) Sides: ray ${vB}${pA} and ray ${vB}${pC}</p>
+      <p>c) &ang;${pA}${vB}${pC} and &ang;${pC}${vB}${pA}</p>`
+  };
+}
+
+function diagramNamingAngle(vB,pA,pC,angleNum,total){
+  const V = [125, 130];
+  function pt(deg, r){
+    const rad = deg * Math.PI / 180;
+    return [V[0] + r*Math.cos(rad), V[1] - r*Math.sin(rad)];
+  }
+  const RA = pt(0, 95);
+  const RC = pt(total, 95);
+  const [lx,ly] = angleLabelPos(V, RA, RC, 35);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 150" width="260" height="150">
+    <line x1="${V[0]}" y1="${V[1]}" x2="${RA[0]}" y2="${RA[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${V[0]}" y1="${V[1]}" x2="${RC[0]}" y2="${RC[1]}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${V[0]}" cy="${V[1]}" r="2.5" fill="currentColor"/>
+    <text x="${RA[0]+2}" y="${RA[1]+2}" font-size="12" fill="currentColor">${pA}</text>
+    <text x="${RC[0]+2}" y="${RC[1]-2}" font-size="12" fill="currentColor">${pC}</text>
+    <text x="${V[0]-14}" y="${V[1]+4}" font-size="12" fill="currentColor">${vB}</text>
+    <text x="${lx-4}" y="${ly}" font-size="12" fill="currentColor">${angleNum}</text>
+  </svg></div>`;
+}
+
+/* =============================================================================
+   18. Polygon classification (convex/concave, name by number of sides)
+   ============================================================================= */
+const POLYGON_NAMES = {3:'triangle',4:'quadrilateral',5:'pentagon',6:'hexagon',7:'heptagon',8:'octagon',9:'nonagon',10:'decagon'};
+
+function genProblemPolygonClassify(n){
+  const sides = randInt(5,9);
+  const isConvex = Math.random() < 0.5;
+  const name = POLYGON_NAMES[sides];
+  const label = isConvex ? `Convex ${name}` : `Concave ${name}`;
+  return {
+    number: n,
+    prompt: `Classify the polygon by the number of sides and state whether it is <i>convex</i> or <i>concave</i>.`,
+    inputsHtml: diagramPolygon(sides, isConvex) + `<div class="fill-row"><input class="fill-input wide" placeholder="e.g. convex hexagon"></div>`,
+    modelHtml: `<p><b>${label}</b> (${sides} sides)</p>`
+  };
+}
+
+function diagramPolygon(sides, isConvex){
+  const cx = 110, cy = 100, r = 75;
+  const pts = [];
+  for (let i = 0; i < sides; i++){
+    const deg = 90 + i * (360/sides);
+    const rad = deg * Math.PI / 180;
+    pts.push([cx + r*Math.cos(rad), cy - r*Math.sin(rad)]);
+  }
+  if (!isConvex){
+    // Pull one vertex sharply inward toward the centroid, guaranteeing a reflex angle
+    const idx = randInt(0, sides-1);
+    const [px,py] = pts[idx];
+    pts[idx] = [cx + (px-cx)*0.15, cy + (py-cy)*0.15];
+  }
+  const pointsStr = pts.map(p => p.join(',')).join(' ');
+  return `<div class="diagram-wrap"><svg viewBox="0 0 220 200" width="220" height="200">
+    <polygon points="${pointsStr}" fill="none" stroke="currentColor" stroke-width="2"/>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   Assemble a full test
+   --------------------------------------------------------------------------- */
+function generateTest(){
+  let n = 0;
+  return [
+    genProblemPointsLinesPlanes(++n),
+    genProblemNamingAngle(++n),
+    genProblemSegmentAddition(++n),
+    genProblemSegmentBisector(++n),
+    genProblemMidpointFormula(++n),
+    genProblemDistanceFormula(++n),
+    genProblemNumberLineDistance(++n),
+    genProblemCoordGeometry(++n),
+    genProblemPolygonClassify(++n),
+    genProblemComplement(++n),
+    genProblemSupplement(++n),
+    genProblemSupplementaryPair(++n),
+    genProblemComplementaryPair(++n),
+    genProblemAngleAdditionAlgebra(++n),
+    genProblemAngleBisectorAlgebra(++n),
+    genProblemVerticalAnglesAlgebra(++n),
+    genProblemAngleWordProblem(++n),
+    genProblemLinearPairWordProblem(++n),
+    genProblemAnglePairID(++n),
+    genProblemLinearVerticalID(++n)
+  ];
+}
+
+function render(problems){
+  auditNotation(problems);
+  const container = document.getElementById('test');
+  container.innerHTML = problems.map(p => `
+    <div class="card problem">
+      <span class="problem-num">Problem ${p.number}</span>
+      <p class="problem-prompt">${p.prompt}</p>
+      ${p.inputsHtml}
+      <div class="action-row">
+        <button class="btn reveal-btn" data-idx="${p.number}">Show answer</button>
+      </div>
+      <div class="model-answer" id="model-${p.number}">
+        <p class="ma-tag">Model answer</p>
+        ${colorizeNotation(p.modelHtml)}
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.reveal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = btn.getAttribute('data-idx');
+      const box = document.getElementById('model-' + idx);
+      const showing = box.classList.toggle('show');
+      btn.textContent = showing ? 'Hide answer' : 'Show answer';
+    });
+  });
+
+  container.querySelectorAll('.accent-key').forEach(btn => {
+    btn.addEventListener('click', () => insertSymbol(btn.getAttribute('data-symbol')));
+  });
+
+  lastFocusedInput = null;
+  document.getElementById('testMeta').textContent =
+    'New set of ' + problems.length + ' problems — generated just now.';
+}
+
+// Symbol-insert buttons work on whichever input she last focused.
+let lastFocusedInput = null;
+document.addEventListener('focusin', (e) => {
+  if (e.target.matches && e.target.matches('.fill-input, .write-area')){
+    lastFocusedInput = e.target;
+  }
+});
+function insertSymbol(symbol){
+  const el = lastFocusedInput;
+  if (!el || !document.contains(el)) return;
+  const start = el.selectionStart ?? el.value.length;
+  const end = el.selectionEnd ?? el.value.length;
+  el.value = el.value.slice(0, start) + symbol + el.value.slice(end);
+  const newPos = start + symbol.length;
+  el.setSelectionRange(newPos, newPos);
+  el.focus();
+}
+
+let allShown = false;
+function toggleAll(){
+  allShown = !allShown;
+  document.querySelectorAll('.model-answer').forEach(el => el.classList.toggle('show', allShown));
+  document.querySelectorAll('.reveal-btn').forEach(b => b.textContent = allShown ? 'Hide answer' : 'Show answer');
+  document.getElementById('toggleAllBtn').textContent = allShown ? 'Hide all answers' : 'Show all answers';
+}
+
+function newTest(){
+  allShown = false;
+  document.getElementById('toggleAllBtn').textContent = 'Show all answers';
+  render(generateTest());
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('newTestBtn').addEventListener('click', newTest);
+document.getElementById('newTestBtn2').addEventListener('click', newTest);
+document.getElementById('toggleAllBtn').addEventListener('click', toggleAll);
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+// Build a fresh practice test the moment the tool is opened.
+render(generateTest());
+</script>
+</body>
+</html>

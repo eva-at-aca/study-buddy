@@ -95,6 +95,13 @@ window.STUDY_SITE = {
       accent: "#7a6ad8",
       tools: [
         {
+          title: "Ch1: Basics of Geometry",
+          topic: "Basics of Geometry",
+          file: "tools/geometry/ch1.html",
+          date: "2026-09-15",
+          note: "Generates a brand-new randomized practice test every time it's opened — points/lines/planes vocabulary, segment & angle addition postulates, midpoint & distance, coordinate geometry, and angle-pair algebra. Matches the style of the Ch. 1 Review and Quiz 1.3–1.6."
+        },
+        {
           title: "Ch2: Reasoning and Proofs",
           topic: "Reasoning and Proofs",
           file: "tools/geometry/ch2.html",
