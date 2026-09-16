@@ -85,6 +85,22 @@ window.STUDY_SITE = {
           note: "Cell cycle, cell structures, and levels of organization — flashcards and write-in. Test on 9/4."
         }
       ]
+    },
+
+    {
+      id: "geometry",
+      name: "Geometry",
+      blurb: "Reasoning, proofs, and angle relationships.",
+      accent: "#7a6ad8",
+      tools: [
+        {
+          title: "Ch2: Reasoning and Proofs",
+          topic: "Reasoning and Proofs",
+          file: "tools/geometry/ch2.html",
+          date: "2026-09-15",
+          note: "Generates a brand-new randomized practice test every time it's opened — conditional statements, two-column proofs, inductive reasoning, properties of equality, and angle relationships. Matches the style of the Ch. 2 Review."
+        }
+      ]
     }
   ]
 };

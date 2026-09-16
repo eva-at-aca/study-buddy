@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch2: Reasoning and Proofs — Study Tool</title>
+<link rel="stylesheet" href="../../assets/study.css">
+<style>
+  /* Extra styles for this worksheet-style tool (on top of the shared study.css) */
+  body{ --accent:#7a6ad8; }
+  .toolbar{ display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 22px; }
+  .problem{ counter-increment:none; }
+  .problem-num{ display:inline-block; font-family:var(--font-mono); font-size:12px; color:var(--accent); border:1px solid var(--rule); border-radius:999px; padding:2px 10px; margin-bottom:10px; }
+  .problem-prompt{ font-size:15.5px; line-height:1.55; margin:0 0 12px; }
+  .problem-prompt b{ color:var(--ink); }
+  .fill-row{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:4px 0 10px; font-size:15px; }
+  .fill-input{ font-family:var(--font-body); font-size:15px; padding:8px 10px; border-radius:8px; border:1px solid var(--rule); background:var(--panel-2); color:var(--ink); width:110px; }
+  .fill-input.wide{ width:220px; }
+  .fill-input:focus{ outline:none; border-color:var(--accent); }
+  .diagram-wrap{ display:flex; justify-content:center; margin:6px 0 14px; }
+  .diagram-wrap svg{ max-width:100%; height:auto; }
+  .reveal-btn{ margin-top:2px; }
+  .model-answer{ display:none; }
+  .model-answer.show{ display:block; }
+  .model-answer ol{ margin:6px 0 0; padding-left:20px; }
+  .model-answer li{ margin-bottom:4px; }
+  .proof-table{ width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; }
+  .proof-table th, .proof-table td{ border:1px solid var(--rule); padding:6px 8px; text-align:left; vertical-align:top; }
+  .proof-table th{ background:var(--panel-2); font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); }
+  .blank-proof-table{ width:100%; border-collapse:collapse; font-size:14px; margin:6px 0 4px; }
+  .blank-proof-table th, .blank-proof-table td{ border:1px solid var(--rule); padding:5px 6px; vertical-align:middle; }
+  .blank-proof-table th{ background:var(--panel-2); font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); text-align:left; }
+  .blank-proof-table td.rownum{ width:22px; text-align:center; color:var(--ink-dim); font-size:12.5px; border-right:none; padding-right:2px; }
+  .blank-proof-table td.statement{ border-left:none; }
+  .blank-proof-table input{ width:100%; font-family:var(--font-body); font-size:14px; padding:6px 8px; border-radius:6px; border:1px solid var(--rule); background:var(--panel-2); color:var(--ink); }
+  .blank-proof-table input:focus{ outline:none; border-color:var(--accent); }
+  .test-meta{ font-size:13px; color:var(--ink-dim); margin:0 0 4px; }
+  @media print{
+    .toolbar, .back-link, .reveal-btn{ display:none !important; }
+    .model-answer{ display:block !important; }
+    body{ background:#fff; color:#000; }
+    .card{ border-color:#999; background:#fff; page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <a class="back-link" href="../../index.html">&lsaquo; Study Buddy</a>
+  <div class="masthead">
+    <p class="eyebrow">Geometry &middot; Ch2</p>
+    <h1>Ch2: Reasoning and Proofs</h1>
+    <p class="sub">A brand-new practice test every time you open this &mdash; same style, length, and difficulty as the teacher's Ch. 2 Review.</p>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="newTestBtn">&#8635; New practice test</button>
+    <button class="btn" id="toggleAllBtn">Show all answers</button>
+    <button class="btn btn-ghost" id="printBtn">Print</button>
+  </div>
+  <p class="test-meta" id="testMeta"></p>
+
+  <div id="test"></div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="newTestBtn2">&#8635; New practice test</button>
+  </div>
+</main>
+
+<script>
+/* =============================================================================
+   Ch2 Practice Test Generator — Reasoning and Proofs
+   Every open (and every "New practice test" click) builds a fresh, randomized
+   set of problems that mirror the shape of the teacher's Ch. 2 Review sheet:
+   conditional statements, converse/inverse/contrapositive + truth values,
+   two-column proofs, biconditionals, inductive reasoning, algebraic
+   properties of equality, and angle relationships (bisectors, vertical
+   angles, solving for x/y).
+
+   This tool doesn't use the shared card-based StudyEngine (assets/study-engine.js)
+   because the content here isn't flashcard-shaped — it's a generated worksheet
+   with diagrams, proofs, and free-response items. Each problem instead gets a
+   "Show answer" reveal (a model solution), same self-check spirit as the
+   worksheet + answer key.
+   ============================================================================= */
+
+function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr){ return arr[randInt(0, arr.length - 1)]; }
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = randInt(0, i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ---------------------------------------------------------------------------
+   1. Conditional statement rewrite (if-then form)
+   --------------------------------------------------------------------------- */
+const CONDITIONAL_FACTS = [
+  { fact: "Congruent angles have equal angle measures.", ifThen: "If two angles are congruent, then they have equal angle measures." },
+  { fact: "Congruent segments have equal lengths.", ifThen: "If two segments are congruent, then they have equal lengths." },
+  { fact: "Perpendicular lines intersect to form right angles.", ifThen: "If two lines are perpendicular, then they intersect to form right angles." },
+  { fact: "Vertical angles are congruent.", ifThen: "If two angles are vertical angles, then they are congruent." },
+  { fact: "A right angle measures 90°.", ifThen: "If an angle is a right angle, then it measures 90°." },
+  { fact: "An isosceles triangle has two congruent sides.", ifThen: "If a triangle is isosceles, then it has two congruent sides." },
+  { fact: "Supplementary angles have measures that sum to 180°.", ifThen: "If two angles are supplementary, then their measures sum to 180°." },
+  { fact: "A square has four congruent sides.", ifThen: "If a quadrilateral is a square, then it has four congruent sides." },
+  { fact: "Complementary angles have measures that sum to 90°.", ifThen: "If two angles are complementary, then their measures sum to 90°." },
+  { fact: "An equilateral triangle has three congruent angles.", ifThen: "If a triangle is equilateral, then it has three congruent angles." }
+];
+
+function genProblemConditionalRewrite(n){
+  const item = pick(CONDITIONAL_FACTS);
+  return {
+    number: n,
+    prompt: `Rewrite the statement in if-then form:<br><b>${esc(item.fact)}</b>`,
+    inputsHtml: `<textarea class="write-area" rows="2" placeholder="If ..., then ..."></textarea>`,
+    modelHtml: `<p>${esc(item.ifThen)}</p>`
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   2. Conditional / converse / inverse / contrapositive + truth values +
+      logical equivalence
+   --------------------------------------------------------------------------- */
+const PQ_PAIRS = [
+  { p: "it is a poodle", notP: "it is not a poodle", q: "it is a dog", notQ: "it is not a dog" },
+  { p: "a shape is a square", notP: "a shape is not a square", q: "it is a rectangle", notQ: "it is not a rectangle" },
+  { p: "an animal is a cat", notP: "an animal is not a cat", q: "it is a mammal", notQ: "it is not a mammal" },
+  { p: "a number is divisible by 4", notP: "a number is not divisible by 4", q: "it is divisible by 2", notQ: "it is not divisible by 2" },
+  { p: "a triangle is equilateral", notP: "a triangle is not equilateral", q: "it is isosceles", notQ: "it is not isosceles" },
+  { p: "a bird is a robin", notP: "a bird is not a robin", q: "it is a bird", notQ: "it is not a bird" },
+  { p: "a shape is a cube", notP: "a shape is not a cube", q: "it is a rectangular prism", notQ: "it is not a rectangular prism" }
+];
+
+function genProblemConditionalFamily(n){
+  const pr = pick(PQ_PAIRS);
+  const cond = `If ${pr.p}, then ${pr.q}.`;
+  const conv = `If ${pr.q}, then ${pr.p}.`;
+  const inv  = `If ${pr.notP}, then ${pr.notQ}.`;
+  const contra = `If ${pr.notQ}, then ${pr.notP}.`;
+  return {
+    number: n,
+    prompt: `Let <i>p</i> be &ldquo;${esc(pr.p)}&rdquo; and let <i>q</i> be &ldquo;${esc(pr.q)}.&rdquo; Write each statement in words, then decide whether it is true or false. Circle the two statements that are logically equivalent.`,
+    inputsHtml: `
+      <div class="fill-row" style="display:block;">
+        <div style="margin-bottom:8px;"><b>a. conditional (p&rarr;q):</b> <textarea class="write-area" rows="1"></textarea></div>
+        <div style="margin-bottom:8px;"><b>b. converse (q&rarr;p):</b> <textarea class="write-area" rows="1"></textarea></div>
+        <div style="margin-bottom:8px;"><b>c. inverse (~p&rarr;~q):</b> <textarea class="write-area" rows="1"></textarea></div>
+        <div style="margin-bottom:8px;"><b>d. contrapositive (~q&rarr;~p):</b> <textarea class="write-area" rows="1"></textarea></div>
+      </div>`,
+    modelHtml: `
+      <ol type="a">
+        <li>${esc(cond)} <b>(True)</b></li>
+        <li>${esc(conv)} <b>(False)</b></li>
+        <li>${esc(inv)} <b>(False)</b></li>
+        <li>${esc(contra)} <b>(True)</b></li>
+      </ol>
+      <p><b>a</b> and <b>d</b> (the conditional and the contrapositive) are logically equivalent &mdash; a conditional and its contrapositive always share the same truth value.</p>`
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   Shared helper: a blank fill-in Statements/Reasons table. She starts from a
+   clean sheet — the prompt only ever states Given/Prove, never a partial
+   answer — and can check her completed proof against the model answer via
+   the Show answer button (added by render(), same as every other problem).
+   --------------------------------------------------------------------------- */
+function blankProofTable(rows){
+  let rowsHtml = '';
+  for (let i = 1; i <= rows; i++){
+    rowsHtml += `<tr>
+      <td class="rownum">${i}.</td>
+      <td class="statement"><input type="text" aria-label="Statement ${i}"></td>
+      <td class="rownum">${i}.</td>
+      <td class="statement"><input type="text" aria-label="Reason ${i}"></td>
+    </tr>`;
+  }
+  return `<table class="blank-proof-table">
+    <tr><th colspan="2">Statements</th><th colspan="2">Reasons</th></tr>
+    ${rowsHtml}
+  </table>`;
+}
+
+/* ---------------------------------------------------------------------------
+   3. Two-column proof — angle addition + substitution
+   --------------------------------------------------------------------------- */
+function genProblemAngleAdditionProof(n){
+  const total = pick([90, 120, 135, 150, 180]);
+  return {
+    number: n,
+    prompt: `Decide whether the statement about the diagram is true: <b>m&ang;PSR = ${total}&deg;</b> means <b>m&ang;1 + m&ang;2 = ${total}&deg;</b>. Explain using deductive reasoning (write a two-column proof).`,
+    inputsHtml: diagramTwoRayAngle(total) + blankProofTable(3),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. m&ang;PSR = ${total}&deg;</td><td>1. Given</td></tr>
+        <tr><td>2. m&ang;1 + m&ang;2 = m&ang;PSR</td><td>2. Angle Addition Postulate</td></tr>
+        <tr><td>3. m&ang;1 + m&ang;2 = ${total}&deg;</td><td>3. Substitution</td></tr>
+      </table>`
+  };
+}
+
+function diagramTwoRayAngle(total){
+  // Standard math convention: angle measured counter-clockwise from the
+  // positive x-axis; screen y is flipped since SVG y grows downward.
+  // Vertex sits low-center; the baseline ray (R) points right-ish and the
+  // fan sweeps counter-clockwise (upward) by `total` degrees, always
+  // staying within the visible box regardless of how big `total` is.
+  const ox = 130, oy = 125, r = 100;
+  const baseDeg = 15; // R's screen angle
+  const midDeg = randInt(30, total - 30);
+  function pt(sweepDeg, radius){
+    const rad = (baseDeg + sweepDeg) * Math.PI / 180;
+    return [ox + radius * Math.cos(rad), oy - radius * Math.sin(rad)];
+  }
+  const [rx, ry] = pt(0, 100);
+  const [qx, qy] = pt(midDeg, 95);
+  const [px, py] = pt(total, 100);
+  const [l1x, l1y] = pt(midDeg/2, 40);
+  const [l2x, l2y] = pt(midDeg + (total-midDeg)/2, 40);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 150" width="260" height="150">
+    <line x1="${ox}" y1="${oy}" x2="${rx}" y2="${ry}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${ox}" y1="${oy}" x2="${qx}" y2="${qy}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${ox}" y1="${oy}" x2="${px}" y2="${py}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${ox}" cy="${oy}" r="2.5" fill="currentColor"/>
+    <text x="${rx+4}" y="${ry+4}" font-size="12" fill="currentColor">R</text>
+    <text x="${qx+2}" y="${qy-8}" font-size="12" fill="currentColor">Q</text>
+    <text x="${px-4}" y="${py-8}" font-size="12" fill="currentColor">P</text>
+    <text x="${ox-4}" y="${oy+16}" font-size="12" fill="currentColor">S</text>
+    <text x="${l1x-4}" y="${l1y}" font-size="11" fill="currentColor">1</text>
+    <text x="${l2x-4}" y="${l2y}" font-size="11" fill="currentColor">2</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   4. Biconditional statement from a definition
+   --------------------------------------------------------------------------- */
+const DEFINITIONS = [
+  { term: "an obtuse angle", def: "an angle with a measure greater than 90° and less than 180°", bicond: "An angle is obtuse if and only if its measure is greater than 90° and less than 180°." },
+  { term: "an acute angle", def: "an angle with a measure greater than 0° and less than 90°", bicond: "An angle is acute if and only if its measure is greater than 0° and less than 90°." },
+  { term: "a right angle", def: "an angle that measures exactly 90°", bicond: "An angle is a right angle if and only if it measures exactly 90°." },
+  { term: "complementary angles", def: "two angles whose measures sum to 90°", bicond: "Two angles are complementary if and only if their measures sum to 90°." },
+  { term: "supplementary angles", def: "two angles whose measures sum to 180°", bicond: "Two angles are supplementary if and only if their measures sum to 180°." },
+  { term: "perpendicular lines", def: "two lines that intersect to form a right angle", bicond: "Two lines are perpendicular if and only if they intersect to form a right angle." },
+  { term: "congruent segments", def: "two segments that have the same length", bicond: "Two segments are congruent if and only if they have the same length." }
+];
+
+function genProblemBiconditional(n){
+  const item = pick(DEFINITIONS);
+  return {
+    number: n,
+    prompt: `Rewrite the definition below as a biconditional statement:<br><b>${esc(item.term[0].toUpperCase() + item.term.slice(1))} ${item.term.startsWith('an') || item.term.startsWith('a ') ? 'is' : 'are'} ${esc(item.def)}.</b>`,
+    inputsHtml: `<textarea class="write-area" rows="2" placeholder="... if and only if ..."></textarea>`,
+    modelHtml: `<p>${esc(item.bicond)}</p>`
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   5. Inductive reasoning — number pattern
+   --------------------------------------------------------------------------- */
+function genProblemNumberPattern(n){
+  const style = pick(['double-plus', 'arith']);
+  let shown, next, rule;
+  if (style === 'double-plus'){
+    const a0 = randInt(1, 4), mult = pick([2, 3]), add = pick([0, 1, 2]);
+    const terms = [a0];
+    for (let i = 0; i < 6; i++) terms.push(terms[terms.length - 1] * mult + add);
+    shown = terms.slice(0, 5); next = terms.slice(5, 7);
+    rule = `Each number is ${mult}&times; the previous number${add ? ' plus ' + add : ''}.`;
+  } else {
+    const a0 = randInt(1, 10), d = randInt(2, 9);
+    const terms = [];
+    for (let i = 0; i < 7; i++) terms.push(a0 + d * i);
+    shown = terms.slice(0, 5); next = terms.slice(5, 7);
+    rule = `Add ${d} each time.`;
+  }
+  return {
+    number: n,
+    prompt: `Write the next two numbers using inductive reasoning. <i>(Reasoning patterns can vary — explain yours if it differs.)</i><br><b>${shown.join(', ')}, ___, ___</b>`,
+    inputsHtml: `<div class="fill-row"><input class="fill-input" placeholder="1st"><input class="fill-input" placeholder="2nd"></div>`,
+    modelHtml: `<p><b>${next[0]}, ${next[1]}</b> &mdash; ${rule}</p>`
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   6. Inductive reasoning — letter pattern
+   --------------------------------------------------------------------------- */
+function genProblemLetterPattern(n){
+  const offset = randInt(0, 3);
+  const seq = [];
+  let f = offset, b = 25 - offset;
+  for (let i = 0; i < 4; i++){
+    seq.push(String.fromCharCode(65 + f));
+    seq.push(String.fromCharCode(65 + b));
+    f += 1; b -= 1;
+  }
+  const shown = seq.slice(0, 5), next = seq.slice(5, 7);
+  return {
+    number: n,
+    prompt: `Write the next two letters using inductive reasoning.<br><b>${shown.join(', ')}, ___, ___</b>`,
+    inputsHtml: `<div class="fill-row"><input class="fill-input" placeholder="1st"><input class="fill-input" placeholder="2nd"></div>`,
+    modelHtml: `<p><b>${next[0]}, ${next[1]}</b> &mdash; alternating letters counting in from the start and end of the alphabet.</p>`
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   7-9. Properties of equality — copy and complete
+   --------------------------------------------------------------------------- */
+function genProperty(kind){
+  if (kind === 'addition'){
+    const a = randInt(20, 80);
+    return { name: 'Addition Property of Equality', prompt: `If m&ang;J = ${a}&deg;, then m&ang;J + m&ang;K = ___.`, answer: `${a} + m&ang;K` };
+  }
+  if (kind === 'reflexive'){
+    const n = pick(['GH','PQ','ST','MN','AB','CD']);
+    return { name: 'Reflexive Property of Equality', prompt: `${n} = ___.`, answer: n };
+  }
+  if (kind === 'distributive'){
+    const a = randInt(2,9), b = randInt(2,12);
+    return { name: 'Distributive Property', prompt: `If ${a}(x + ${b}) = 30, then ___ + ___ = 30.`, answer: `${a}x + ${a*b}` };
+  }
+  if (kind === 'symmetric'){
+    const pairs = [['AB','CD'], ['PQ','RS'], ['XY','ZW']];
+    const [l, r] = pick(pairs);
+    return { name: 'Symmetric Property of Equality', prompt: `If ${l} = ${r}, then ${r} = ___.`, answer: l };
+  }
+  if (kind === 'transitive'){
+    const trip = pick([['AB','CD','EF'], ['PQ','RS','TU'], ['GH','JK','LM']]);
+    return { name: 'Transitive Property of Equality', prompt: `If ${trip[0]} = ${trip[1]} and ${trip[1]} = ${trip[2]}, then ${trip[0]} = ___.`, answer: trip[2] };
+  }
+  if (kind === 'substitution'){
+    const a = randInt(2,9);
+    return { name: 'Substitution Property of Equality', prompt: `If x = ${a} and y = 2x + 1, then y = ___.`, answer: `${2*a+1}` };
+  }
+}
+
+function genProblemProperty(n, kind){
+  const p = genProperty(kind);
+  return {
+    number: n,
+    prompt: `Use the property to copy and complete the statement.<br><b>${p.name}:</b> ${p.prompt}`,
+    inputsHtml: `<div class="fill-row"><input class="fill-input wide"></div>`,
+    modelHtml: `<p><b>${p.answer}</b></p>`
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   10. Angle bisector
+   --------------------------------------------------------------------------- */
+function genProblemBisector(n){
+  const total = randInt(6, 18) * 10; // multiple of 10, keeps the half clean-ish
+  const half = total / 2;
+  return {
+    number: n,
+    prompt: `In the diagram, ray <b>CE</b> bisects &ang;DCF. If m&ang;DCF = ${total}&deg;, find m&ang;DCE and m&ang;ECF. Explain your reasoning.`,
+    inputsHtml: diagramBisector(total) + `<div class="fill-row"><input class="fill-input" placeholder="m∠DCE"><input class="fill-input" placeholder="m∠ECF"></div><textarea class="write-area" rows="2" placeholder="Explain your reasoning..."></textarea>`,
+    modelHtml: `<p>m&ang;DCE = m&ang;ECF = <b>${half}&deg;</b> &mdash; a bisector splits an angle into two congruent halves, so each half is ${total}&deg; &divide; 2 = ${half}&deg;.</p>`
+  };
+}
+
+function diagramBisector(total){
+  const ox = 130, oy = 125, r = 100;
+  const baseDeg = 15; // D's screen angle; fan sweeps counter-clockwise by `total`
+  function pt(sweepDeg, radius){
+    const rad = (baseDeg + sweepDeg) * Math.PI / 180;
+    return [ox + radius * Math.cos(rad), oy - radius * Math.sin(rad)];
+  }
+  const [dx, dy] = pt(0, 100);
+  const [ex, ey] = pt(total/2, 95);
+  const [fx, fy] = pt(total, 100);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 150" width="260" height="150">
+    <line x1="${ox}" y1="${oy}" x2="${dx}" y2="${dy}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${ox}" y1="${oy}" x2="${ex}" y2="${ey}" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/>
+    <line x1="${ox}" y1="${oy}" x2="${fx}" y2="${fy}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${ox}" cy="${oy}" r="2.5" fill="currentColor"/>
+    <text x="${dx+2}" y="${dy-4}" font-size="12" fill="currentColor">D</text>
+    <text x="${ex+2}" y="${ey-8}" font-size="12" fill="currentColor">E</text>
+    <text x="${fx+2}" y="${fy-4}" font-size="12" fill="currentColor">F</text>
+    <text x="${ox-4}" y="${oy+16}" font-size="12" fill="currentColor">C</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   11. Intersecting lines — congruent angles + measures
+   --------------------------------------------------------------------------- */
+function genProblemVerticalAngles(n){
+  const a1 = randInt(2, 17) * 5; // multiple of 5, under 180
+  const a2 = 180 - a1;
+  return {
+    number: n,
+    prompt: `Two lines intersect at point <b>X</b>, forming &ang;1, &ang;2, &ang;3, and &ang;4 in order around the point. If m&ang;1 = ${a1}&deg;, name all pairs of congruent angles and find the measures of &ang;2, &ang;3, and &ang;4.`,
+    inputsHtml: diagramXIntersection(a1) + `<div class="fill-row"><input class="fill-input" placeholder="m∠2"><input class="fill-input" placeholder="m∠3"><input class="fill-input" placeholder="m∠4"></div><textarea class="write-area" rows="2" placeholder="Congruent pairs: ..."></textarea>`,
+    modelHtml: `<p>&ang;1 &cong; &ang;3 and &ang;2 &cong; &ang;4 (vertical angles). m&ang;2 = m&ang;4 = <b>${a2}&deg;</b> (linear pair with &ang;1, so they sum to 180&deg;). m&ang;3 = <b>${a1}&deg;</b> (vertical angle with &ang;1).</p>`
+  };
+}
+
+function diagramXIntersection(a1){
+  const cx = 130, cy = 90, r = 75;
+  const angles = [ (90 - a1/2), (90 - a1/2 - 180) ]; // one line's two directions
+  // Build two lines: line A at angle (a1/2 above horizontal on both sides), line B perpendicular-ish crossing
+  const halfDeg = a1 / 2;
+  function pt(deg, radius){
+    const rad = deg * Math.PI / 180;
+    return [cx + radius * Math.cos(rad), cy - radius * Math.sin(rad)];
+  }
+  const [x1,y1] = pt(halfDeg, r);
+  const [x2,y2] = pt(halfDeg + 180, r);
+  const [x3,y3] = pt(halfDeg + a1, r);
+  const [x4,y4] = pt(halfDeg + a1 + 180, r);
+  // label positions (mid-angle, smaller radius)
+  const lab1 = pt(halfDeg + a1/2, 40);
+  const lab2 = pt(halfDeg + a1 + (180-a1)/2, 40);
+  const lab3 = pt(halfDeg + 180 + a1/2, 40);
+  const lab4 = pt(halfDeg + a1 + 180 + (180-a1)/2, 40);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 180" width="260" height="180">
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${x3}" y1="${y3}" x2="${x4}" y2="${y4}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${cx}" cy="${cy}" r="2.5" fill="currentColor"/>
+    <text x="${lab1[0]-4}" y="${lab1[1]}" font-size="12" fill="currentColor">1</text>
+    <text x="${lab2[0]-4}" y="${lab2[1]}" font-size="12" fill="currentColor">2</text>
+    <text x="${lab3[0]-4}" y="${lab3[1]}" font-size="12" fill="currentColor">3</text>
+    <text x="${lab4[0]-4}" y="${lab4[1]}" font-size="12" fill="currentColor">4</text>
+    <text x="${cx+8}" y="${cy+16}" font-size="11" fill="currentColor">X</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   12-13. Solve for x and y (vertical-angle equations), reverse-engineered
+   so the numbers always work out clean.
+   --------------------------------------------------------------------------- */
+function genLinearVsLinear(varName){
+  const target = randInt(3, 20);
+  let a = randInt(2, 9), c = randInt(2, 9);
+  while (c === a) c = randInt(2, 9);
+  let d = (a - c) * target;
+  let tries = 0;
+  while (d === 0 && tries < 10){ c = randInt(2, 9); if (c !== a) d = (a - c) * target; tries++; }
+  const dStr = d > 0 ? ` + ${d}` : d < 0 ? ` - ${Math.abs(d)}` : '';
+  return { left: `${a}${varName}`, right: `${c}${varName}${dStr}`, target,
+           steps: [`${a}${varName} = ${c}${varName}${dStr}`, `${a-c}${varName} = ${d}`, `${varName} = ${target}`] };
+}
+function genDistributiveVsLinear(varName){
+  const target = randInt(2, 15);
+  const k = randInt(2, 6), p = randInt(1, 9);
+  let m = randInt(2, 9);
+  while (m === k) m = randInt(2, 9);
+  const n = k * (target + p) - m * target;
+  const nStr = n > 0 ? ` + ${n}` : n < 0 ? ` - ${Math.abs(n)}` : '';
+  return { left: `${k}(${varName} + ${p})`, right: `${m}${varName}${nStr}`, target,
+           steps: [`${k}${varName} + ${k*p} = ${m}${varName}${nStr}`, `${k-m}${varName} = ${n - k*p}`, `${varName} = ${target}`] };
+}
+
+function genProblemSolveXY(n, style){
+  const xEq = style === 'distributive' ? genDistributiveVsLinear('x') : genLinearVsLinear('x');
+  const yEq = genLinearVsLinear('y');
+  return {
+    number: n,
+    prompt: `Find the values of <b>x</b> and <b>y</b>. Two lines intersect, forming two pairs of vertical angles.<br><b>${xEq.left} = ${xEq.right}</b> and <b>${yEq.left} = ${yEq.right}</b>`,
+    inputsHtml: `<div class="fill-row"><input class="fill-input" placeholder="x ="><input class="fill-input" placeholder="y ="></div><textarea class="write-area" rows="3" placeholder="Show your algebraic work..."></textarea>`,
+    modelHtml: `
+      <p><b>x = ${xEq.target}</b><br>${xEq.steps.join('<br>')}</p>
+      <p style="margin-top:8px;"><b>y = ${yEq.target}</b><br>${yEq.steps.join('<br>')}</p>`
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   14. Two-column proof — a named theorem (Congruent Supplements / Complements
+   / Vertical Angles), with randomized angle labels each time.
+   --------------------------------------------------------------------------- */
+function genProblemNamedTheoremProof(n){
+  const labels = shuffle([1,2,3,4,5,6]).slice(0,3);
+  const [a, b, c] = labels;
+  const kind = pick(['supplements', 'complements']);
+  const word = kind === 'supplements' ? 'supplementary' : 'complementary';
+  const sum = kind === 'supplements' ? 180 : 90;
+  return {
+    number: n,
+    prompt: `Complete the two-column proof.<br><b>Given:</b> &ang;${a} and &ang;${b} are ${word}; &ang;${a} and &ang;${c} are ${word}.<br><b>Prove:</b> &ang;${b} &cong; &ang;${c}`,
+    inputsHtml: blankProofTable(5),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. &ang;${a} and &ang;${b} are ${word}. &ang;${a} and &ang;${c} are ${word}.</td><td>1. Given</td></tr>
+        <tr><td>2. m&ang;${a} + m&ang;${b} = ${sum}&deg;, m&ang;${a} + m&ang;${c} = ${sum}&deg;</td><td>2. Definition of ${word} angles</td></tr>
+        <tr><td>3. m&ang;${a} + m&ang;${b} = m&ang;${a} + m&ang;${c}</td><td>3. Transitive Property of Equality</td></tr>
+        <tr><td>4. m&ang;${b} = m&ang;${c}</td><td>4. Subtraction Property of Equality</td></tr>
+        <tr><td>5. &ang;${b} &cong; &ang;${c}</td><td>5. Definition of congruent angles</td></tr>
+      </table>`
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   15. Two-column proof — linear pair / exterior angle, with substitution
+   and reflexive + subtraction properties (this is the multi-property proof
+   pattern students tend to find hardest).
+   --------------------------------------------------------------------------- */
+function genProblemLinearPairProof(n){
+  const [nExt, nInt, nL] = shuffle([1,2,3,4,5,6,7,8,9]).slice(0,3);
+  return {
+    number: n,
+    prompt: `Given: &ang;${nExt} and &ang;${nInt} are a linear pair; m&ang;${nExt} + m&ang;${nL} = 180&deg;.<br><b>Prove:</b> m&ang;${nInt} = m&ang;${nL}`,
+    inputsHtml: diagramLinearPairTriangle(nExt, nInt, nL) + blankProofTable(7),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. &ang;${nExt} and &ang;${nInt} are a linear pair</td><td>1. Given</td></tr>
+        <tr><td>2. &ang;${nExt} and &ang;${nInt} are supplementary angles</td><td>2. Definition of linear pairs</td></tr>
+        <tr><td>3. m&ang;${nExt} + m&ang;${nInt} = 180&deg;</td><td>3. Definition of supplementary angles</td></tr>
+        <tr><td>4. m&ang;${nExt} + m&ang;${nL} = 180&deg;</td><td>4. Given</td></tr>
+        <tr><td>5. m&ang;${nExt} + m&ang;${nInt} = m&ang;${nExt} + m&ang;${nL}</td><td>5. Substitution</td></tr>
+        <tr><td>6. m&ang;${nExt} = m&ang;${nExt}</td><td>6. Reflexive Property of Equality</td></tr>
+        <tr><td>7. m&ang;${nInt} = m&ang;${nL}</td><td>7. Subtraction Property of Equality</td></tr>
+      </table>`
+  };
+}
+
+function diagramLinearPairTriangle(nExt, nInt, nL){
+  const J = [100, 125], L = [210, 125], K = [155, 40], Jext = [30, 125];
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 150" width="260" height="150">
+    <line x1="${Jext[0]}" y1="${Jext[1]}" x2="${L[0]}" y2="${L[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${J[0]}" y1="${J[1]}" x2="${K[0]}" y2="${K[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${L[0]}" y1="${L[1]}" x2="${K[0]}" y2="${K[1]}" stroke="currentColor" stroke-width="2"/>
+    <polyline points="${Jext[0]+11},${Jext[1]-6} ${Jext[0]},${Jext[1]} ${Jext[0]+11},${Jext[1]+6}" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${J[0]}" cy="${J[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${L[0]}" cy="${L[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${K[0]}" cy="${K[1]}" r="2.5" fill="currentColor"/>
+    <text x="${K[0]-4}" y="${K[1]-8}" font-size="12" fill="currentColor">K</text>
+    <text x="${J[0]-8}" y="${J[1]+16}" font-size="12" fill="currentColor">J</text>
+    <text x="${L[0]-2}" y="${L[1]+16}" font-size="12" fill="currentColor">L</text>
+    <text x="${J[0]-32}" y="${J[1]-8}" font-size="12" fill="currentColor">${nExt}</text>
+    <text x="${J[0]+10}" y="${J[1]-14}" font-size="12" fill="currentColor">${nInt}</text>
+    <text x="${L[0]-26}" y="${L[1]-14}" font-size="12" fill="currentColor">${nL}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   16. Two-column proof — triangle with two cevians, separated givens +
+   Angle Addition Postulate + substitution + subtraction.
+   --------------------------------------------------------------------------- */
+function genProblemTriangleCevianProof(n){
+  const [n1, n2, n3, n4] = shuffle([1,2,3,4,5,6,7,8]).slice(0,4);
+  const [vS, vR, vT] = shuffle(['S','X','M','J','K','A','D','G']).slice(0,3);
+  return {
+    number: n,
+    prompt: `(Separate the givens into two different steps — the second given is used later in the proof.)<br>Given: m&ang;${vS}${vR}${vT} = m&ang;${vS}${vT}${vR}; m&ang;${n3} = m&ang;${n4}.<br><b>Prove:</b> m&ang;${n1} = m&ang;${n2}`,
+    inputsHtml: diagramTriangleCevians(vS, vR, vT, n1, n2, n3, n4) + blankProofTable(6),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. m&ang;${vS}${vR}${vT} = m&ang;${vS}${vT}${vR}</td><td>1. Given</td></tr>
+        <tr><td>2. m&ang;${n3} + m&ang;${n1} = m&ang;${vS}${vR}${vT}</td><td>2. Angle Addition Postulate</td></tr>
+        <tr><td>3. m&ang;${n4} + m&ang;${n2} = m&ang;${vS}${vT}${vR}</td><td>3. Angle Addition Postulate</td></tr>
+        <tr><td>4. m&ang;${n3} + m&ang;${n1} = m&ang;${n4} + m&ang;${n2}</td><td>4. Substitution</td></tr>
+        <tr><td>5. m&ang;${n4} = m&ang;${n3}</td><td>5. Given</td></tr>
+        <tr><td>6. m&ang;${n1} = m&ang;${n2}</td><td>6. Subtraction Property of Equality</td></tr>
+      </table>`
+  };
+}
+
+function diagramTriangleCevians(vS, vR, vT, n1, n2, n3, n4){
+  const S = [130, 35], R = [55, 165], T = [215, 165];
+  function lerp(A,B,t){ return [A[0]+(B[0]-A[0])*t, A[1]+(B[1]-A[1])*t]; }
+  const P = lerp(S, R, 0.55), Q = lerp(S, T, 0.55);
+  function intersect(p1,p2,p3,p4){
+    const [x1,y1]=p1,[x2,y2]=p2,[x3,y3]=p3,[x4,y4]=p4;
+    const d = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+    const t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/d;
+    return [x1+t*(x2-x1), y1+t*(y2-y1)];
+  }
+  const Z = intersect(R, Q, T, P);
+  const n1pos = [ (R[0]+Q[0])/2 - 6, (R[1]+Q[1])/2 - 10 ];
+  const n3pos = [ R[0] + 38, R[1] - 6 ];
+  const n4pos = [ (T[0]+P[0])/2 + 2, (T[1]+P[1])/2 - 10 ];
+  const n2pos = [ T[0] - 42, T[1] - 6 ];
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 180" width="260" height="180">
+    <line x1="${S[0]}" y1="${S[1]}" x2="${R[0]}" y2="${R[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${S[0]}" y1="${S[1]}" x2="${T[0]}" y2="${T[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${R[0]}" y1="${R[1]}" x2="${T[0]}" y2="${T[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${R[0]}" y1="${R[1]}" x2="${Q[0]}" y2="${Q[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${T[0]}" y1="${T[1]}" x2="${P[0]}" y2="${P[1]}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${S[0]}" cy="${S[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${R[0]}" cy="${R[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${T[0]}" cy="${T[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${P[0]}" cy="${P[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${Q[0]}" cy="${Q[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${Z[0]}" cy="${Z[1]}" r="2" fill="currentColor"/>
+    <text x="${S[0]-4}" y="${S[1]-8}" font-size="12" fill="currentColor">${vS}</text>
+    <text x="${R[0]-14}" y="${R[1]+6}" font-size="12" fill="currentColor">${vR}</text>
+    <text x="${T[0]+4}" y="${T[1]+6}" font-size="12" fill="currentColor">${vT}</text>
+    <text x="${P[0]-16}" y="${P[1]-2}" font-size="11" fill="currentColor">P</text>
+    <text x="${Q[0]+4}" y="${Q[1]-2}" font-size="11" fill="currentColor">Q</text>
+    <text x="${n1pos[0]}" y="${n1pos[1]}" font-size="11" fill="currentColor">${n1}</text>
+    <text x="${n3pos[0]}" y="${n3pos[1]}" font-size="11" fill="currentColor">${n3}</text>
+    <text x="${n4pos[0]}" y="${n4pos[1]}" font-size="11" fill="currentColor">${n4}</text>
+    <text x="${n2pos[0]}" y="${n2pos[1]}" font-size="11" fill="currentColor">${n2}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   17. Two-column proof — segment addition, separated givens.
+   --------------------------------------------------------------------------- */
+function genProblemSegmentAdditionProof(n){
+  const [p1, p2, p3, p4, p5, p6] = shuffle(['S','I','T','R','U','N','A','B','C','D','E','F']).slice(0,6);
+  return {
+    number: n,
+    prompt: `(Separate the givens into two different steps — the second given is used later in the proof.)<br>Given: ${p1}${p3} = ${p4}${p6}; ${p2}${p3} = ${p4}${p5}.<br><b>Prove:</b> ${p1}${p2} = ${p5}${p6}`,
+    inputsHtml: diagramSegmentAddition(p1, p2, p3, p4, p5, p6) + blankProofTable(5),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. ${p1}${p3} = ${p4}${p6}</td><td>1. Given</td></tr>
+        <tr><td>2. ${p1}${p2} + ${p2}${p3} = ${p1}${p3}; ${p4}${p5} + ${p5}${p6} = ${p4}${p6}</td><td>2. Segment Addition Postulate</td></tr>
+        <tr><td>3. ${p1}${p2} + ${p2}${p3} = ${p4}${p5} + ${p5}${p6}</td><td>3. Substitution</td></tr>
+        <tr><td>4. ${p2}${p3} = ${p4}${p5}</td><td>4. Given</td></tr>
+        <tr><td>5. ${p1}${p2} = ${p5}${p6}</td><td>5. Subtraction Property of Equality</td></tr>
+      </table>`
+  };
+}
+
+function diagramSegmentAddition(p1, p2, p3, p4, p5, p6){
+  const y1 = 55, y2 = 115, xL = 40, xR = 220;
+  const f1 = 0.35 + Math.random() * 0.3;
+  const f2 = 0.35 + Math.random() * 0.3;
+  const x2 = xL + (xR - xL) * f1;
+  const x5 = xL + (xR - xL) * f2;
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 140" width="260" height="140">
+    <line x1="${xL}" y1="${y1}" x2="${xR}" y2="${y1}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${xL}" cy="${y1}" r="2.5" fill="currentColor"/>
+    <circle cx="${x2}" cy="${y1}" r="2.5" fill="currentColor"/>
+    <circle cx="${xR}" cy="${y1}" r="2.5" fill="currentColor"/>
+    <text x="${xL-4}" y="${y1-8}" font-size="12" fill="currentColor">${p1}</text>
+    <text x="${x2-4}" y="${y1-8}" font-size="12" fill="currentColor">${p2}</text>
+    <text x="${xR-4}" y="${y1-8}" font-size="12" fill="currentColor">${p3}</text>
+    <line x1="${xL}" y1="${y2}" x2="${xR}" y2="${y2}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${xL}" cy="${y2}" r="2.5" fill="currentColor"/>
+    <circle cx="${x5}" cy="${y2}" r="2.5" fill="currentColor"/>
+    <circle cx="${xR}" cy="${y2}" r="2.5" fill="currentColor"/>
+    <text x="${xL-4}" y="${y2-8}" font-size="12" fill="currentColor">${p4}</text>
+    <text x="${x5-4}" y="${y2-8}" font-size="12" fill="currentColor">${p5}</text>
+    <text x="${xR-4}" y="${y2-8}" font-size="12" fill="currentColor">${p6}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   Assemble a full test
+   --------------------------------------------------------------------------- */
+function generateTest(){
+  const propertyKinds = shuffle(['addition','reflexive','distributive','symmetric','transitive','substitution']).slice(0,3);
+  const xyStyles = shuffle(['linear','distributive']);
+  let n = 0;
+  return [
+    genProblemConditionalRewrite(++n),
+    genProblemConditionalFamily(++n),
+    genProblemAngleAdditionProof(++n),
+    genProblemBiconditional(++n),
+    genProblemNumberPattern(++n),
+    genProblemLetterPattern(++n),
+    genProblemProperty(++n, propertyKinds[0]),
+    genProblemProperty(++n, propertyKinds[1]),
+    genProblemProperty(++n, propertyKinds[2]),
+    genProblemBisector(++n),
+    genProblemVerticalAngles(++n),
+    genProblemSolveXY(++n, xyStyles[0]),
+    genProblemSolveXY(++n, xyStyles[1]),
+    genProblemNamedTheoremProof(++n),
+    genProblemLinearPairProof(++n),
+    genProblemTriangleCevianProof(++n),
+    genProblemSegmentAdditionProof(++n)
+  ];
+}
+
+function render(problems){
+  const container = document.getElementById('test');
+  container.innerHTML = problems.map(p => `
+    <div class="card problem">
+      <span class="problem-num">Problem ${p.number}</span>
+      <p class="problem-prompt">${p.prompt}</p>
+      ${p.inputsHtml}
+      <div class="action-row">
+        <button class="btn reveal-btn" data-idx="${p.number}">Show answer</button>
+      </div>
+      <div class="model-answer" id="model-${p.number}">
+        <p class="ma-tag">Model answer</p>
+        ${p.modelHtml}
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.reveal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = btn.getAttribute('data-idx');
+      const box = document.getElementById('model-' + idx);
+      const showing = box.classList.toggle('show');
+      btn.textContent = showing ? 'Hide answer' : 'Show answer';
+    });
+  });
+
+  document.getElementById('testMeta').textContent =
+    'New set of ' + problems.length + ' problems — generated just now.';
+}
+
+let allShown = false;
+function toggleAll(){
+  allShown = !allShown;
+  document.querySelectorAll('.model-answer').forEach(el => el.classList.toggle('show', allShown));
+  document.querySelectorAll('.reveal-btn').forEach(b => b.textContent = allShown ? 'Hide answer' : 'Show answer');
+  document.getElementById('toggleAllBtn').textContent = allShown ? 'Hide all answers' : 'Show all answers';
+}
+
+function newTest(){
+  allShown = false;
+  document.getElementById('toggleAllBtn').textContent = 'Show all answers';
+  render(generateTest());
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('newTestBtn').addEventListener('click', newTest);
+document.getElementById('newTestBtn2').addEventListener('click', newTest);
+document.getElementById('toggleAllBtn').addEventListener('click', toggleAll);
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+// Build a fresh practice test the moment the tool is opened.
+render(generateTest());
+</script>
+</body>
+</html>
