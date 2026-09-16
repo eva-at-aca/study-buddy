@@ -519,8 +519,32 @@ function genProblemLinearPairProof(n){
   };
 }
 
+/* ---------------------------------------------------------------------------
+   Shared helper: place an angle-number label so it unambiguously sits inside
+   the wedge at `vertex` between the rays toward `towardA` and `towardB` —
+   i.e. hugging the correct vertex, on the correct side, never drifting
+   toward some other point in the diagram (a label like "1" is only clear
+   if it's obviously anchored to one vertex's wedge, not floating near a
+   different vertex or crossing point).
+   --------------------------------------------------------------------------- */
+function angleLabelPos(vertex, towardA, towardB, radius){
+  function unit(from, to){
+    const dx = to[0] - from[0], dy = to[1] - from[1];
+    const len = Math.hypot(dx, dy) || 1;
+    return [dx / len, dy / len];
+  }
+  const uA = unit(vertex, towardA), uB = unit(vertex, towardB);
+  let ux = uA[0] + uB[0], uy = uA[1] + uB[1];
+  const ulen = Math.hypot(ux, uy) || 1;
+  ux /= ulen; uy /= ulen;
+  return [vertex[0] + ux * radius, vertex[1] + uy * radius];
+}
+
 function diagramLinearPairTriangle(nExt, nInt, nL){
   const J = [100, 125], L = [210, 125], K = [155, 40], Jext = [30, 125];
+  const [extX, extY] = angleLabelPos(J, Jext, K, 26);
+  const [intX, intY] = angleLabelPos(J, K, L, 24);
+  const [lX, lY] = angleLabelPos(L, K, J, 26);
   return `<div class="diagram-wrap"><svg viewBox="0 0 260 150" width="260" height="150">
     <line x1="${Jext[0]}" y1="${Jext[1]}" x2="${L[0]}" y2="${L[1]}" stroke="currentColor" stroke-width="2"/>
     <line x1="${J[0]}" y1="${J[1]}" x2="${K[0]}" y2="${K[1]}" stroke="currentColor" stroke-width="2"/>
@@ -532,9 +556,9 @@ function diagramLinearPairTriangle(nExt, nInt, nL){
     <text x="${K[0]-4}" y="${K[1]-8}" font-size="12" fill="currentColor">K</text>
     <text x="${J[0]-8}" y="${J[1]+16}" font-size="12" fill="currentColor">J</text>
     <text x="${L[0]-2}" y="${L[1]+16}" font-size="12" fill="currentColor">L</text>
-    <text x="${J[0]-32}" y="${J[1]-8}" font-size="12" fill="currentColor">${nExt}</text>
-    <text x="${J[0]+10}" y="${J[1]-14}" font-size="12" fill="currentColor">${nInt}</text>
-    <text x="${L[0]-26}" y="${L[1]-14}" font-size="12" fill="currentColor">${nL}</text>
+    <text x="${extX-4}" y="${extY}" font-size="12" fill="currentColor">${nExt}</text>
+    <text x="${intX-4}" y="${intY}" font-size="12" fill="currentColor">${nInt}</text>
+    <text x="${lX-4}" y="${lY}" font-size="12" fill="currentColor">${nL}</text>
   </svg></div>`;
 }
 
@@ -573,10 +597,13 @@ function diagramTriangleCevians(vS, vR, vT, n1, n2, n3, n4){
     return [x1+t*(x2-x1), y1+t*(y2-y1)];
   }
   const Z = intersect(R, Q, T, P);
-  const n1pos = [ (R[0]+Q[0])/2 - 6, (R[1]+Q[1])/2 - 10 ];
-  const n3pos = [ R[0] + 38, R[1] - 6 ];
-  const n4pos = [ (T[0]+P[0])/2 + 2, (T[1]+P[1])/2 - 10 ];
-  const n2pos = [ T[0] - 42, T[1] - 6 ];
+  // n1 and n3 both live at vertex R (upper wedge toward S, lower wedge toward T);
+  // n4 and n2 both live at vertex T (upper wedge toward S, lower wedge toward R).
+  // Each is placed hugging its OWN vertex, never drifting toward Z, P, or Q.
+  const [n1x, n1y] = angleLabelPos(R, S, Q, 28);
+  const [n3x, n3y] = angleLabelPos(R, Q, T, 24);
+  const [n4x, n4y] = angleLabelPos(T, S, P, 28);
+  const [n2x, n2y] = angleLabelPos(T, P, R, 24);
   return `<div class="diagram-wrap"><svg viewBox="0 0 260 180" width="260" height="180">
     <line x1="${S[0]}" y1="${S[1]}" x2="${R[0]}" y2="${R[1]}" stroke="currentColor" stroke-width="2"/>
     <line x1="${S[0]}" y1="${S[1]}" x2="${T[0]}" y2="${T[1]}" stroke="currentColor" stroke-width="2"/>
@@ -594,10 +621,10 @@ function diagramTriangleCevians(vS, vR, vT, n1, n2, n3, n4){
     <text x="${T[0]+4}" y="${T[1]+6}" font-size="12" fill="currentColor">${vT}</text>
     <text x="${P[0]-16}" y="${P[1]-2}" font-size="11" fill="currentColor">P</text>
     <text x="${Q[0]+4}" y="${Q[1]-2}" font-size="11" fill="currentColor">Q</text>
-    <text x="${n1pos[0]}" y="${n1pos[1]}" font-size="11" fill="currentColor">${n1}</text>
-    <text x="${n3pos[0]}" y="${n3pos[1]}" font-size="11" fill="currentColor">${n3}</text>
-    <text x="${n4pos[0]}" y="${n4pos[1]}" font-size="11" fill="currentColor">${n4}</text>
-    <text x="${n2pos[0]}" y="${n2pos[1]}" font-size="11" fill="currentColor">${n2}</text>
+    <text x="${n1x-4}" y="${n1y}" font-size="11" fill="currentColor">${n1}</text>
+    <text x="${n3x-4}" y="${n3y}" font-size="11" fill="currentColor">${n3}</text>
+    <text x="${n4x-4}" y="${n4y}" font-size="11" fill="currentColor">${n4}</text>
+    <text x="${n2x-4}" y="${n2y}" font-size="11" fill="currentColor">${n2}</text>
   </svg></div>`;
 }
 
