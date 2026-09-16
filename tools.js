@@ -44,6 +44,7 @@ window.STUDY_SITE = {
           topic: "Verbs",
           file: "tools/spanish/verbs.html",
           date: "2026-09-03",
+          status: "done",
           note: "Verbs — infinitive practice (multiple choice, letter bank, write-in) and present-tense conjugation (by irregularity type, single or full-table)."
         },
         {
