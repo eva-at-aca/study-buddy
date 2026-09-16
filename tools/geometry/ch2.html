@@ -25,9 +25,15 @@
   .model-answer ol{ margin:6px 0 0; padding-left:20px; }
   .model-answer li{ margin-bottom:4px; }
   .proof-table{ width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; }
+  /* Notation color-coding in revealed answers: blue = measure/equality (m∠, =),
+     green = object/congruence (∠, ≅). Chosen for contrast against the model-answer
+     box's dark green background (#20402f), not just "any blue/green". */
+  .notation-blue{ color:#7cc4ff; font-weight:600; }
+  .notation-green{ color:#5ee6a0; font-weight:600; }
   .proof-table th, .proof-table td{ border:1px solid var(--rule); padding:6px 8px; text-align:left; vertical-align:top; }
   .proof-table th{ background:var(--panel-2); font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); }
   .blank-proof-table{ width:100%; border-collapse:collapse; font-size:14px; margin:6px 0 4px; }
+  .add-row-btn{ margin:2px 0 14px; font-size:13px; }
   .blank-proof-table th, .blank-proof-table td{ border:1px solid var(--rule); padding:5px 6px; vertical-align:middle; }
   .blank-proof-table th{ background:var(--panel-2); font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); text-align:left; }
   .blank-proof-table td.rownum{ width:22px; text-align:center; color:var(--ink-dim); font-size:12.5px; border-right:none; padding-right:2px; }
@@ -166,25 +172,44 @@ function genProblemConditionalFamily(n){
 }
 
 /* ---------------------------------------------------------------------------
-   Shared helper: a blank fill-in Statements/Reasons table. She starts from a
+   Shared helpers: a blank fill-in Statements/Reasons table. She starts from a
    clean sheet — the prompt only ever states Given/Prove, never a partial
    answer — and can check her completed proof against the model answer via
    the Show answer button (added by render(), same as every other problem).
+   Every table gets a unique id (for the "add row" button to target) and an
+   accent-row of symbol buttons (&ang; / &cong;) matching the Spanish tool's
+   existing accent-key pattern, so she never has to hunt for these symbols.
    --------------------------------------------------------------------------- */
+let PROOF_TABLE_COUNTER = 0;
+
+function proofSymbolRow(){
+  return `<div class="accent-row">
+    <button type="button" class="accent-key" data-symbol="&ang;" title="Insert angle symbol">&ang;</button>
+    <button type="button" class="accent-key" data-symbol="&cong;" title="Insert congruent symbol">&cong;</button>
+  </div>`;
+}
+
+function proofRowHtml(i){
+  return `<tr>
+    <td class="rownum">${i}.</td>
+    <td class="statement"><input type="text" aria-label="Statement ${i}"></td>
+    <td class="rownum">${i}.</td>
+    <td class="statement"><input type="text" aria-label="Reason ${i}"></td>
+  </tr>`;
+}
+
 function blankProofTable(rows){
+  const tableId = 'proof-table-' + (++PROOF_TABLE_COUNTER);
   let rowsHtml = '';
   for (let i = 1; i <= rows; i++){
-    rowsHtml += `<tr>
-      <td class="rownum">${i}.</td>
-      <td class="statement"><input type="text" aria-label="Statement ${i}"></td>
-      <td class="rownum">${i}.</td>
-      <td class="statement"><input type="text" aria-label="Reason ${i}"></td>
-    </tr>`;
+    rowsHtml += proofRowHtml(i);
   }
-  return `<table class="blank-proof-table">
+  return `${proofSymbolRow()}
+  <table class="blank-proof-table" id="${tableId}">
     <tr><th colspan="2">Statements</th><th colspan="2">Reasons</th></tr>
     ${rowsHtml}
-  </table>`;
+  </table>
+  <button type="button" class="btn btn-ghost add-row-btn" data-table="${tableId}">+ Add row</button>`;
 }
 
 /* ---------------------------------------------------------------------------
@@ -195,6 +220,7 @@ function blankProofTable(rows){
    proof from scratch: recognizing *why* each step follows, given the *what*.
    --------------------------------------------------------------------------- */
 function reasonsOnlyProofTable(statements){
+  const tableId = 'proof-table-' + (++PROOF_TABLE_COUNTER);
   let rowsHtml = '';
   statements.forEach((s, i) => {
     rowsHtml += `<tr>
@@ -204,10 +230,12 @@ function reasonsOnlyProofTable(statements){
       <td class="statement"><input type="text" aria-label="Reason ${i+1}"></td>
     </tr>`;
   });
-  return `<table class="blank-proof-table">
+  return `${proofSymbolRow()}
+  <table class="blank-proof-table" id="${tableId}">
     <tr><th colspan="2">Statements</th><th colspan="2">Reasons</th></tr>
     ${rowsHtml}
-  </table>`;
+  </table>
+  <button type="button" class="btn btn-ghost add-row-btn" data-table="${tableId}">+ Add row</button>`;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1281,7 +1309,91 @@ function generateTest(){
   return nonProofProblems.concat(proofProblems);
 }
 
+// Symbol-insert buttons (&ang; / &cong;) work on whichever proof-table input
+// she last focused, so they stay usable even after rows are added dynamically.
+let lastFocusedInput = null;
+document.addEventListener('focusin', (e) => {
+  if (e.target.matches && e.target.matches('.blank-proof-table input')){
+    lastFocusedInput = e.target;
+  }
+});
+
+function insertSymbol(symbol){
+  const el = lastFocusedInput;
+  if (!el || !document.contains(el)) return;
+  const start = el.selectionStart ?? el.value.length;
+  const end = el.selectionEnd ?? el.value.length;
+  el.value = el.value.slice(0, start) + symbol + el.value.slice(end);
+  const newPos = start + symbol.length;
+  el.setSelectionRange(newPos, newPos);
+  el.focus();
+}
+
+/* ---------------------------------------------------------------------------
+   Notation self-check (dev safety net, invisible to the student).
+   Geometry notation has a precise 4-way distinction that's easy to blur when
+   templates get edited later: ∠X (an angle, an object) only ever pairs with
+   ≅; m∠X (its measure, a number) only ever pairs with =. Same idea for
+   segments, though segments legitimately use "=" for lengths OR "≅" for the
+   segments-as-objects, so we only flag the genuinely-impossible angle cases.
+   This scans every generated problem's text and warns in the console (never
+   shown to the student) if a future edit ever reintroduces the mix-up.
+   --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   Color-code notation in revealed answers: blue for "measure of angle" (m∠)
+   and "equal" (=) — these pair up, since measures are numbers compared with
+   equals; green for "angle" (∠) and "congruent" (≅) — these pair up too,
+   since congruence relates the angle/segment objects themselves. Only text
+   content gets touched (never inside a tag like class="proof-table"), so
+   this is safe to run on any modelHtml.
+   --------------------------------------------------------------------------- */
+function colorizeNotation(html){
+  if (!html) return html;
+  return html.replace(/<[^>]*>|[^<]+/g, (segment) => {
+    if (segment.startsWith('<')) return segment;
+    return segment.replace(/m&ang;|&ang;|&cong;|=/g, (sym) => {
+      if (sym === 'm&ang;') return '<span class="notation-blue">m&ang;</span>';
+      if (sym === '&ang;') return '<span class="notation-green">&ang;</span>';
+      if (sym === '&cong;') return '<span class="notation-green">&cong;</span>';
+      if (sym === '=') return '<span class="notation-blue">=</span>';
+      return sym;
+    });
+  });
+}
+
+function auditNotation(problems){
+  const issues = [];
+  function scan(text, where){
+    if (!text) return;
+    for (let i = 0; i < text.length; i++){
+      if (text.startsWith('&ang;', i)){
+        const precededByM = text[i-1] === 'm';
+        let j = i + 5;
+        // skip over one or more ${...} template-expansion results or plain label chars
+        while (j < text.length && /[A-Za-z0-9]/.test(text[j])) j++;
+        const rest = text.slice(j).replace(/^\s+/, '');
+        if (!precededByM && rest.startsWith('=') && !rest.startsWith('==')){
+          issues.push(where + ': "∠" (object) used with "=" — should be "m∠" or "≅"');
+        }
+        if (precededByM && rest.startsWith('&cong;')){
+          issues.push(where + ': "m∠" (measure) used with "≅" — should be "="');
+        }
+      }
+    }
+  }
+  problems.forEach(p => {
+    scan(p.prompt, 'Problem ' + p.number + ' prompt');
+    scan(p.modelHtml, 'Problem ' + p.number + ' model answer');
+    if (p.options) p.options.forEach((o, i) => scan(o, 'Problem ' + p.number + ' option ' + i));
+  });
+  if (issues.length){
+    console.warn('[notation self-check] Found ' + issues.length + ' issue(s):');
+    issues.forEach(i => console.warn('  - ' + i));
+  }
+}
+
 function render(problems){
+  auditNotation(problems);
   const container = document.getElementById('test');
   container.innerHTML = problems.map(p => {
     if (p.type === 'mc'){
@@ -1307,7 +1419,7 @@ function render(problems){
       </div>
       <div class="model-answer" id="model-${p.number}">
         <p class="ma-tag">Model answer</p>
-        ${p.modelHtml}
+        ${colorizeNotation(p.modelHtml)}
       </div>
     </div>
   `;
@@ -1344,6 +1456,19 @@ function render(problems){
     });
   });
 
+  container.querySelectorAll('.add-row-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const table = document.getElementById(btn.getAttribute('data-table'));
+      const nextNum = table.querySelectorAll('tr').length; // header row + N existing rows = next row number
+      table.insertAdjacentHTML('beforeend', proofRowHtml(nextNum));
+    });
+  });
+
+  container.querySelectorAll('.accent-key').forEach(btn => {
+    btn.addEventListener('click', () => insertSymbol(btn.getAttribute('data-symbol')));
+  });
+
+  lastFocusedInput = null;
   document.getElementById('testMeta').textContent =
     'New set of ' + problems.length + ' problems — generated just now.';
 }
