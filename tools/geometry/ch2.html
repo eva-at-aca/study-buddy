@@ -34,6 +34,7 @@
   .blank-proof-table td.statement{ border-left:none; }
   .blank-proof-table input{ width:100%; font-family:var(--font-body); font-size:14px; padding:6px 8px; border-radius:6px; border:1px solid var(--rule); background:var(--panel-2); color:var(--ink); }
   .blank-proof-table input:focus{ outline:none; border-color:var(--accent); }
+  .blank-proof-table td.statement-fixed{ border-left:none; color:var(--ink); font-size:14px; }
   .test-meta{ font-size:13px; color:var(--ink-dim); margin:0 0 4px; }
   @media print{
     .toolbar, .back-link, .reveal-btn{ display:none !important; }
@@ -180,6 +181,29 @@ function blankProofTable(rows){
       <td class="statement"><input type="text" aria-label="Reason ${i}"></td>
     </tr>`;
   }
+  return `<table class="blank-proof-table">
+    <tr><th colspan="2">Statements</th><th colspan="2">Reasons</th></tr>
+    ${rowsHtml}
+  </table>`;
+}
+
+/* ---------------------------------------------------------------------------
+   Shared helper: a "reasons-only" proof table — the statements are already
+   filled in (read-only), and she only has to supply the reason for each
+   step. This mirrors the "enter the reasons in the correct positions" style
+   worksheet, a different (and slightly easier) skill than writing the whole
+   proof from scratch: recognizing *why* each step follows, given the *what*.
+   --------------------------------------------------------------------------- */
+function reasonsOnlyProofTable(statements){
+  let rowsHtml = '';
+  statements.forEach((s, i) => {
+    rowsHtml += `<tr>
+      <td class="rownum">${i+1}.</td>
+      <td class="statement-fixed">${s}</td>
+      <td class="rownum">${i+1}.</td>
+      <td class="statement"><input type="text" aria-label="Reason ${i+1}"></td>
+    </tr>`;
+  });
   return `<table class="blank-proof-table">
     <tr><th colspan="2">Statements</th><th colspan="2">Reasons</th></tr>
     ${rowsHtml}
@@ -541,7 +565,10 @@ function angleLabelPos(vertex, towardA, towardB, radius){
 }
 
 function diagramLinearPairTriangle(nExt, nInt, nL){
-  const J = [100, 125], L = [210, 125], K = [155, 40], Jext = [30, 125];
+  const flip = Math.random() < 0.5;
+  const apexX = randInt(140, 170);
+  const mirror = (p) => flip ? [260 - p[0], p[1]] : p;
+  const J = mirror([100, 125]), L = mirror([210, 125]), K = mirror([apexX, 40]), Jext = mirror([30, 125]);
   const [extX, extY] = angleLabelPos(J, Jext, K, 26);
   const [intX, intY] = angleLabelPos(J, K, L, 24);
   const [lX, lY] = angleLabelPos(L, K, J, 26);
@@ -549,7 +576,7 @@ function diagramLinearPairTriangle(nExt, nInt, nL){
     <line x1="${Jext[0]}" y1="${Jext[1]}" x2="${L[0]}" y2="${L[1]}" stroke="currentColor" stroke-width="2"/>
     <line x1="${J[0]}" y1="${J[1]}" x2="${K[0]}" y2="${K[1]}" stroke="currentColor" stroke-width="2"/>
     <line x1="${L[0]}" y1="${L[1]}" x2="${K[0]}" y2="${K[1]}" stroke="currentColor" stroke-width="2"/>
-    <polyline points="${Jext[0]+11},${Jext[1]-6} ${Jext[0]},${Jext[1]} ${Jext[0]+11},${Jext[1]+6}" fill="none" stroke="currentColor" stroke-width="2"/>
+    <polyline points="${Jext[0]+(flip?-11:11)},${Jext[1]-6} ${Jext[0]},${Jext[1]} ${Jext[0]+(flip?-11:11)},${Jext[1]+6}" fill="none" stroke="currentColor" stroke-width="2"/>
     <circle cx="${J[0]}" cy="${J[1]}" r="2.5" fill="currentColor"/>
     <circle cx="${L[0]}" cy="${L[1]}" r="2.5" fill="currentColor"/>
     <circle cx="${K[0]}" cy="${K[1]}" r="2.5" fill="currentColor"/>
@@ -587,9 +614,13 @@ function genProblemTriangleCevianProof(n){
 }
 
 function diagramTriangleCevians(vS, vR, vT, n1, n2, n3, n4){
-  const S = [130, 35], R = [55, 165], T = [215, 165];
+  const flip = Math.random() < 0.5;
+  const mirror = (p) => flip ? [260 - p[0], p[1]] : p;
+  const apexX = randInt(100, 160);
+  const S = mirror([apexX, 35]), R = mirror([55, 165]), T = mirror([215, 165]);
+  const tP = 0.45 + Math.random() * 0.2, tQ = 0.45 + Math.random() * 0.2;
   function lerp(A,B,t){ return [A[0]+(B[0]-A[0])*t, A[1]+(B[1]-A[1])*t]; }
-  const P = lerp(S, R, 0.55), Q = lerp(S, T, 0.55);
+  const P = lerp(S, R, tP), Q = lerp(S, T, tQ);
   function intersect(p1,p2,p3,p4){
     const [x1,y1]=p1,[x2,y2]=p2,[x3,y3]=p3,[x4,y4]=p4;
     const d = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
@@ -674,16 +705,517 @@ function diagramSegmentAddition(p1, p2, p3, p4, p5, p6){
 }
 
 /* ---------------------------------------------------------------------------
+   18. Two-column proof — Transitive Property of Segment Congruence.
+   AB ≅ CD, CD ≅ EF, therefore AB ≅ EF.
+   --------------------------------------------------------------------------- */
+function genProblemTransitiveSegmentProof(n){
+  const [p1,p2,p3,p4,p5,p6] = shuffle(['A','B','C','D','E','F','G','H','J','K','L','M']).slice(0,6);
+  return {
+    number: n,
+    prompt: `Write a two-column proof for the Transitive Property of Segment Congruence.<br>Given: ${p1}${p2} &cong; ${p3}${p4}, ${p3}${p4} &cong; ${p5}${p6}<br><b>Prove:</b> ${p1}${p2} &cong; ${p5}${p6}`,
+    inputsHtml: diagramThreeSegments(p1,p2,p3,p4,p5,p6) + blankProofTable(4),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. ${p1}${p2} &cong; ${p3}${p4}, ${p3}${p4} &cong; ${p5}${p6}</td><td>1. Given</td></tr>
+        <tr><td>2. ${p1}${p2} = ${p3}${p4}, ${p3}${p4} = ${p5}${p6}</td><td>2. Definition of congruent segments</td></tr>
+        <tr><td>3. ${p1}${p2} = ${p5}${p6}</td><td>3. Transitive Property of Equality</td></tr>
+        <tr><td>4. ${p1}${p2} &cong; ${p5}${p6}</td><td>4. Definition of congruent segments</td></tr>
+      </table>`
+  };
+}
+
+function diagramThreeSegments(p1,p2,p3,p4,p5,p6){
+  const xL = 50, xR = 210;
+  const rows = [ [p1,p2,30], [p3,p4,80], [p5,p6,130] ];
+  const lines = rows.map(([a,b,y]) => `
+    <line x1="${xL}" y1="${y}" x2="${xR}" y2="${y}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${xL}" cy="${y}" r="2.5" fill="currentColor"/>
+    <circle cx="${xR}" cy="${y}" r="2.5" fill="currentColor"/>
+    <text x="${xL-4}" y="${y-8}" font-size="12" fill="currentColor">${a}</text>
+    <text x="${xR-4}" y="${y-8}" font-size="12" fill="currentColor">${b}</text>`).join('');
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 160" width="260" height="160">${lines}</svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   19. Two-column proof — Vertical Angles + Transitive Property.
+   ∠A ≅ ∠B (given); ∠A and ∠C are vertical (so congruent); therefore ∠B ≅ ∠C.
+   --------------------------------------------------------------------------- */
+function genProblemVerticalTransitiveProof(n){
+  const labels = shuffle([1,2,3,4,5,6]);
+  const idxA = randInt(0,5);
+  const idxC = (idxA + 3) % 6; // directly opposite around the 6-ray star
+  const others = [0,1,2,3,4,5].filter(i => i !== idxA && i !== idxC);
+  const idxB = pick(others);
+  const [nA, nB, nC] = [labels[idxA], labels[idxB], labels[idxC]];
+  return {
+    number: n,
+    prompt: `Write a proof using any format (two-column or paragraph).<br>Given: &ang;${nA} &cong; &ang;${nB}<br><b>Prove:</b> &ang;${nB} &cong; &ang;${nC}`,
+    inputsHtml: diagramSixRayStar(labels) + blankProofTable(3),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. &ang;${nA} &cong; &ang;${nB}</td><td>1. Given</td></tr>
+        <tr><td>2. &ang;${nA} &cong; &ang;${nC}</td><td>2. Vertical Angles Congruence Theorem</td></tr>
+        <tr><td>3. &ang;${nB} &cong; &ang;${nC}</td><td>3. Transitive Property of Angle Congruence</td></tr>
+      </table>`
+  };
+}
+
+function diagramSixRayStar(labels){
+  const cx = 130, cy = 90, r = 70;
+  // 3 lines through the center at randomized-but-ordered angles, 6 rays total
+  const gaps = [randInt(20,40), randInt(20,40), randInt(20,40)];
+  let base = randInt(0, 30);
+  const thetas = [base, base + gaps[0], base + gaps[0] + gaps[1]]; // 3 line directions, all < 180
+  function pt(deg, radius){
+    const rad = deg * Math.PI / 180;
+    return [cx + radius*Math.cos(rad), cy - radius*Math.sin(rad)];
+  }
+  const rayAngles = [thetas[0], thetas[1], thetas[2], thetas[0]+180, thetas[1]+180, thetas[2]+180];
+  const linesSvg = thetas.map(t => {
+    const [x1,y1] = pt(t, r), [x2,y2] = pt(t+180, r);
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width="2"/>`;
+  }).join('');
+  const labelsSvg = rayAngles.map((ang, i) => {
+    const [lx, ly] = pt(ang, 40);
+    return `<text x="${lx-4}" y="${ly}" font-size="12" fill="currentColor">${labels[i]}</text>`;
+  }).join('');
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 180" width="260" height="180">
+    ${linesSvg}
+    <circle cx="${cx}" cy="${cy}" r="2.5" fill="currentColor"/>
+    ${labelsSvg}
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   20. Two-column proof — Linear Pair + Congruent Supplements Theorem
+   (a "shortcut" style proof using the named theorem directly).
+   --------------------------------------------------------------------------- */
+function genProblemLinearPairSupplementsProof(n){
+  const [nA, nB, nC] = shuffle([1,2,3,4,5,6,7,8]).slice(0,3);
+  return {
+    number: n,
+    prompt: `Write a two-column proof.<br>Given: &ang;${nA} and &ang;${nB} are supplementary; &ang;${nA} and &ang;${nC} are a linear pair.<br><b>Prove:</b> &ang;${nB} &cong; &ang;${nC}`,
+    inputsHtml: diagramSimpleLinearPair(nA, nC) + blankProofTable(4),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. &ang;${nA} and &ang;${nB} are supplementary</td><td>1. Given</td></tr>
+        <tr><td>2. &ang;${nA} and &ang;${nC} are a linear pair</td><td>2. Given</td></tr>
+        <tr><td>3. &ang;${nA} and &ang;${nC} are supplementary</td><td>3. Linear Pair Postulate</td></tr>
+        <tr><td>4. &ang;${nB} &cong; &ang;${nC}</td><td>4. Congruent Supplements Theorem</td></tr>
+      </table>`
+  };
+}
+
+function diagramSimpleLinearPair(nA, nC){
+  const M = [130, 100];
+  const flip = Math.random() < 0.5;
+  const upDeg = randInt(50, 130);
+  function pt(deg, radius){
+    const rad = deg * Math.PI / 180;
+    return [M[0] + radius*Math.cos(rad), M[1] - radius*Math.sin(rad)];
+  }
+  const left = pt(180, 100), right = pt(0, 100), up = pt(upDeg, 90);
+  const nLeft = flip ? nA : nC, nRight = flip ? nC : nA;
+  const [leftX, leftY] = angleLabelPos(M, up, left, 30);
+  const [rightX, rightY] = angleLabelPos(M, up, right, 30);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 140" width="260" height="140">
+    <line x1="${left[0]}" y1="${left[1]}" x2="${right[0]}" y2="${right[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${M[0]}" y1="${M[1]}" x2="${up[0]}" y2="${up[1]}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${M[0]}" cy="${M[1]}" r="2.5" fill="currentColor"/>
+    <text x="${leftX-4}" y="${leftY}" font-size="12" fill="currentColor">${nLeft}</text>
+    <text x="${rightX-4}" y="${rightY}" font-size="12" fill="currentColor">${nRight}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   21. Two-column proof — Segment Addition "bowtie", reasons-only fill-in.
+   Given AX ≅ DX, XB ≅ XC. Prove AC ≅ BD.
+   --------------------------------------------------------------------------- */
+function genProblemBowtieProof(n){
+  const [pA,pB,pC,pD,pX] = shuffle(['A','B','C','D','G','H','J','K']).slice(0,4).concat(['X']);
+  const statements = [
+    `${pA}${pX} &cong; ${pD}${pX}`,
+    `${pA}${pX} = ${pD}${pX}`,
+    `${pX}${pB} &cong; ${pX}${pC}`,
+    `${pX}${pB} = ${pX}${pC}`,
+    `${pA}${pX} + ${pX}${pC} = ${pA}${pC}`,
+    `${pD}${pX} + ${pX}${pB} = ${pD}${pB}`,
+    `${pA}${pC} = ${pD}${pX} + ${pX}${pB}`,
+    `${pA}${pC} = ${pD}${pB}`,
+    `${pA}${pC} &cong; ${pD}${pB}`
+  ];
+  const reasons = [
+    'Given',
+    'Definition of congruent segments',
+    'Given',
+    'Definition of congruent segments',
+    'Segment Addition Postulate',
+    'Segment Addition Postulate',
+    'Substitution Property of Equality',
+    'Substitution Property of Equality',
+    'Definition of congruent segments'
+  ];
+  const tableRows = statements.map((s,i) => `<tr><td>${i+1}. ${s}</td><td>${i+1}. ${reasons[i]}</td></tr>`).join('');
+  return {
+    number: n,
+    prompt: `Enter the reasons in the correct positions to complete the two-column proof.<br>Given: ${pA}${pX} &cong; ${pD}${pX}, ${pX}${pB} &cong; ${pX}${pC}<br><b>Prove:</b> ${pA}${pC} &cong; ${pD}${pB}`,
+    inputsHtml: diagramBowtie(pA,pB,pC,pD,pX) + reasonsOnlyProofTable(statements.map((s,i) => `${i+1}. ${s}`)),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        ${tableRows}
+      </table>`
+  };
+}
+
+function diagramBowtie(pA,pB,pC,pD,pX){
+  const A = [50, 40], B = [210, 40], C = [210, 150], D = [50, 150];
+  function intersect(p1,p2,p3,p4){
+    const [x1,y1]=p1,[x2,y2]=p2,[x3,y3]=p3,[x4,y4]=p4;
+    const d = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+    const t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/d;
+    return [x1+t*(x2-x1), y1+t*(y2-y1)];
+  }
+  const X = intersect(A,C,D,B);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 190" width="260" height="190">
+    <line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${B[0]}" y1="${B[1]}" x2="${C[0]}" y2="${C[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${C[0]}" y1="${C[1]}" x2="${D[0]}" y2="${D[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${D[0]}" y1="${D[1]}" x2="${A[0]}" y2="${A[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${A[0]}" y1="${A[1]}" x2="${C[0]}" y2="${C[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${D[0]}" y1="${D[1]}" x2="${B[0]}" y2="${B[1]}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${A[0]}" cy="${A[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${B[0]}" cy="${B[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${C[0]}" cy="${C[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${D[0]}" cy="${D[1]}" r="2.5" fill="currentColor"/>
+    <circle cx="${X[0]}" cy="${X[1]}" r="2.5" fill="currentColor"/>
+    <text x="${A[0]-14}" y="${A[1]-4}" font-size="12" fill="currentColor">${pA}</text>
+    <text x="${B[0]+6}" y="${B[1]-4}" font-size="12" fill="currentColor">${pB}</text>
+    <text x="${C[0]+6}" y="${C[1]+14}" font-size="12" fill="currentColor">${pC}</text>
+    <text x="${D[0]-14}" y="${D[1]+14}" font-size="12" fill="currentColor">${pD}</text>
+    <text x="${X[0]+6}" y="${X[1]-6}" font-size="11" fill="currentColor">${pX}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   22. Two-column proof — Angle Bisector + Transitive Property.
+   Ray bisects an angle into ∠1 and ∠2; ∠2 ≅ ∠3 (elsewhere); prove ∠1 ≅ ∠3.
+   --------------------------------------------------------------------------- */
+function genProblemBisectorTransitiveProof(n){
+  const [n1, n2, n3] = shuffle([1,2,3,4,5,6,7,8]).slice(0,3);
+  const [vD, vE, vF, vQ] = shuffle(['D','E','F','Q','P','G','H','J']).slice(0,4);
+  return {
+    number: n,
+    prompt: `Write a proof using any format.<br>Given: Ray ${vQ}${vE} bisects &ang;${vD}${vQ}${vF} (forming &ang;${n1} and &ang;${n2}); &ang;${n2} &cong; &ang;${n3}<br><b>Prove:</b> &ang;${n1} &cong; &ang;${n3}`,
+    inputsHtml: diagramAngleBisectorPair(vD, vE, vF, vQ, n1, n2) + blankProofTable(4),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. Ray ${vQ}${vE} bisects &ang;${vD}${vQ}${vF}</td><td>1. Given</td></tr>
+        <tr><td>2. &ang;${n1} &cong; &ang;${n2}</td><td>2. Definition of angle bisector</td></tr>
+        <tr><td>3. &ang;${n2} &cong; &ang;${n3}</td><td>3. Given</td></tr>
+        <tr><td>4. &ang;${n1} &cong; &ang;${n3}</td><td>4. Transitive Property of Angle Congruence</td></tr>
+      </table>`
+  };
+}
+
+function diagramAngleBisectorPair(vD, vE, vF, vQ, n1, n2){
+  const Q = [75, 130];
+  const total = randInt(50, 80);
+  const startDeg = randInt(15, 30);
+  function pt(deg, radius){
+    const rad = deg * Math.PI / 180;
+    return [Q[0] + radius*Math.cos(rad), Q[1] - radius*Math.sin(rad)];
+  }
+  const D = pt(startDeg, 100), E = pt(startDeg + total/2, 95), F = pt(startDeg + total, 100);
+  const [n1x, n1y] = angleLabelPos(Q, D, E, 30);
+  const [n2x, n2y] = angleLabelPos(Q, E, F, 30);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 150" width="260" height="150">
+    <line x1="${Q[0]}" y1="${Q[1]}" x2="${D[0]}" y2="${D[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${Q[0]}" y1="${Q[1]}" x2="${E[0]}" y2="${E[1]}" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/>
+    <line x1="${Q[0]}" y1="${Q[1]}" x2="${F[0]}" y2="${F[1]}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${Q[0]}" cy="${Q[1]}" r="2.5" fill="currentColor"/>
+    <text x="${D[0]+2}" y="${D[1]-4}" font-size="12" fill="currentColor">${vD}</text>
+    <text x="${E[0]+2}" y="${E[1]-8}" font-size="12" fill="currentColor">${vE}</text>
+    <text x="${F[0]+2}" y="${F[1]-4}" font-size="12" fill="currentColor">${vF}</text>
+    <text x="${Q[0]-12}" y="${Q[1]+14}" font-size="12" fill="currentColor">${vQ}</text>
+    <text x="${n1x-4}" y="${n1y}" font-size="11" fill="currentColor">${n1}</text>
+    <text x="${n2x-4}" y="${n2y}" font-size="11" fill="currentColor">${n2}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   23. Two-column proof — four rays from one vertex sharing a middle angle.
+   Given m∠(q1 B q3) = m∠(q2 B q4); prove m∠n1 = m∠n3, via Angle Addition +
+   Substitution + REFLEXIVE Property (for the shared middle angle) +
+   Subtraction, ending with the equal-measures → congruent step.
+   --------------------------------------------------------------------------- */
+function genProblemSharedAngleProof(n){
+  const [q1,q2,q3,q4] = shuffle(['A','C','D','E','F','G','H','J']).slice(0,4);
+  const vB = pick(['B','X','M','P','Q','R']);
+  const [n1,n2,n3] = shuffle([1,2,3,4,5,6,7,8]).slice(0,3);
+  return {
+    number: n,
+    prompt: `Fill in each reason to support each statement to prove that m&ang;${n1} = m&ang;${n3}.<br>In the diagram, m&ang;${q1}${vB}${q3} = m&ang;${q2}${vB}${q4}.`,
+    inputsHtml: diagramFourRayFan(q1,q2,q3,q4,vB,n1,n2,n3) + blankProofTable(6),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. m&ang;${q1}${vB}${q3} = m&ang;${q2}${vB}${q4}</td><td>1. Given</td></tr>
+        <tr><td>2. m&ang;${q1}${vB}${q3} = m&ang;${n1} + m&ang;${n2}, and m&ang;${q2}${vB}${q4} = m&ang;${n2} + m&ang;${n3}</td><td>2. Angle Addition Postulate</td></tr>
+        <tr><td>3. m&ang;${n1} + m&ang;${n2} = m&ang;${n2} + m&ang;${n3}</td><td>3. Substitution Property of Equality</td></tr>
+        <tr><td>4. m&ang;${n2} = m&ang;${n2}</td><td>4. Reflexive Property of Equality</td></tr>
+        <tr><td>5. m&ang;${n1} = m&ang;${n3}</td><td>5. Subtraction Property of Equality</td></tr>
+        <tr><td>6. &ang;${n1} &cong; &ang;${n3}</td><td>6. Definition of congruent angles</td></tr>
+      </table>`
+  };
+}
+
+function diagramFourRayFan(q1,q2,q3,q4,vB,n1,n2,n3){
+  const B = [70, 150];
+  const total = randInt(70, 100);
+  const startDeg = randInt(15, 25);
+  const gap1 = 0.25 + Math.random() * 0.15, gap2 = gap1 + 0.15 + Math.random() * 0.1; // guarantees angle 2 is never too narrow to label
+  function pt(deg, radius){
+    const rad = deg * Math.PI / 180;
+    return [B[0] + radius*Math.cos(rad), B[1] - radius*Math.sin(rad)];
+  }
+  const d1 = startDeg, d4 = startDeg + total;
+  const d2 = startDeg + total * gap1, d3 = startDeg + total * gap2;
+  const R1 = pt(d1, 100), R2 = pt(d2, 95), R3 = pt(d3, 95), R4 = pt(d4, 100);
+  const [n1x,n1y] = angleLabelPos(B, R1, R2, 55);
+  const [n2x,n2y] = angleLabelPos(B, R2, R3, 72);
+  const [n3x,n3y] = angleLabelPos(B, R3, R4, 55);
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 170" width="260" height="170">
+    <line x1="${B[0]}" y1="${B[1]}" x2="${R1[0]}" y2="${R1[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${B[0]}" y1="${B[1]}" x2="${R2[0]}" y2="${R2[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${B[0]}" y1="${B[1]}" x2="${R3[0]}" y2="${R3[1]}" stroke="currentColor" stroke-width="2"/>
+    <line x1="${B[0]}" y1="${B[1]}" x2="${R4[0]}" y2="${R4[1]}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${B[0]}" cy="${B[1]}" r="2.5" fill="currentColor"/>
+    <text x="${R1[0]+2}" y="${R1[1]-4}" font-size="12" fill="currentColor">${q1}</text>
+    <text x="${R2[0]+2}" y="${R2[1]-6}" font-size="12" fill="currentColor">${q2}</text>
+    <text x="${R3[0]+2}" y="${R3[1]-6}" font-size="12" fill="currentColor">${q3}</text>
+    <text x="${R4[0]+2}" y="${R4[1]-4}" font-size="12" fill="currentColor">${q4}</text>
+    <text x="${B[0]-14}" y="${B[1]+14}" font-size="12" fill="currentColor">${vB}</text>
+    <text x="${n1x-4}" y="${n1y}" font-size="11" fill="currentColor">${n1}</text>
+    <text x="${n2x-4}" y="${n2y}" font-size="11" fill="currentColor">${n2}</text>
+    <text x="${n3x-4}" y="${n3y}" font-size="11" fill="currentColor">${n3}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   24. Two-column proof — four collinear points sharing a middle segment.
+   Given AC = BD; prove AB ≅ CD, via Segment Addition + Substitution +
+   REFLEXIVE Property (for the shared middle segment BC) + Subtraction.
+   --------------------------------------------------------------------------- */
+function genProblemSharedSegmentProof(n){
+  const [p1,p2,p3,p4] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,4);
+  return {
+    number: n,
+    prompt: `Fill in the missing statement or reason. Be careful to use proper notation.<br>Given: ${p1}${p3} = ${p2}${p4}<br><b>Prove:</b> ${p1}${p2} &cong; ${p3}${p4}`,
+    inputsHtml: diagramFourCollinearPoints(p1,p2,p3,p4) + blankProofTable(6),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. ${p1}${p3} = ${p2}${p4}</td><td>1. Given</td></tr>
+        <tr><td>2. ${p1}${p3} = ${p1}${p2} + ${p2}${p3}, and ${p2}${p4} = ${p2}${p3} + ${p3}${p4}</td><td>2. Segment Addition Postulate</td></tr>
+        <tr><td>3. ${p1}${p2} + ${p2}${p3} = ${p2}${p3} + ${p3}${p4}</td><td>3. Substitution Property of Equality</td></tr>
+        <tr><td>4. ${p2}${p3} = ${p2}${p3}</td><td>4. Reflexive Property of Equality</td></tr>
+        <tr><td>5. ${p1}${p2} = ${p3}${p4}</td><td>5. Subtraction Property of Equality</td></tr>
+        <tr><td>6. ${p1}${p2} &cong; ${p3}${p4}</td><td>6. Definition of congruent segments</td></tr>
+      </table>`
+  };
+}
+
+function diagramFourCollinearPoints(p1,p2,p3,p4){
+  const y = 90, xL = 40, xR = 220;
+  const f2 = 0.2 + Math.random() * 0.15, f3 = 0.55 + Math.random() * 0.15;
+  const x2 = xL + (xR-xL)*f2, x3 = xL + (xR-xL)*f3;
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 130" width="260" height="130">
+    <line x1="${xL}" y1="${y}" x2="${xR}" y2="${y}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${xL}" cy="${y}" r="2.5" fill="currentColor"/>
+    <circle cx="${x2}" cy="${y}" r="2.5" fill="currentColor"/>
+    <circle cx="${x3}" cy="${y}" r="2.5" fill="currentColor"/>
+    <circle cx="${xR}" cy="${y}" r="2.5" fill="currentColor"/>
+    <text x="${xL-4}" y="${y-10}" font-size="12" fill="currentColor">${p1}</text>
+    <text x="${x2-4}" y="${y-10}" font-size="12" fill="currentColor">${p2}</text>
+    <text x="${x3-4}" y="${y-10}" font-size="12" fill="currentColor">${p3}</text>
+    <text x="${xR-4}" y="${y-10}" font-size="12" fill="currentColor">${p4}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   25. "What's the very first step?" recognition drill.
+   The specific skill this reinforces: several definitions/postulates require
+   an intermediate statement (a right-angle or congruence declaration) before
+   any equation can be written, while others go straight to an equation.
+   Mixing both kinds as options — with the tempting "jump straight to the
+   number" answer as a distractor when it's wrong — directly targets the
+   mistake of skipping that intermediate step.
+   --------------------------------------------------------------------------- */
+const DEFINITION_CHAIN = {
+  rightAngle(){
+    const n1 = randInt(1,9);
+    return { given: `&ang;${n1} is a right angle.`, correct: `m&ang;${n1} = 90&deg;`, reason: 'Definition of a Right Angle' };
+  },
+  complementary(){
+    const [n1,n2] = shuffle([1,2,3,4,5,6,7,8,9]).slice(0,2);
+    return { given: `&ang;${n1} and &ang;${n2} are complementary angles.`, correct: `m&ang;${n1} + m&ang;${n2} = 90&deg;`, reason: 'Definition of Complementary Angles' };
+  },
+  supplementary(){
+    const [n1,n2] = shuffle([1,2,3,4,5,6,7,8,9]).slice(0,2);
+    return { given: `&ang;${n1} and &ang;${n2} are supplementary angles.`, correct: `m&ang;${n1} + m&ang;${n2} = 180&deg;`, reason: 'Definition of Supplementary Angles' };
+  },
+  linearPair(){
+    const [n1,n2] = shuffle([1,2,3,4,5,6,7,8,9]).slice(0,2);
+    return { given: `&ang;${n1} and &ang;${n2} are a linear pair.`, correct: `&ang;${n1} and &ang;${n2} are supplementary angles.`, reason: 'Linear Pair Postulate' };
+  },
+  perpendicular(){
+    const [l1,l2] = shuffle(['AB','CD','EF','GH','JK','LM']).slice(0,2);
+    return { given: `Line ${l1} is perpendicular to line ${l2}.`, correct: `The angles formed at their intersection are right angles.`, reason: 'Definition of Perpendicular Lines' };
+  },
+  angleBisector(){
+    const [p1,pV,p2,p3] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,4);
+    return { given: `Ray ${pV}${p2} bisects &ang;${p1}${pV}${p3}.`, correct: `&ang;${p1}${pV}${p2} &cong; &ang;${p2}${pV}${p3}`, reason: 'Definition of Angle Bisector' };
+  },
+  segmentBisector(){
+    const [a,m,b] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,3);
+    return { given: `Point ${m} bisects segment ${a}${b}.`, correct: `${a}${m} &cong; ${m}${b}`, reason: 'Definition of Segment Bisector' };
+  },
+  midpoint(){
+    const [a,m,b] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,3);
+    return { given: `${m} is the midpoint of segment ${a}${b}.`, correct: `${a}${m} &cong; ${m}${b}`, reason: 'Definition of Midpoint' };
+  },
+  segmentAddition(){
+    const [a,b,c] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,3);
+    return { given: `Point ${b} is between points ${a} and ${c} on segment ${a}${c}.`, correct: `${a}${b} + ${b}${c} = ${a}${c}`, reason: 'Segment Addition Postulate' };
+  },
+  angleAddition(){
+    const [a,b,c,d] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,4);
+    return { given: `Ray ${b}${d} lies between rays ${b}${a} and ${b}${c}.`, correct: `m&ang;${a}${b}${d} + m&ang;${d}${b}${c} = m&ang;${a}${b}${c}`, reason: 'Angle Addition Postulate' };
+  }
+};
+
+function genProblemFirstStepMC(n){
+  const keys = shuffle(Object.keys(DEFINITION_CHAIN));
+  const correctKey = keys[0];
+  const distractorKeys = keys.slice(1,4);
+  const item = DEFINITION_CHAIN[correctKey]();
+  const distractors = distractorKeys.map(k => DEFINITION_CHAIN[k]().correct);
+  const options = shuffle([item.correct, ...distractors]);
+  const correctIndex = options.indexOf(item.correct);
+  return {
+    number: n,
+    type: 'mc',
+    prompt: `Given: <b>${item.given}</b><br>What is the very next true statement you can write &mdash; before doing any arithmetic?`,
+    options,
+    correctIndex,
+    reasonText: item.reason
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   26. Two-column proof — Perpendicular Lines → Right Angles.
+   Reinforces the same "intermediate step" idea inside a full proof: you
+   can't jump from "perpendicular" straight to "= 90°".
+   --------------------------------------------------------------------------- */
+function genProblemPerpendicularProof(n){
+  const [pA,pX,pC,pD] = shuffle(['A','B','C','D','E','F','G','H']).slice(0,4);
+  return {
+    number: n,
+    prompt: `Write a two-column proof.<br>Given: Line ${pA}${pX} is perpendicular to line ${pC}${pD} at point ${pX}.<br><b>Prove:</b> &ang;${pA}${pX}${pC} &cong; &ang;${pA}${pX}${pD}`,
+    inputsHtml: diagramPerpendicular(pA,pX,pC,pD) + blankProofTable(5),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. Line ${pA}${pX} &perp; line ${pC}${pD}</td><td>1. Given</td></tr>
+        <tr><td>2. &ang;${pA}${pX}${pC} and &ang;${pA}${pX}${pD} are right angles</td><td>2. Definition of Perpendicular Lines</td></tr>
+        <tr><td>3. m&ang;${pA}${pX}${pC} = 90&deg;, m&ang;${pA}${pX}${pD} = 90&deg;</td><td>3. Definition of a Right Angle</td></tr>
+        <tr><td>4. m&ang;${pA}${pX}${pC} = m&ang;${pA}${pX}${pD}</td><td>4. Transitive Property of Equality</td></tr>
+        <tr><td>5. &ang;${pA}${pX}${pC} &cong; &ang;${pA}${pX}${pD}</td><td>5. Definition of Congruent Angles</td></tr>
+      </table>`
+  };
+}
+
+function diagramPerpendicular(pA,pX,pC,pD){
+  const X = [130, 85];
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 170" width="260" height="170">
+    <line x1="${X[0]}" y1="20" x2="${X[0]}" y2="150" stroke="currentColor" stroke-width="2"/>
+    <line x1="20" y1="${X[1]}" x2="240" y2="${X[1]}" stroke="currentColor" stroke-width="2"/>
+    <rect x="${X[0]}" y="${X[1]-14}" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="${X[0]}" cy="${X[1]}" r="2.5" fill="currentColor"/>
+    <text x="${X[0]-4}" y="14" font-size="12" fill="currentColor">${pA}</text>
+    <text x="${X[0]+6}" y="${X[1]+16}" font-size="12" fill="currentColor">${pX}</text>
+    <text x="244" y="${X[1]+4}" font-size="12" fill="currentColor">${pC}</text>
+    <text x="8" y="${X[1]+4}" font-size="12" fill="currentColor">${pD}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   27. Two-column proof — Midpoint → Congruent Segments + Transitive.
+   --------------------------------------------------------------------------- */
+function genProblemMidpointTransitiveProof(n){
+  const [pA,pM,pB,pQ1,pQ2] = shuffle(['A','B','C','D','E','F','G','H','J','K']).slice(0,5);
+  const seg = `${pQ1}${pQ2}`;
+  return {
+    number: n,
+    prompt: `Write a proof using any format.<br>Given: ${pM} is the midpoint of segment ${pA}${pB}; ${pA}${pM} &cong; ${seg}<br><b>Prove:</b> ${pM}${pB} &cong; ${seg}`,
+    inputsHtml: diagramMidpoint(pA,pM,pB) + blankProofTable(4),
+    modelHtml: `
+      <table class="proof-table">
+        <tr><th>Statements</th><th>Reasons</th></tr>
+        <tr><td>1. ${pM} is the midpoint of segment ${pA}${pB}</td><td>1. Given</td></tr>
+        <tr><td>2. ${pA}${pM} &cong; ${pM}${pB}</td><td>2. Definition of Midpoint</td></tr>
+        <tr><td>3. ${pA}${pM} &cong; ${seg}</td><td>3. Given</td></tr>
+        <tr><td>4. ${pM}${pB} &cong; ${seg}</td><td>4. Transitive Property of Segment Congruence</td></tr>
+      </table>`
+  };
+}
+
+function diagramMidpoint(pA,pM,pB){
+  const y = 80, xL = 50, xR = 210, xM = 130;
+  return `<div class="diagram-wrap"><svg viewBox="0 0 260 120" width="260" height="120">
+    <line x1="${xL}" y1="${y}" x2="${xR}" y2="${y}" stroke="currentColor" stroke-width="2"/>
+    <circle cx="${xL}" cy="${y}" r="2.5" fill="currentColor"/>
+    <circle cx="${xM}" cy="${y}" r="2.5" fill="currentColor"/>
+    <circle cx="${xR}" cy="${y}" r="2.5" fill="currentColor"/>
+    <text x="${xL-4}" y="${y-10}" font-size="12" fill="currentColor">${pA}</text>
+    <text x="${xM-4}" y="${y-10}" font-size="12" fill="currentColor">${pM}</text>
+    <text x="${xR-4}" y="${y-10}" font-size="12" fill="currentColor">${pB}</text>
+  </svg></div>`;
+}
+
+/* ---------------------------------------------------------------------------
    Assemble a full test
    --------------------------------------------------------------------------- */
+const PROOF_GENERATORS = [
+  genProblemAngleAdditionProof,
+  genProblemNamedTheoremProof,
+  genProblemLinearPairProof,
+  genProblemTriangleCevianProof,
+  genProblemSegmentAdditionProof,
+  genProblemTransitiveSegmentProof,
+  genProblemVerticalTransitiveProof,
+  genProblemLinearPairSupplementsProof,
+  genProblemBowtieProof,
+  genProblemBisectorTransitiveProof,
+  genProblemSharedAngleProof,
+  genProblemSharedSegmentProof,
+  genProblemPerpendicularProof,
+  genProblemMidpointTransitiveProof
+];
+
 function generateTest(){
   const propertyKinds = shuffle(['addition','reflexive','distributive','symmetric','transitive','substitution']).slice(0,3);
   const xyStyles = shuffle(['linear','distributive']);
+  const proofPicks = shuffle(PROOF_GENERATORS).slice(0, 5);
   let n = 0;
-  return [
+  const nonProofProblems = [
     genProblemConditionalRewrite(++n),
     genProblemConditionalFamily(++n),
-    genProblemAngleAdditionProof(++n),
     genProblemBiconditional(++n),
     genProblemNumberPattern(++n),
     genProblemLetterPattern(++n),
@@ -694,16 +1226,30 @@ function generateTest(){
     genProblemVerticalAngles(++n),
     genProblemSolveXY(++n, xyStyles[0]),
     genProblemSolveXY(++n, xyStyles[1]),
-    genProblemNamedTheoremProof(++n),
-    genProblemLinearPairProof(++n),
-    genProblemTriangleCevianProof(++n),
-    genProblemSegmentAdditionProof(++n)
+    genProblemFirstStepMC(++n),
+    genProblemFirstStepMC(++n)
   ];
+  const proofProblems = proofPicks.map(fn => fn(++n));
+  return nonProofProblems.concat(proofProblems);
 }
 
 function render(problems){
   const container = document.getElementById('test');
-  container.innerHTML = problems.map(p => `
+  container.innerHTML = problems.map(p => {
+    if (p.type === 'mc'){
+      const optionsHtml = p.options.map((opt, i) => `
+        <button class="option-btn" data-idx="${i}" data-correct="${i === p.correctIndex}">${opt}</button>
+      `).join('');
+      return `
+        <div class="card problem">
+          <span class="problem-num">Problem ${p.number}</span>
+          <p class="problem-prompt">${p.prompt}</p>
+          <div class="options">${optionsHtml}</div>
+          <p class="feedback" id="feedback-${p.number}"></p>
+        </div>
+      `;
+    }
+    return `
     <div class="card problem">
       <span class="problem-num">Problem ${p.number}</span>
       <p class="problem-prompt">${p.prompt}</p>
@@ -716,7 +1262,8 @@ function render(problems){
         ${p.modelHtml}
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   container.querySelectorAll('.reveal-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -724,6 +1271,28 @@ function render(problems){
       const box = document.getElementById('model-' + idx);
       const showing = box.classList.toggle('show');
       btn.textContent = showing ? 'Hide answer' : 'Show answer';
+    });
+  });
+
+  problems.filter(p => p.type === 'mc').forEach(p => {
+    const card = container.querySelectorAll('.problem')[p.number - 1];
+    const buttons = card.querySelectorAll('.option-btn');
+    const feedback = document.getElementById('feedback-' + p.number);
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const isCorrect = btn.getAttribute('data-correct') === 'true';
+        buttons.forEach(b => { b.disabled = true; });
+        if (isCorrect){
+          btn.classList.add('correct');
+          feedback.textContent = 'Right — reason: ' + p.reasonText + '.';
+          feedback.className = 'feedback show good';
+        } else {
+          btn.classList.add('incorrect');
+          buttons[p.correctIndex].classList.add('correct');
+          feedback.textContent = 'The correct next step (' + p.reasonText + ') is highlighted above.';
+          feedback.className = 'feedback show bad';
+        }
+      });
     });
   });
 
